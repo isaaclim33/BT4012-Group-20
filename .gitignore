@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+
+# virtual environments (either name)
+.venv/
+venv/
+
+# secrets: your API key lives here, never commit it
+.env
+
+# Kaggle data: licensed and large; rebuilt from data/raw by 01_build_features.py
+data/raw/
+data/processed/
+
+# large model files; rebuilt by 02_run_experiments.py
+results/cache/*.pkl
+
+# bundle made for sending results, not part of the repo
+agent_outputs_*.zip
+
+# editor and OS files
+.vscode/
+.DS_Store
+Thumbs.db

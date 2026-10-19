@@ -1,0 +1,13 @@
+{
+  "edges": 103147,
+  "fraud_fraud": 5561,
+  "legit_legit": 59706,
+  "cross": 37880,
+  "fraud_share": 0.09357670979667283,
+  "expected_cross_share": 0.1696402183606042,
+  "observed_cross_share": 0.3672428669762572,
+  "z": 169.0921700208721,
+  "edge_end_fraud_share": 0.23753478045895662,
+  "expected_cross_share_degree_adj": 0.3622240170625438,
+  "z_degree_adj": 3.353588775781837
+}

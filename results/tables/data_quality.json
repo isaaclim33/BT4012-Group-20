@@ -1,0 +1,18 @@
+{
+  "n_claims": 558211,
+  "n_inpatient": 40474,
+  "n_outpatient": 517737,
+  "n_beneficiaries": 138556,
+  "n_providers": 5410,
+  "n_flagged": 506,
+  "duplicate_claim_ids": 0,
+  "end_before_start": 0,
+  "discharge_before_admission": 0,
+  "claims_after_death": 0,
+  "claims_without_beneficiary": 0,
+  "providers_without_label": 0,
+  "first_claim": "2008-11-27",
+  "last_claim": "2009-12-31",
+  "ip_reimb_multiple_of_1000": 0.9921183969956021,
+  "op_reimb_multiple_of_10": 1.0
+}

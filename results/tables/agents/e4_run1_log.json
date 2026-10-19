@@ -1,0 +1,482 @@
+{
+  "history": [
+    {
+      "run_id": 1,
+      "model": "logistic",
+      "feature_set": "no_size",
+      "imbalance": "class_weight",
+      "params": {
+        "C": 0.1,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": null,
+        "learning_rate": null,
+        "n_estimators": null,
+        "min_child_samples": null,
+        "colsample_bytree": null
+      },
+      "pr_auc_mean": 0.6809,
+      "pr_auc_sd": 0.0595,
+      "prec_k50_mean": 0.74,
+      "roc_auc_mean": 0.9407
+    },
+    {
+      "run_id": 2,
+      "model": "random_forest",
+      "feature_set": "all",
+      "imbalance": "none",
+      "params": {
+        "C": null,
+        "min_samples_leaf": 5,
+        "max_features": 0.3,
+        "num_leaves": null,
+        "learning_rate": null,
+        "n_estimators": null,
+        "min_child_samples": null,
+        "colsample_bytree": null
+      },
+      "pr_auc_mean": 0.7351,
+      "pr_auc_sd": 0.0596,
+      "prec_k50_mean": 0.776,
+      "roc_auc_mean": 0.942
+    },
+    {
+      "run_id": 3,
+      "model": "lightgbm",
+      "feature_set": "all+agent",
+      "imbalance": "none",
+      "params": {
+        "C": null,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": 15,
+        "learning_rate": 0.03,
+        "n_estimators": 400,
+        "min_child_samples": 30,
+        "colsample_bytree": 0.6
+      },
+      "pr_auc_mean": 0.7362,
+      "pr_auc_sd": 0.0573,
+      "prec_k50_mean": 0.776,
+      "roc_auc_mean": 0.9456
+    },
+    {
+      "run_id": 4,
+      "model": "lightgbm",
+      "feature_set": "no_size+agent",
+      "imbalance": "class_weight",
+      "params": {
+        "C": null,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": 8,
+        "learning_rate": 0.02,
+        "n_estimators": 600,
+        "min_child_samples": 40,
+        "colsample_bytree": 0.5
+      },
+      "pr_auc_mean": 0.7116,
+      "pr_auc_sd": 0.0719,
+      "prec_k50_mean": 0.788,
+      "roc_auc_mean": 0.9446
+    }
+  ],
+  "verdicts": [
+    {
+      "chosen_run": 2,
+      "stop": true,
+      "concerns": [
+        "Run 3 (LightGBM, all+agent) beats run 2 (random forest, all) by only 0.0011 PR-AUC, far below one fold SD (~0.06), so the simpler model is preferred. Run 2 vs run 1 (logistic) is +0.054, just under one SD (0.0596), so strictly the logistic model is the simplest choice that is not clearly beaten. Random forest is carried forward as a pragmatic compromise, but the margin is not significant.",
+        "All differences between runs are within fold noise. With only about 506 positives and SD around 0.06, the ranking of configurations is unreliable and more search is unlikely to help.",
+        "ROC-AUC of about 0.94 and PR-AUC of 0.68-0.74 are high for a label of undocumented origin. The label may be derived from, or correlated with, the same claim-level features (leakage or circularity), so the model may be reproducing a rule rather than detecting fraud.",
+        "Feature set 'all' includes 13 size features. Provider size can proxy for claim volume and may inflate performance. The no_size logistic result is similar, which suggests size is not the sole driver, but size dependence should be checked.",
+        "Agent features add nothing (run 3 is about equal to run 2, run 4 is lower), so they add complexity without clear value.",
+        "Precision@50 of 0.74-0.79 is on a queue of 50, while the audit queue is about 100. Precision@100 was not reported, and the fold-level variation is unknown.",
+        "The claim window is under a year, so no temporal holdout is possible. Cross-validation may be optimistic if providers share patterns or agents across folds.",
+        "The positive label is suspicion, not confirmed fraud, so the metrics measure agreement with the label, not audit yield."
+      ],
+      "next_experiments": []
+    }
+  ],
+  "chosen": 2,
+  "first_round_best": 3,
+  "features": {
+    "proposal": {
+      "claim_aggregates": [
+        {
+          "name": "agent_reimb_std_op",
+          "column": "InscClaimAmtReimbursed",
+          "agg": "std",
+          "scope": "op",
+          "rationale": "Dispersion of outpatient payments reveals unusual billing patterns such as templated amounts or mixed high-cost claims, independent of volume."
+        },
+        {
+          "name": "agent_reimb_median_ip",
+          "column": "InscClaimAmtReimbursed",
+          "agg": "median",
+          "scope": "ip",
+          "rationale": "Typical inpatient payment is robust to outliers and contrasts with the mean to show skew."
+        },
+        {
+          "name": "agent_reimb_std_ip",
+          "column": "InscClaimAmtReimbursed",
+          "agg": "std",
+          "scope": "ip",
+          "rationale": "Spread of inpatient payments captures inconsistent case mix or upcoding bursts."
+        },
+        {
+          "name": "agent_ndiag_std_all",
+          "column": "n_diag",
+          "agg": "std",
+          "scope": "all",
+          "rationale": "Low variability in diagnosis counts suggests templated coding."
+        },
+        {
+          "name": "agent_ndiag_max_all",
+          "column": "n_diag",
+          "agg": "max",
+          "scope": "all",
+          "rationale": "Extreme diagnosis counts on a claim flag padded coding."
+        },
+        {
+          "name": "agent_nproc_share_ip",
+          "column": "n_proc",
+          "agg": "share_positive",
+          "scope": "ip",
+          "rationale": "Share of inpatient claims with procedures differs from existing per-claim averages and may signal procedure inflation."
+        },
+        {
+          "name": "agent_los_std_ip",
+          "column": "los",
+          "agg": "std",
+          "scope": "ip",
+          "rationale": "Uniform length of stay across admissions suggests formulaic billing."
+        },
+        {
+          "name": "agent_claimdays_std_op",
+          "column": "claim_days",
+          "agg": "std",
+          "scope": "op",
+          "rationale": "Variation in outpatient claim duration shows whether billing is formulaic."
+        },
+        {
+          "name": "agent_deduct_share_op",
+          "column": "OPDeductible",
+          "agg": "share_positive",
+          "scope": "op",
+          "rationale": "Share of outpatient claims with a deductible collected may indicate whether patient cost-sharing is being skipped."
+        },
+        {
+          "name": "agent_chronic_std_all",
+          "column": "n_chronic",
+          "agg": "std",
+          "scope": "all",
+          "rationale": "Narrow patient chronic burden spread may indicate a selected or recruited patient population."
+        },
+        {
+          "name": "agent_dead_share_pos",
+          "column": "bene_dead",
+          "agg": "share_positive",
+          "scope": "all",
+          "rationale": "Claims linked to deceased beneficiaries suggest billing after death or related irregularities."
+        },
+        {
+          "name": "agent_age_std_all",
+          "column": "age",
+          "agg": "std",
+          "scope": "all",
+          "rationale": "Unusually tight or wide age spread may indicate atypical patient sourcing."
+        }
+      ],
+      "ratios": [
+        {
+          "name": "agent_bene_per_claim",
+          "numerator": "n_bene",
+          "denominator": "n_claims",
+          "rationale": "Low patients per claim indicates repeated billing of the same beneficiaries."
+        },
+        {
+          "name": "agent_op_reimb_share_ratio",
+          "numerator": "op_total_reimb",
+          "denominator": "total_reimb",
+          "rationale": "Share of money from outpatient billing differs from claim-count mix and shows where the dollars concentrate."
+        },
+        {
+          "name": "agent_ip_per_bene",
+          "numerator": "n_ip_claims",
+          "denominator": "n_bene",
+          "rationale": "Inpatient admissions per patient capture repeated admission patterns."
+        },
+        {
+          "name": "agent_op_per_bene",
+          "numerator": "n_op_claims",
+          "denominator": "n_bene",
+          "rationale": "Outpatient visits per patient flag churning of the same patients."
+        },
+        {
+          "name": "agent_operating_per_attending",
+          "numerator": "n_operating",
+          "denominator": "n_attending",
+          "rationale": "Operating-to-attending physician ratio indicates a physician network structure."
+        },
+        {
+          "name": "agent_dgc_per_ip",
+          "numerator": "n_dgc",
+          "denominator": "n_ip_claims",
+          "rationale": "Distinct diagnosis groups relative to inpatient claims shows case mix breadth versus templating."
+        },
+        {
+          "name": "agent_admitdx_per_ip",
+          "numerator": "n_admit_diag",
+          "denominator": "n_ip_claims",
+          "rationale": "Diversity of admit diagnoses per admission suggests repeated use of the same justification."
+        },
+        {
+          "name": "agent_states_per_bene",
+          "numerator": "n_states",
+          "denominator": "n_bene",
+          "rationale": "Patients spread across many states relative to patient count may flag unusual patient sourcing."
+        }
+      ]
+    },
+    "review": {
+      "verdicts": [
+        {
+          "feature": "agent_reimb_std_op",
+          "verdict": "ok",
+          "reason": "Per-provider aggregate of claim reimbursement amounts; uses only claims data, not the label."
+        },
+        {
+          "feature": "agent_reimb_median_ip",
+          "verdict": "ok",
+          "reason": "Per-provider aggregate of inpatient claim reimbursements from claims only."
+        },
+        {
+          "feature": "agent_reimb_std_ip",
+          "verdict": "ok",
+          "reason": "Per-provider aggregate of inpatient reimbursements from claims only."
+        },
+        {
+          "feature": "agent_ndiag_std_all",
+          "verdict": "ok",
+          "reason": "Per-provider std of diagnosis counts from claims; no label or cross-provider info."
+        },
+        {
+          "feature": "agent_ndiag_max_all",
+          "verdict": "ok",
+          "reason": "Per-provider max of diagnosis counts from claims only."
+        },
+        {
+          "feature": "agent_nproc_share_ip",
+          "verdict": "ok",
+          "reason": "Share of inpatient claims with procedures, computed per provider from claims."
+        },
+        {
+          "feature": "agent_los_std_ip",
+          "verdict": "ok",
+          "reason": "Per-provider std of length of stay from claims only."
+        },
+        {
+          "feature": "agent_claimdays_std_op",
+          "verdict": "ok",
+          "reason": "Per-provider std of claim duration from outpatient claims."
+        },
+        {
+          "feature": "agent_deduct_share_op",
+          "verdict": "ok",
+          "reason": "Share of outpatient claims with a deductible, per provider from claims."
+        },
+        {
+          "feature": "agent_chronic_std_all",
+          "verdict": "ok",
+          "reason": "Per-provider std of beneficiary chronic condition counts from claims."
+        },
+        {
+          "feature": "agent_dead_share_pos",
+          "verdict": "ok",
+          "reason": "Share of claims with deceased beneficiary flag; claim-level data, not an audit outcome."
+        },
+        {
+          "feature": "agent_age_std_all",
+          "verdict": "ok",
+          "reason": "Per-provider std of beneficiary age from claims."
+        },
+        {
+          "feature": "agent_bene_per_claim",
+          "verdict": "ok",
+          "reason": "Ratio of provider-level claim counts; no label involvement."
+        },
+        {
+          "feature": "agent_op_reimb_share_ratio",
+          "verdict": "ok",
+          "reason": "Ratio of provider-level reimbursement totals from claims."
+        },
+        {
+          "feature": "agent_ip_per_bene",
+          "verdict": "ok",
+          "reason": "Provider-level ratio of claim counts to beneficiaries from claims."
+        },
+        {
+          "feature": "agent_op_per_bene",
+          "verdict": "ok",
+          "reason": "Provider-level ratio computed from claims only."
+        },
+        {
+          "feature": "agent_operating_per_attending",
+          "verdict": "ok",
+          "reason": "Ratio of distinct physician counts per provider from claims."
+        },
+        {
+          "feature": "agent_dgc_per_ip",
+          "verdict": "ok",
+          "reason": "Provider-level ratio of distinct diagnosis group codes to inpatient claims from claims."
+        },
+        {
+          "feature": "agent_admitdx_per_ip",
+          "verdict": "ok",
+          "reason": "Provider-level ratio of distinct admit diagnoses to inpatient claims from claims."
+        },
+        {
+          "feature": "agent_states_per_bene",
+          "verdict": "ok",
+          "reason": "Provider-level ratio of distinct states to beneficiaries from claims."
+        }
+      ],
+      "split_ok": true,
+      "split_comment": "Stratified provider-level 5-fold CV keeps each provider in one fold, and all features are per-provider aggregates from claims, so no cross-provider or label leakage is evident. Stratification preserves the 9.35% rate for PR-AUC. Caveat: the label origin is undocumented, so it may reflect claim-derived patterns, and the time window is not split temporally."
+    },
+    "accepted": [
+      "agent_reimb_std_op",
+      "agent_reimb_median_ip",
+      "agent_reimb_std_ip",
+      "agent_ndiag_std_all",
+      "agent_ndiag_max_all",
+      "agent_nproc_share_ip",
+      "agent_los_std_ip",
+      "agent_claimdays_std_op",
+      "agent_deduct_share_op",
+      "agent_chronic_std_all",
+      "agent_dead_share_pos",
+      "agent_age_std_all",
+      "agent_bene_per_claim",
+      "agent_op_reimb_share_ratio",
+      "agent_ip_per_bene",
+      "agent_op_per_bene",
+      "agent_operating_per_attending",
+      "agent_dgc_per_ip",
+      "agent_admitdx_per_ip",
+      "agent_states_per_bene"
+    ],
+    "rejected": [],
+    "all_proposed": [
+      "agent_reimb_std_op",
+      "agent_reimb_median_ip",
+      "agent_reimb_std_ip",
+      "agent_ndiag_std_all",
+      "agent_ndiag_max_all",
+      "agent_nproc_share_ip",
+      "agent_los_std_ip",
+      "agent_claimdays_std_op",
+      "agent_deduct_share_op",
+      "agent_chronic_std_all",
+      "agent_dead_share_pos",
+      "agent_age_std_all",
+      "agent_bene_per_claim",
+      "agent_op_reimb_share_ratio",
+      "agent_ip_per_bene",
+      "agent_op_per_bene",
+      "agent_operating_per_attending",
+      "agent_dgc_per_ip",
+      "agent_admitdx_per_ip",
+      "agent_states_per_bene"
+    ]
+  },
+  "agent_cols": [
+    "agent_reimb_std_op",
+    "agent_reimb_median_ip",
+    "agent_reimb_std_ip",
+    "agent_ndiag_std_all",
+    "agent_ndiag_max_all",
+    "agent_nproc_share_ip",
+    "agent_los_std_ip",
+    "agent_claimdays_std_op",
+    "agent_deduct_share_op",
+    "agent_chronic_std_all",
+    "agent_dead_share_pos",
+    "agent_age_std_all",
+    "agent_bene_per_claim",
+    "agent_op_reimb_share_ratio",
+    "agent_ip_per_bene",
+    "agent_op_per_bene",
+    "agent_operating_per_attending",
+    "agent_dgc_per_ip",
+    "agent_admitdx_per_ip",
+    "agent_states_per_bene"
+  ],
+  "runs": {
+    "1": {
+      "model": "logistic",
+      "feature_set": "no_size",
+      "imbalance": "class_weight",
+      "params": {
+        "C": 0.1,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": null,
+        "learning_rate": null,
+        "n_estimators": null,
+        "min_child_samples": null,
+        "colsample_bytree": null
+      },
+      "rationale": "Regularized linear baseline without size features to check whether signal is more than provider volume. Class weighting suits the 9% positive rate and gives a stable reference for PR-AUC."
+    },
+    "2": {
+      "model": "random_forest",
+      "feature_set": "all",
+      "imbalance": "none",
+      "params": {
+        "C": null,
+        "min_samples_leaf": 5,
+        "max_features": 0.3,
+        "num_leaves": null,
+        "learning_rate": null,
+        "n_estimators": null,
+        "min_child_samples": null,
+        "colsample_bytree": null
+      },
+      "rationale": "Bagged trees capture nonlinearity with little tuning. Leaf size 5 keeps probabilities smooth for ranking at the top of the queue. No resampling keeps the score calibrated."
+    },
+    "3": {
+      "model": "lightgbm",
+      "feature_set": "all+agent",
+      "imbalance": "none",
+      "params": {
+        "C": null,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": 15,
+        "learning_rate": 0.03,
+        "n_estimators": 400,
+        "min_child_samples": 30,
+        "colsample_bytree": 0.6
+      },
+      "rationale": "Moderate-capacity boosting with the agent features added to test whether they add signal. Low learning rate, large child samples and column subsampling limit overfitting on about 500 positives."
+    },
+    "4": {
+      "model": "lightgbm",
+      "feature_set": "no_size+agent",
+      "imbalance": "class_weight",
+      "params": {
+        "C": null,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": 8,
+        "learning_rate": 0.02,
+        "n_estimators": 600,
+        "min_child_samples": 40,
+        "colsample_bytree": 0.5
+      },
+      "rationale": "A smaller, more regularized boosted model without size features but with agent features, plus class weighting. It tests robustness when volume is not available as a shortcut for the label."
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "median_claims_flagged": 155.5,
+  "median_claims_not_flagged": 27.0,
+  "flagged_share_of_claims": 0.3812106891480103,
+  "flagged_share_of_reimbursement": 0.5312815822327808,
+  "precision_top50_by_claims": 1.0,
+  "beneficiaries_seeing_2plus_providers": 0.661487052166633,
+  "flag_rate_by_type": {
+    "both": {
+      "mean": 0.23376623376623376,
+      "sum": 396,
+      "size": 1694
+    },
+    "ip_only": {
+      "mean": 0.11055276381909548,
+      "sum": 44,
+      "size": 398
+    },
+    "op_only": {
+      "mean": 0.019891500904159132,
+      "sum": 66,
+      "size": 3318
+    }
+  },
+  "ip_operating_physician_missing": 0.41122696051786334,
+  "op_procedure_code_missing": 0.9996870998209516
+}

@@ -1,0 +1,247 @@
+{
+ "request": {
+  "model": "claude-sonnet-5-5",
+  "system": "You are an experiment designer for a fraud ranking model. Task: rank Medicare providers for audit. Each of 5,410 providers carries a PotentialFraud label (9.35% flagged) whose origin is undocumented; treat it as suspicion, not confirmed fraud. Claims run 27 Nov 2008 to 31 Dec 2009. The primary metric is PR-AUC; the audit queue holds about 100 providers. Propose 3 or 4 distinct configurations to test next with 5-fold cross-validation. Each must differ meaningfully (model family, feature set, imbalance handling or capacity). You only see cross-validation results; the test set is hidden from you. (Independent run 1, no feature agent.)",
+  "messages": [
+   {
+    "role": "user",
+    "content": "<data>\n{\n \"feature_sets\": {\n  \"all\": 63,\n  \"no_size\": 50,\n  \"agent_features\": \"not available\"\n },\n \"families\": {\n  \"size\": 13,\n  \"service_mix\": 4,\n  \"money\": 9,\n  \"intensity\": 6,\n  \"coding\": 6,\n  \"physicians\": 5,\n  \"duplication\": 2,\n  \"patient_mix\": 18\n },\n \"history\": []\n}\n</data>"
+   }
+  ],
+  "schema": {
+   "$defs": {
+    "ExperimentProposal": {
+     "type": "object",
+     "title": "ExperimentProposal",
+     "properties": {
+      "model": {
+       "type": "string",
+       "enum": [
+        "logistic",
+        "random_forest",
+        "lightgbm"
+       ],
+       "title": "Model"
+      },
+      "feature_set": {
+       "type": "string",
+       "enum": [
+        "all",
+        "no_size",
+        "all+agent",
+        "no_size+agent"
+       ],
+       "title": "Feature Set"
+      },
+      "imbalance": {
+       "type": "string",
+       "enum": [
+        "none",
+        "class_weight",
+        "smote"
+       ],
+       "title": "Imbalance"
+      },
+      "params": {
+       "$ref": "#/$defs/ModelParams"
+      },
+      "rationale": {
+       "type": "string",
+       "title": "Rationale"
+      }
+     },
+     "additionalProperties": false,
+     "required": [
+      "model",
+      "feature_set",
+      "imbalance",
+      "params",
+      "rationale"
+     ]
+    },
+    "ModelParams": {
+     "type": "object",
+     "title": "ModelParams",
+     "properties": {
+      "C": {
+       "anyOf": [
+        {
+         "type": "number",
+         "description": "{maximum: 100, minimum: 0.0001}"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "C",
+       "description": "{default: None}"
+      },
+      "min_samples_leaf": {
+       "anyOf": [
+        {
+         "type": "integer",
+         "description": "{maximum: 50, minimum: 1}"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Min Samples Leaf",
+       "description": "{default: None}"
+      },
+      "max_features": {
+       "anyOf": [
+        {
+         "type": "number",
+         "description": "{maximum: 1.0, minimum: 0.05}"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Max Features",
+       "description": "{default: None}"
+      },
+      "num_leaves": {
+       "anyOf": [
+        {
+         "type": "integer",
+         "description": "{maximum: 64, minimum: 4}"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Num Leaves",
+       "description": "{default: None}"
+      },
+      "learning_rate": {
+       "anyOf": [
+        {
+         "type": "number",
+         "description": "{maximum: 0.2, minimum: 0.005}"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Learning Rate",
+       "description": "{default: None}"
+      },
+      "n_estimators": {
+       "anyOf": [
+        {
+         "type": "integer",
+         "description": "{maximum: 1500, minimum: 50}"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "N Estimators",
+       "description": "{default: None}"
+      },
+      "min_child_samples": {
+       "anyOf": [
+        {
+         "type": "integer",
+         "description": "{maximum: 100, minimum: 5}"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Min Child Samples",
+       "description": "{default: None}"
+      },
+      "colsample_bytree": {
+       "anyOf": [
+        {
+         "type": "number",
+         "description": "{maximum: 1.0, minimum: 0.3}"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Colsample Bytree",
+       "description": "{default: None}"
+      }
+     },
+     "additionalProperties": false
+    }
+   },
+   "type": "object",
+   "title": "ExperimentBatch",
+   "properties": {
+    "proposals": {
+     "type": "array",
+     "title": "Proposals",
+     "items": {
+      "$ref": "#/$defs/ExperimentProposal"
+     },
+     "description": "{maxItems: 4, minItems: 3}"
+    }
+   },
+   "additionalProperties": false,
+   "required": [
+    "proposals"
+   ]
+  },
+  "effort": "low"
+ },
+ "output": {
+  "proposals": [
+   {
+    "model": "lightgbm",
+    "feature_set": "all",
+    "imbalance": "none",
+    "params": {
+     "num_leaves": 15,
+     "learning_rate": 0.03,
+     "n_estimators": 400,
+     "min_child_samples": 30,
+     "colsample_bytree": 0.7
+    },
+    "rationale": "Strong baseline for tabular data. No resampling keeps probabilities calibrated, which suits ranking by PR-AUC. Moderate capacity limits overfitting on about 500 positives."
+   },
+   {
+    "model": "random_forest",
+    "feature_set": "no_size",
+    "imbalance": "class_weight",
+    "params": {
+     "min_samples_leaf": 10,
+     "max_features": 0.3
+    },
+    "rationale": "Drops the 13 size features to test whether the model learns only volume. Fraud labels may largely track provider size, and a size-independent signal would be more useful for audit. A random forest with class weights and larger leaves is a robust, low-variance comparison."
+   },
+   {
+    "model": "logistic",
+    "feature_set": "all",
+    "imbalance": "class_weight",
+    "params": {
+     "C": 0.1
+    },
+    "rationale": "Regularized linear baseline. It shows how much signal is simple and monotone, and gives a reference for judging whether the tree models' extra complexity pays off."
+   },
+   {
+    "model": "lightgbm",
+    "feature_set": "no_size",
+    "imbalance": "class_weight",
+    "params": {
+     "num_leaves": 8,
+     "learning_rate": 0.02,
+     "n_estimators": 600,
+     "min_child_samples": 40,
+     "colsample_bytree": 0.5
+    },
+    "rationale": "Low-capacity boosted model without size features and with class weighting. Tests whether a smaller, heavily regularized model with feature subsampling improves PR-AUC at the top of the ranking."
+   }
+  ]
+ },
+ "stop_reason": "end_turn",
+ "usage": {
+  "input": 1913,
+  "output": 554
+ }
+}

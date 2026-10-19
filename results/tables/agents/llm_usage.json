@@ -1,0 +1,44 @@
+{
+  "RETRIEVAL": {
+    "model": "claude-sonnet-5-5",
+    "api_calls": 0,
+    "cache_hits": 0,
+    "input_tokens": 0,
+    "output_tokens": 0
+  },
+  "CLEAN": {
+    "model": "claude-sonnet-5-5",
+    "api_calls": 0,
+    "cache_hits": 1,
+    "input_tokens": 6440,
+    "output_tokens": 3175
+  },
+  "E10": {
+    "model": "claude-sonnet-5-5",
+    "api_calls": 0,
+    "cache_hits": 3,
+    "input_tokens": 4209,
+    "output_tokens": 3334
+  },
+  "E4": {
+    "model": "claude-sonnet-5-5",
+    "api_calls": 0,
+    "cache_hits": 16,
+    "input_tokens": 40306,
+    "output_tokens": 14812
+  },
+  "E8": {
+    "model": "claude-sonnet-5-5",
+    "api_calls": 0,
+    "cache_hits": 40,
+    "input_tokens": 90670,
+    "output_tokens": 26184
+  },
+  "E11": {
+    "model": "claude-sonnet-5-5",
+    "api_calls": 63,
+    "cache_hits": 0,
+    "input_tokens": 231039,
+    "output_tokens": 69720
+  }
+}

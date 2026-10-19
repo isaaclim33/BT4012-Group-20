@@ -1,0 +1,1447 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Provider review queue</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600&family=Mulish:wght@400;500;600;700;800&display=swap">
+<style>
+/* Visual language: dark hero shell, pill nav, stat tiles, soft status pills, lifted cards (reference A);
+   sage page tint, serif card titles, green insights panel, range bars, activity list (reference B). */
+:root{
+  --bg:#eef1ee;--card:#ffffff;--sub:#f4f6f4;--sub-2:#e8ebe8;--line:#e3e7e3;
+  --ink:#0f1116;--ink-2:#4a5160;--quiet:#7f8691;
+  --solid:#0f1116;--solid-ink:#ffffff;
+  --hero:#0b0e1a;--hero-2:#1a2138;--hero-mute:rgba(255,255,255,.64);--hero-line:rgba(255,255,255,.14);--hero-tile:rgba(255,255,255,.055);
+  --violet:#7b5cf6;--violet-hover:#6947ea;--violet-soft:#efebff;--violet-ink:#5f3fe4;--lav:#dcd3ff;--lav-2:#c7b9ff;--lav-ink:#3b2a8a;
+  --green:#2fb463;--green-soft:#e1f5e8;--green-ink:#147a3c;
+  --amber-soft:#fff1d0;--amber-ink:#9a6200;--amber:#f5b100;
+  --pink:#f2477f;--pink-soft:#ffe5ed;--pink-ink:#c81f55;
+  --blue-soft:#e5eeff;--blue-ink:#2a60cc;
+  --grey-soft:#eef0f2;--grey-ink:#5f6672;
+  --panel-1:#6aa56d;--panel-2:#3d7a46;
+  --track:#e6eae6;--band:#b9cdb9;--warm:#f6c9bd;--dot:#c5cbd3;
+  --sans:"Mulish","Nunito Sans","Segoe UI",system-ui,-apple-system,sans-serif;
+  --serif:"Lora","Iowan Old Style","Palatino Linotype",Georgia,serif;
+  --r:20px;--r-sm:14px;
+  --soft:0 1px 2px rgba(15,17,22,.04);
+  --lift:0 30px 50px -24px rgba(15,17,22,.38),0 10px 20px -12px rgba(15,17,22,.14);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0b0d12;--card:#151922;--sub:#1c212b;--sub-2:#262c38;--line:#272d39;
+  --ink:#eef0f4;--ink-2:#b8bfcb;--quiet:#8b93a1;--solid:#eef0f4;--solid-ink:#0f1116;
+  --hero:#06080e;--hero-2:#151b31;
+  --violet-soft:#2a2352;--violet-ink:#bcaaff;--lav:#51458f;--lav-2:#5f52a3;--lav-ink:#ece8ff;
+  --green-soft:#15301f;--green-ink:#74dd9c;--amber-soft:#3a2b0b;--amber-ink:#f3c65e;
+  --pink-soft:#3e1627;--pink-ink:#ff92b6;--blue-soft:#162949;--blue-ink:#93b7ff;--grey-soft:#242a35;--grey-ink:#a8b0bc;
+  --panel-1:#4f8c54;--panel-2:#2a5a31;--track:#2a303c;--band:#4d6650;--warm:#6b3c33;--dot:#465061;
+  --soft:0 0 0 1px rgba(255,255,255,.03);--lift:0 30px 50px -24px rgba(0,0,0,.8);
+}}
+:root[data-theme="dark"]{
+  --bg:#0b0d12;--card:#151922;--sub:#1c212b;--sub-2:#262c38;--line:#272d39;
+  --ink:#eef0f4;--ink-2:#b8bfcb;--quiet:#8b93a1;--solid:#eef0f4;--solid-ink:#0f1116;
+  --hero:#06080e;--hero-2:#151b31;
+  --violet-soft:#2a2352;--violet-ink:#bcaaff;--lav:#51458f;--lav-2:#5f52a3;--lav-ink:#ece8ff;
+  --green-soft:#15301f;--green-ink:#74dd9c;--amber-soft:#3a2b0b;--amber-ink:#f3c65e;
+  --pink-soft:#3e1627;--pink-ink:#ff92b6;--blue-soft:#162949;--blue-ink:#93b7ff;--grey-soft:#242a35;--grey-ink:#a8b0bc;
+  --panel-1:#4f8c54;--panel-2:#2a5a31;--track:#2a303c;--band:#4d6650;--warm:#6b3c33;--dot:#465061;
+  --soft:0 0 0 1px rgba(255,255,255,.03);--lift:0 30px 50px -24px rgba(0,0,0,.8);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--sans);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+button,select,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--violet);outline-offset:2px;border-radius:6px}
+main:focus{outline:none}
+p{margin:0}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg{flex:none}
+.frame{max-width:1440px;margin:0 auto;padding:20px 24px 28px}
+
+/* ---------- hero shell ---------- */
+.hero{position:relative;background:radial-gradient(110% 150% at 88% -30%,var(--hero-2) 0%,var(--hero) 58%);color:#fff;border-radius:26px;padding:14px 24px 26px;isolation:isolate;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(40% 60% at 50% 0%,rgba(123,92,246,.10),transparent 70%);z-index:-1}
+.top{display:flex;align-items:center;gap:16px;min-height:52px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:15px;text-decoration:none;color:#fff;white-space:nowrap;letter-spacing:-.01em}
+.logo i{width:32px;height:32px;border-radius:50%;background:var(--violet);display:grid;place-items:center;box-shadow:0 0 0 4px rgba(123,92,246,.18)}
+.nav{display:flex;gap:4px;margin:0 auto;overflow-x:auto;scrollbar-width:none;min-width:0}
+.nav::-webkit-scrollbar{display:none}
+.nav a{padding:8px 16px;border-radius:12px;color:var(--hero-mute);text-decoration:none;font-size:13.5px;font-weight:600;white-space:nowrap;transition:background .2s,color .2s}
+.nav a:hover{color:#fff;background:rgba(255,255,255,.04)}
+.nav a[aria-current=page]{background:rgba(255,255,255,.10);color:#fff}
+.icons{display:flex;gap:8px}
+.ib{width:38px;height:38px;border-radius:50%;border:1px solid var(--hero-line);background:transparent;color:#fff;display:grid;place-items:center;cursor:pointer;position:relative;transition:background .2s,border-color .2s;text-decoration:none}
+.ib:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.3)}
+.ib .badge{position:absolute;top:-4px;right:-4px;min-width:19px;height:19px;border-radius:10px;background:var(--pink);font-size:11px;font-weight:800;display:grid;place-items:center;padding:0 5px;border:2px solid var(--hero);line-height:1}
+.hb{padding-top:30px}
+.hb-row{display:flex;align-items:flex-end;justify-content:space-between;gap:18px 28px;flex-wrap:wrap}
+.hb h1{font-size:clamp(26px,3vw,36px);line-height:1.12;font-weight:800;letter-spacing:-.025em;margin:0}
+.hb .lead{color:var(--hero-mute);margin:10px 0 0;max-width:62ch;font-size:15px}
+.hact{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:8px;color:#fff;font-size:13.5px;font-weight:600;white-space:nowrap;margin-right:8px}
+.cta{display:inline-flex;align-items:center;gap:8px;background:var(--violet);color:#fff;border:0;border-radius:14px;padding:12px 20px;font-weight:700;font-size:14px;text-decoration:none;cursor:pointer;transition:background .2s,transform .2s;white-space:nowrap}
+.cta:hover{background:var(--violet-hover);transform:translateY(-1px)}
+.wpill{display:inline-flex;align-items:center;gap:8px;background:#fff;color:#0f1116;border:0;border-radius:999px;padding:0 16px;height:42px;font-weight:700;font-size:13.5px;cursor:pointer;text-decoration:none;white-space:nowrap}
+.wpill select{appearance:none;-webkit-appearance:none;border:0;background:transparent;font-weight:700;font-size:13.5px;color:#0f1116;cursor:pointer;padding-right:4px}
+.wpill select:focus-visible{outline:none}
+.wpill:focus-within{outline:3px solid var(--lav-2);outline-offset:2px}
+.ib.light{background:#fff;color:#0f1116;border-color:#fff;width:42px;height:42px}
+.ib.light:hover{background:#e9e9ee}
+.ib[aria-disabled=true]{opacity:.35;pointer-events:none}
+.crumbs{display:flex;align-items:center;gap:8px;color:var(--hero-mute);font-size:13.5px;flex-wrap:wrap;margin-bottom:14px}
+.crumbs a{color:var(--hero-mute);text-decoration:none;display:inline-flex;align-items:center;gap:8px}.crumbs a:hover{color:#fff}
+.crumbs b{color:#fff;font-weight:700}
+.hb .pls{display:inline-flex;gap:8px;vertical-align:middle;margin-left:12px;flex-wrap:wrap}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:24px}
+.tile{background:var(--hero-tile);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:14px 16px;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto 1fr;gap:14px;min-height:98px;color:#fff;text-align:left;font:inherit;min-width:0}
+button.tile{cursor:pointer;transition:background .2s,border-color .2s,transform .2s}
+button.tile:hover{background:rgba(255,255,255,.09);transform:translateY(-2px)}
+.tile[aria-pressed=true]{border-color:rgba(160,138,255,.75);background:rgba(123,92,246,.17)}
+.tile .lab{grid-column:1/-1;font-size:13px;font-weight:600;color:rgba(255,255,255,.88)}
+.tile .num{font-size:30px;font-weight:800;line-height:1;align-self:end;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .num small{font-size:13px;font-weight:600;color:var(--hero-mute);margin-left:6px;letter-spacing:0}
+.tile .ic{align-self:end;width:34px;height:34px;border-radius:50%;display:grid;place-items:center}
+.ic-violet{background:rgba(123,92,246,.24);color:#c3b5ff}.ic-pink{background:rgba(242,71,127,.2);color:#ff94b8}
+.ic-amber{background:rgba(245,177,0,.18);color:#ffcf5c}.ic-green{background:rgba(47,180,99,.2);color:#7fe6a6}
+.notice{margin-top:16px;background:var(--amber-soft);color:var(--ink);border-radius:var(--r-sm);padding:12px 16px;font-size:14px;display:flex;gap:10px;align-items:flex-start}
+.notice svg{color:var(--amber-ink);margin-top:2px}
+
+/* ---------- cards and layout ---------- */
+main{display:block;margin-top:16px}
+.card{background:var(--card);border-radius:var(--r);padding:20px;box-shadow:var(--soft);min-width:0}
+.ch{display:flex;align-items:flex-start;justify-content:space-between;gap:10px 14px;margin-bottom:16px;flex-wrap:wrap}
+.ct{font-family:var(--serif);font-weight:500;font-size:19px;line-height:1.25;margin:0;letter-spacing:-.005em;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.cs{color:var(--quiet);font-size:13px;margin-top:3px;max-width:70ch}
+.count-chip{font-family:var(--sans);font-size:12px;font-weight:700;background:var(--sub);color:var(--ink-2);border-radius:8px;padding:2px 8px}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sp{flex:1}
+.ov{display:grid;grid-template-columns:minmax(0,2.15fr) minmax(0,1fr);gap:16px;align-items:start}
+.stack{display:flex;flex-direction:column;gap:16px;min-width:0}
+.pg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+.pg .full{grid-column:1/-1}.pg .two{grid-column:span 2}
+.pg .panel{grid-column:3;grid-row:1/span 2;align-self:stretch}
+@media (max-width:1100px){
+  .ov{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stack{display:contents}
+  .o1{order:1;grid-column:1/-1}.o2{order:2}.o3{order:3;grid-column:1/-1}.o4{order:4;grid-column:1/-1}.o5{order:5}.o6{order:6;grid-column:1/-1}
+  .pg{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pg .panel{grid-column:2;grid-row:1/span 2}
+  .pg .two{grid-column:1/-1}
+}
+@media (max-width:720px){
+  .ov,.pg{grid-template-columns:minmax(0,1fr)}
+  .ov>*,.pg>*,.pg .panel{grid-column:1/-1!important;grid-row:auto!important}
+  .o2b{order:2}
+}
+
+/* buttons, pills, inputs */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;padding:10px 16px;font-weight:700;font-size:13.5px;cursor:pointer;text-decoration:none;border:1px solid var(--line);background:var(--card);color:var(--ink);transition:background .2s,color .2s,border-color .2s;white-space:nowrap}
+.btn:hover{border-color:var(--ink-2)}
+.btn.solid{background:var(--solid);color:var(--solid-ink);border-color:var(--solid)}
+.btn.solid:hover{opacity:.9}
+.btn.pill{border-radius:999px}
+.btn.wide{width:100%}
+.btn.sm{padding:7px 12px;font-size:13px}
+.circ{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;cursor:pointer;color:var(--ink);transition:background .2s,border-color .2s}
+.circ:hover:not(:disabled){border-color:var(--ink-2)}
+.circ:disabled{opacity:.35;cursor:default}
+.pl{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;white-space:nowrap;line-height:1.35}
+.pl-audit{background:var(--pink-soft);color:var(--pink-ink)}
+.pl-desk{background:var(--amber-soft);color:var(--amber-ink)}
+.pl-mon{background:var(--blue-soft);color:var(--blue-ink)}
+.pl-none{background:var(--grey-soft);color:var(--grey-ink)}
+.pl-violet{background:var(--violet-soft);color:var(--violet-ink)}
+.pl-green{background:var(--green-soft);color:var(--green-ink)}
+.pl-pink{background:var(--pink-soft);color:var(--pink-ink)}
+.pl-white{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.pl-dot::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.hero .pl-none{background:rgba(255,255,255,.12);color:#fff}
+.sel{position:relative;display:inline-flex;align-items:center}
+.sel select{appearance:none;-webkit-appearance:none;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 34px 8px 14px;font-weight:700;font-size:13px;cursor:pointer;color:var(--ink);max-width:100%}
+.sel select:hover{border-color:var(--ink-2)}
+.sel svg{position:absolute;right:11px;pointer-events:none;color:var(--quiet)}
+.search{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:0 12px;min-width:0;flex:0 1 280px}
+.search:focus-within{border-color:var(--violet);box-shadow:0 0 0 3px var(--violet-soft)}
+.search input{border:0;background:transparent;padding:9px 0;outline:none;font-weight:600;font-size:13.5px;min-width:0;width:100%}
+.search svg{color:var(--quiet)}
+.av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;flex:none}
+.av-h{background:var(--violet-soft);color:var(--violet-ink)}
+.av-o{background:var(--green-soft);color:var(--green-ink)}
+.av-i{background:var(--blue-soft);color:var(--blue-ink)}
+.who{display:flex;align-items:center;gap:10px;min-width:0}
+.who b{font-weight:800;letter-spacing:.01em;white-space:nowrap}
+.who small{display:block;color:var(--quiet);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who>div{min-width:0}
+.subc{background:var(--sub);border-radius:12px;padding:10px 12px;min-width:0}
+.subc>span{display:block;color:var(--quiet);font-size:12px}
+.subc b{display:block;font-size:15px;font-weight:800;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.subs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,20px);opacity:0;background:var(--solid);color:var(--solid-ink);padding:10px 18px;border-radius:999px;font-size:14px;font-weight:700;z-index:20;pointer-events:none;transition:opacity .25s,transform .25s;display:flex;gap:8px;align-items:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.tip{position:fixed;pointer-events:none;background:#0f1116;color:#fff;font-size:12.5px;font-weight:600;padding:7px 11px;border-radius:10px;z-index:9;max-width:19rem;display:none;box-shadow:0 10px 24px -10px rgba(0,0,0,.5)}
+kbd{font:inherit;font-size:11.5px;font-weight:700;border:1px solid var(--hero-line);border-bottom-width:2px;border-radius:5px;padding:0 5px}
+
+/* ---------- overview ---------- */
+.trow{display:grid;grid-template-columns:1fr 1fr 1.45fr 1.45fr 1.45fr;gap:16px}
+.act{border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font:inherit;font-weight:700;font-size:14px;text-decoration:none;border:0;cursor:pointer;min-height:132px;padding:14px;text-align:center;transition:transform .25s,box-shadow .25s}
+.act:hover{transform:translateY(-3px);box-shadow:var(--lift)}
+.act small{font-weight:600;font-size:11.5px;opacity:.75}
+.act.green{background:var(--green);color:#fff}
+.act.black{background:#0f1116;color:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .act.black{background:#000;box-shadow:inset 0 0 0 1px #262b36}}
+:root[data-theme="dark"] .act.black{background:#000;box-shadow:inset 0 0 0 1px #262b36}
+.stat{display:flex;flex-direction:column;min-height:132px}
+.stat h3{font-size:14px;font-weight:800;margin:0;line-height:1.3}
+.stat p{font-size:12.5px;color:var(--quiet);margin-top:2px}
+.stat .big{margin-top:auto;display:flex;align-items:center;gap:10px;padding-top:14px;flex-wrap:wrap}
+.stat .big b{font-size:40px;font-weight:800;letter-spacing:-.035em;line-height:1}
+.stat .big b small{font-size:16px;color:var(--quiet);letter-spacing:0;margin-left:2px}
+.delta{font-size:11.5px;font-weight:800;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.d-up{background:var(--green-soft);color:var(--green-ink)}.d-down{background:var(--pink-soft);color:var(--pink-ink)}
+.meter{height:6px;border-radius:3px;background:var(--sub-2);overflow:hidden;flex:1 1 60px;min-width:40px}
+.meter i{display:block;height:100%;background:var(--violet);border-radius:3px;width:0;transition:width .8s cubic-bezier(.2,.8,.2,1)}
+@media (max-width:1240px){.trow{grid-template-columns:1fr 1fr 1fr 1fr 1fr}.stat .big b{font-size:34px}}
+@media (max-width:860px){.trow{grid-template-columns:1fr 1fr}.trow .stat:last-child{grid-column:1/-1}}
+
+.bars{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));height:214px;border-top:1px solid var(--line)}
+.bcol{position:relative;display:flex;flex-direction:column;border-left:1px solid var(--line);padding:8px 3px 0}
+.bcol:first-child{border-left:0}
+.bcol .v{font-size:20px;font-weight:800;padding:0 6px;letter-spacing:-.02em}
+.bcol .plot{flex:1;display:flex;align-items:flex-end;position:relative}
+.bcol .fill{width:100%;height:0;border-radius:16px 16px 6px 6px;transition:height 1s cubic-bezier(.2,.8,.2,1);position:relative}
+.f-black{background:var(--solid)}.f-pink{background:var(--pink)}
+.f-stripe{background:repeating-linear-gradient(135deg,var(--lav) 0 9px,var(--lav-2) 9px 18px)}
+.bcol .dp{position:absolute;left:50%;top:-11px;transform:translateX(-50%);background:var(--pink-soft);color:var(--pink-ink);border:2px solid var(--card);font-size:11.5px;font-weight:800;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.bcol .lab{font-size:12px;color:var(--quiet);padding:8px 6px 0;line-height:1.3}
+.bcol.me .lab{color:var(--ink);font-weight:700}
+
+.ins{background:linear-gradient(160deg,var(--panel-1),var(--panel-2));color:#fff;border-radius:var(--r);padding:20px;position:relative;overflow:hidden;min-width:0}
+.ins::before{content:"";position:absolute;inset:0;background:radial-gradient(70% 50% at 20% 0%,rgba(255,255,255,.18),transparent 70%);pointer-events:none}
+.ins .ct{color:#fff}
+.ins .badge{font-family:var(--sans);font-size:11.5px;font-weight:700;background:rgba(255,255,255,.18);border-radius:999px;padding:3px 9px}
+.icard{position:relative;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.16);border-radius:16px;padding:14px 16px;backdrop-filter:blur(2px)}
+.icard+.icard{margin-top:10px}
+.icard .ih{display:flex;gap:12px;align-items:flex-start}
+.icard .ii{width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.3);display:grid;place-items:center;flex:none}
+.icard h4{font-size:14.5px;font-weight:700;margin:0;line-height:1.35}
+.icard .isub{font-size:12.5px;opacity:.8;margin-top:2px}
+.icard p.ib2{font-size:13.5px;opacity:.92;margin-top:8px;line-height:1.5}
+.icard ul{margin:8px 0 0;padding-left:18px;font-size:13.5px;opacity:.92}
+.icard li+li{margin-top:4px}
+.slides{position:relative}
+.slide{display:none;animation:fade .45s ease}
+.slide.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.segs{display:flex;gap:8px;margin-top:14px}
+.segs button{flex:1;height:4px;border-radius:2px;border:0;padding:0;background:rgba(255,255,255,.28);cursor:pointer;position:relative;overflow:hidden}
+.segs button::after{content:"";position:absolute;inset:0;background:#fff;transform:scaleX(0);transform-origin:left}
+.segs button.done::after{transform:scaleX(1)}
+.segs button.on::after{animation:seg var(--dur,8s) linear forwards}
+.segs.paused button.on::after{animation-play-state:paused}
+.segs.still button.on::after{animation:none;transform:scaleX(1)}
+.segs button::before{content:"";position:absolute;inset:-10px 0}
+@keyframes seg{to{transform:scaleX(1)}}
+.note{background:#fff;color:#0f1116;border-radius:14px;padding:14px;margin-top:10px}
+.note p{font-size:13.5px;white-space:pre-wrap;overflow-wrap:anywhere}
+.note .nf{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:12px;color:#7f8691}
+.note textarea{width:100%;min-height:96px;border:1px solid #dfe3df;border-radius:10px;padding:10px;font-size:13.5px;resize:vertical;color:#0f1116;background:#fff}
+.ins .btn{background:#fff;color:#0f1116;border-color:#fff}
+.ins .btn.ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.45)}
+.ins .circ{background:transparent;color:#fff;border-color:rgba(255,255,255,.45)}
+.ins .note .circ{color:#0f1116;border-color:#dfe3df;background:#fff;width:32px;height:32px}
+
+.rail-wrap{position:relative}
+.rail{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 24px)/3);gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;scroll-behavior:smooth;padding-bottom:2px}
+.rail::-webkit-scrollbar{display:none}
+.rc{scroll-snap-align:start;background:var(--sub);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:16px;text-decoration:none;color:inherit;border:1px solid transparent;transition:border-color .2s,background .2s,transform .2s;min-width:0}
+.rc:hover{border-color:var(--line);background:var(--sub-2);transform:translateY(-2px)}
+.rc .m{font-size:12.5px;color:var(--ink-2);margin-top:2px}
+.rc .m b{color:var(--ink);font-weight:800}
+.rc .ft{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12.5px;color:var(--quiet);margin-top:auto}
+@media (max-width:900px){.rail{grid-auto-columns:calc((100% - 12px)/2)}}
+@media (max-width:560px){.rail{grid-auto-columns:86%}}
+
+.tcard{container-type:inline-size}
+.tw{overflow-x:auto;margin:0 -6px;padding:0 6px;position:relative}
+table{width:100%;border-collapse:separate;border-spacing:0;font-size:13.5px}
+thead th{background:var(--sub);color:var(--quiet);font-weight:600;font-size:12.5px;text-align:left;padding:11px 12px;white-space:nowrap}
+thead th:first-child{border-radius:12px 0 0 12px}thead th:last-child{border-radius:0 12px 12px 0}
+th button{all:unset;cursor:pointer;display:inline-flex;gap:4px;align-items:center}
+th button:focus-visible{outline:3px solid var(--violet);border-radius:4px}
+th[aria-sort=ascending] button::after{content:"↑"}th[aria-sort=descending] button::after{content:"↓"}
+tbody td{padding:12px;vertical-align:middle;transition:background .15s}
+tbody tr{cursor:pointer}
+tbody tr:hover td,tbody tr:focus-within td{background:var(--sub)}
+tbody tr td:first-child{border-radius:12px 0 0 12px}tbody tr td:last-child{border-radius:0 12px 12px 0}
+td.num,th.num{text-align:right}
+.rk{font-weight:700;color:var(--ink-2)}
+.arrow{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);display:grid;place-items:center;background:var(--card);color:var(--ink);transition:background .15s,color .15s,border-color .15s;margin-left:auto;text-decoration:none}
+tbody tr:hover .arrow,.arrow:focus-visible{background:var(--solid);color:var(--solid-ink);border-color:var(--solid)}
+.why{color:var(--ink-2);font-size:13px}
+.why b{color:var(--ink);font-weight:700}
+.beyond-y{color:var(--green-ink);font-weight:800}
+.flag{display:block;font-size:11.5px;color:var(--amber-ink);font-weight:700;margin-top:4px;white-space:nowrap}
+@container (max-width:900px){.c-care{display:none}}
+@container (max-width:760px){.c-why{display:none}}
+@container (max-width:620px){.c-status,.c-pay,.c-claims{display:none}}
+@container (max-width:470px){.c-sfr,.who small{display:none}.tw .who .av{display:none}tbody td,thead th{padding-left:8px;padding-right:8px}}
+.more{display:block;margin:16px auto 0}
+
+.bub{width:100%;max-width:340px;display:block;margin:0 auto}
+.bub g{cursor:pointer}
+.bub g circle{transition:transform .25s;transform-box:fill-box;transform-origin:center}
+.bub g:hover circle,.bub g:focus-visible circle{transform:scale(1.04)}
+.bub g:focus{outline:none}
+.bub g:focus-visible circle{stroke:var(--violet)}
+.legend{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.legend button{all:unset;display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer;padding:6px 8px;border-radius:10px}
+.legend button:hover,.legend button:focus-visible{background:var(--sub)}
+.legend i{width:10px;height:10px;border-radius:50%;flex:none}
+.legend b{margin-left:auto;font-weight:800}
+
+.acts{list-style:none;margin:0;padding:0}
+.acts li+li{margin-top:4px}
+.acts a{display:flex;gap:12px;align-items:center;padding:8px;border-radius:12px;text-decoration:none;transition:background .15s}
+.acts a:hover{background:var(--sub)}
+.acts .ai{width:40px;height:40px;border-radius:12px;background:var(--sub);display:grid;place-items:center;flex:none;color:var(--ink-2)}
+.acts .ai.hot{background:var(--pink-soft);color:var(--pink-ink)}
+.acts .ai.ok{background:var(--green-soft);color:var(--green-ink)}
+.acts .ai.vi{background:var(--violet-soft);color:var(--violet-ink)}
+.acts b{display:block;font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.acts small{color:var(--quiet);font-size:12px}
+.acts .t{margin-left:auto;color:var(--quiet);font-size:12px;white-space:nowrap}
+.acts>li>a>div{min-width:0}
+.crit{color:var(--pink-ink);font-weight:700;font-size:13px;font-family:var(--sans)}
+.empty{color:var(--quiet);font-size:13.5px;padding:14px;background:var(--sub);border-radius:12px}
+
+.seg{display:inline-flex;background:var(--sub);border-radius:12px;padding:3px}
+.seg button{border:0;background:transparent;padding:6px 12px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;color:var(--quiet);white-space:nowrap}
+.seg button[aria-pressed=true]{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(15,17,22,.08)}
+.dots{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-2)}
+.dots span{display:inline-flex;align-items:center;gap:6px}
+.dots i{width:9px;height:9px;border-radius:50%}
+svg text{fill:var(--quiet);font-size:12px;font-family:var(--sans)}
+.map svg{width:100%;height:auto;display:block}
+
+.cols3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.cols3>div{background:var(--sub);border-radius:16px;padding:16px}
+.cols3 h3{font-size:14px;font-weight:800;margin:0 0 8px;display:flex;align-items:center;gap:8px}
+.cols3 ul{margin:0;padding-left:18px;color:var(--ink-2);font-size:13.5px}
+.cols3 li+li{margin-top:6px}
+dl.gloss{margin:0;font-size:13.5px}
+dl.gloss dt{font-weight:700}dl.gloss dd{margin:0 0 8px;color:var(--ink-2)}
+@media (max-width:900px){.cols3{grid-template-columns:minmax(0,1fr)}}
+
+/* ---------- providers list ---------- */
+.lay{display:grid;grid-template-columns:250px minmax(0,1fr);gap:16px;align-items:start}
+.filters{position:sticky;top:16px}
+.filters h2{font-size:16px;font-weight:800;margin:0 0 4px}
+.fg{border:0;margin:0;padding:14px 0 0;min-width:0}
+.fg legend{font-size:12.5px;color:var(--quiet);font-weight:600;padding:0;margin-bottom:6px}
+.opt{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13.5px;font-weight:600;cursor:pointer}
+.opt input{width:18px;height:18px;margin:0;accent-color:var(--solid);cursor:pointer;flex:none}
+.opt small{margin-left:auto;color:var(--quiet);font-weight:600;font-size:12px}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:16px;margin-top:12px;border-top:1px solid var(--line);font-size:13.5px;font-weight:600;cursor:pointer}
+.switch input{appearance:none;-webkit-appearance:none;width:44px;height:26px;border-radius:13px;background:var(--sub-2);position:relative;cursor:pointer;transition:background .2s;margin:0;flex:none}
+.switch input::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
+.switch input:checked{background:var(--violet)}
+.switch input:checked::after{transform:translateX(18px)}
+.reset{all:unset;cursor:pointer;color:var(--violet-ink);font-weight:700;font-size:13px;margin-top:14px;display:inline-block}
+.reset:focus-visible{outline:3px solid var(--violet)}
+.bar2{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.cnt{color:var(--quiet);font-size:13.5px;font-weight:600;margin-right:auto}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:16px}
+.oc{background:var(--card);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:14px;box-shadow:var(--soft);cursor:pointer;transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s;position:relative;min-width:0}
+.oc:hover,.oc:focus-within{transform:translate(-4px,-8px) rotate(-1.6deg);box-shadow:var(--lift);z-index:2}
+.oc .hd{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.items{display:flex;flex-direction:column;gap:10px}
+.item{display:flex;align-items:center;gap:10px;font-size:13px}
+.item .ii{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--sub);color:var(--ink-2);flex:none}
+.item b{display:block;font-weight:700;font-size:13px;line-height:1.3}
+.item small{color:var(--quiet);font-size:12px}
+.item .pc{margin-left:auto;font-weight:800;font-size:12.5px;white-space:nowrap}
+.item>div{min-width:0}
+.plus{font-size:12px;color:var(--quiet);text-align:right;margin-top:-4px}
+.notes{background:var(--sub);border-radius:12px;padding:10px 12px;font-size:13px}
+.notes>span{display:block;font-size:12px;color:var(--quiet)}
+.notes.warn span{color:var(--amber-ink);font-weight:700}
+.oc .btn{margin-top:auto}
+.oc:hover .btn,.oc:focus-within .btn{background:var(--solid);color:var(--solid-ink);border-color:var(--solid)}
+@media (max-width:900px){.lay{grid-template-columns:minmax(0,1fr)}.filters{position:static}
+  .filters form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 18px}
+  .filters .switch,.filters .reset{grid-column:1/-1}}
+@media (max-width:520px){.filters form{grid-template-columns:minmax(0,1fr)}}
+
+/* ---------- provider page ---------- */
+.prof{display:flex;flex-direction:column;gap:14px}
+.prof .pic{display:flex;gap:16px;align-items:center}
+.prof .big-av{width:84px;height:84px;border-radius:22px;display:grid;place-items:center;flex:none}
+.prof h2{font-family:var(--serif);font-weight:500;font-size:26px;line-height:1.1;margin:0;letter-spacing:.005em}
+.prof .mrn{color:var(--quiet);font-size:13px;margin-top:4px}
+.prof .subs{grid-template-columns:repeat(2,minmax(0,1fr))}
+.prof .subc b .pl{font-size:11.5px;padding:2px 8px}
+.prof .subc b{white-space:normal;overflow-wrap:anywhere}
+.prof .last{font-size:13px;color:var(--quiet)}
+.prof .last b{color:var(--ink);font-weight:700}
+.lede{font-size:15.5px;line-height:1.6;color:var(--ink)}
+.facts{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.facts .subc b{white-space:normal}
+.facts .subc em{font-style:normal;color:var(--ink-2);font-weight:600;font-size:12.5px;display:block}
+.recn{display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-size:13.5px;color:var(--ink-2)}
+.callout{background:var(--amber-soft);border-radius:14px;padding:12px 14px;margin-top:14px;font-size:13.5px;display:flex;gap:10px}
+.callout svg{color:var(--amber-ink);margin-top:2px}
+.callout b{display:block;color:var(--ink)}
+.list{list-style:none;margin:0;padding:0}
+.list li+li{border-top:1px solid var(--line)}
+.chk{display:flex;gap:12px;align-items:flex-start;padding:12px 4px;cursor:pointer;font-size:13.5px}
+.chk .ai{width:38px;height:38px;border-radius:12px;background:var(--sub);display:grid;place-items:center;flex:none;color:var(--ink-2);transition:background .2s,color .2s}
+.chk input{position:absolute;opacity:0;pointer-events:none}
+.chk input:checked~.ai{background:var(--green-soft);color:var(--green-ink)}
+.chk input:checked~span{color:var(--quiet);text-decoration:line-through}
+.chk input:focus-visible~.ai{outline:3px solid var(--violet)}
+.chk span{padding-top:9px}
+.pat summary{list-style:none;display:flex;gap:12px;align-items:center;padding:12px 4px;cursor:pointer}
+.pat summary::-webkit-details-marker{display:none}
+.pat summary .ai{width:38px;height:38px;border-radius:12px;background:var(--sub);display:grid;place-items:center;flex:none;color:var(--ink-2)}
+.pat summary b{display:block;font-size:13.5px;font-weight:700}
+.pat summary small{color:var(--quiet);font-size:12px}
+.pat summary .chev{margin-left:auto;color:var(--quiet);transition:transform .2s}
+.pat[open] summary .chev{transform:rotate(180deg)}
+.pat p{font-size:13.5px;color:var(--ink-2);padding:0 4px 14px 54px}
+.prog{font-family:var(--sans);font-size:12.5px;color:var(--quiet);font-weight:600}
+.fts{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.ftile{background:var(--sub);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.ftile .fh{display:flex;align-items:center;gap:10px;font-weight:700;font-size:13.5px}
+.ftile .fh i{width:30px;height:30px;border-radius:50%;background:var(--card);display:grid;place-items:center;color:var(--green-ink);flex:none}
+.ftile .fv{font-size:24px;font-weight:800;letter-spacing:-.02em;line-height:1.2;margin-top:4px}
+.ftile .fc{font-size:12.5px;color:var(--ink-2)}
+.ftile .fw{font-size:13.5px;color:var(--ink-2);margin-top:6px;line-height:1.5}
+.frows{list-style:none;margin:0;padding:0}
+.frow{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr) minmax(0,1.5fr);gap:8px 24px;padding:16px 4px;align-items:start}
+.frow+.frow{border-top:1px solid var(--line)}
+.frow .nm{font-weight:800;font-size:14px}
+.frow .vl{font-size:18px;font-weight:800;margin-top:4px;letter-spacing:-.01em}
+.frow .cp{font-size:12.5px;color:var(--ink-2)}
+.frow .ex{font-size:13.5px;color:var(--ink-2);line-height:1.55}
+.frow .row{margin-top:6px}
+@media (max-width:900px){.frow{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.frow .ex{grid-column:1/-1}}
+@media (max-width:560px){.frow{grid-template-columns:minmax(0,1fr)}}
+.legend-line{font-size:12.5px;color:var(--quiet);display:flex;gap:6px 16px;flex-wrap:wrap;margin-top:6px}
+.legend-line i{display:inline-block;width:18px;height:6px;border-radius:3px;vertical-align:1px;margin-right:6px}
+
+.rng{position:relative;padding-top:8px;margin-top:6px;min-width:0}
+.rng-t{position:relative;height:6px;border-radius:3px;background:var(--track)}
+.rng-t i{position:absolute;top:0;bottom:0;border-radius:3px}
+.rng-out{background:var(--warm)}
+.rng-band{background:var(--band)}
+.rng-t .rng-med{width:2px;margin-left:-1px;background:var(--ink-2);top:-3px;bottom:-3px;border-radius:1px}
+.rng-m{position:absolute;top:15px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;font-size:12px;font-weight:800;white-space:nowrap;line-height:1.2;transition:left .8s cubic-bezier(.2,.8,.2,1)}
+.rng-m::before{content:"";border:6px solid transparent;border-bottom:7px solid var(--ink);border-top:0;margin-bottom:3px}
+.rng-m.l{transform:translateX(-6px);align-items:flex-start}
+.rng-m.r{transform:translateX(calc(-100% + 6px));align-items:flex-end}
+.rng-m.hot::before{border-bottom-color:var(--pink-ink)}.rng-m.hot span{color:var(--pink-ink)}
+.rng-l{display:flex;justify-content:space-between;font-size:11.5px;color:var(--quiet);margin-top:5px;min-height:28px}
+.rng-d .rng-t{background:rgba(255,255,255,.28)}
+.rng-d .rng-band{background:rgba(255,255,255,.8)}
+.rng-d .rng-out{background:rgba(255,170,150,.75)}
+.rng-d .rng-t .rng-med{background:#fff}
+.rng-d .rng-m::before{border-bottom-color:#fff}
+.rng-d .rng-m,.rng-d .rng-m.hot span{color:#fff}
+.rng-d .rng-l{color:rgba(255,255,255,.75)}
+
+.tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:thin;padding-bottom:6px;margin-bottom:10px}
+.tabs button{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 14px;cursor:pointer;font-size:13px;font-weight:700;white-space:nowrap;color:var(--ink-2);transition:all .15s}
+.tabs button:hover{border-color:var(--ink-2)}
+.tabs button[aria-selected=true]{background:var(--solid);color:var(--solid-ink);border-color:var(--solid)}
+.hist svg{width:100%;height:auto;display:block}
+.hist-note{color:var(--ink-2);font-size:13.5px;margin:4px 0 10px}
+details.all{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+details.all>summary{cursor:pointer;font-weight:700;font-size:14px}
+.mtable{margin-top:10px}
+.mtable tbody tr{cursor:default}
+.mtable tbody tr:hover td{background:none}
+.mtable td{vertical-align:top}
+.mtable .rng{min-width:180px}
+.room .img{height:138px;border-radius:16px;background:linear-gradient(140deg,var(--violet-soft),var(--green-soft));display:flex;align-items:flex-end;justify-content:space-between;padding:14px 16px;position:relative;overflow:hidden}
+.room .img::after{content:"";position:absolute;right:-30px;top:-40px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.35)}
+.room .img b{font-family:var(--serif);font-weight:500;font-size:44px;line-height:1;position:relative;z-index:1}
+.room .img small{display:block;font-family:var(--sans);font-size:12px;color:var(--ink-2);font-weight:700}
+.room h3{font-size:17px;font-weight:800;margin:14px 0 0}
+.room .ty{font-size:12.5px;color:var(--quiet)}
+.room .subs{margin:14px 0}
+.room .subs .full{grid-column:1/-1}
+.about{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.about .card{display:flex;gap:14px}
+.about .ai{width:42px;height:42px;border-radius:12px;background:var(--sub);display:grid;place-items:center;flex:none;color:var(--violet-ink)}
+.about h3{font-family:var(--serif);font-weight:500;font-size:18px;margin:0 0 6px}
+.about p{color:var(--ink-2);font-size:14px;line-height:1.6}
+@media (max-width:800px){.about{grid-template-columns:minmax(0,1fr)}}
+footer{color:var(--quiet);font-size:12.5px;padding:22px 6px 0;display:flex;justify-content:space-between;gap:8px 24px;flex-wrap:wrap}
+
+/* entrance */
+.rise>*{animation:rise .5s cubic-bezier(.2,.8,.2,1) both}
+.rise>*:nth-child(2){animation-delay:.05s}.rise>*:nth-child(3){animation-delay:.1s}.rise>*:nth-child(4){animation-delay:.15s}.rise>*:nth-child(5){animation-delay:.2s}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* small screens */
+@media (max-width:860px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){
+  .frame{padding:10px 10px 24px}
+  .hero{padding:10px 14px 20px;border-radius:22px}
+  .top{gap:8px;flex-wrap:wrap}
+  .logo span{display:none}
+  .nav{order:3;flex-basis:100%;margin:2px -4px 0}
+  .icons{margin-left:auto;gap:6px}
+  .ib{width:36px;height:36px}
+  .hb{padding-top:18px}
+  .tile{min-height:86px;padding:12px}
+  .tile .num{font-size:24px;white-space:normal}
+  .tile .num small{display:block;margin:4px 0 0}
+  .card{padding:16px}
+  .hb .pls{margin:8px 0 0;display:flex}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.rail{scroll-behavior:auto}}
+@media print{.top,.hact,.icons,.toast,.filters,.segs{display:none!important}body{background:#fff}.card,.ins{break-inside:avoid;box-shadow:none}
+  .hero{background:#0b0e1a!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<div class="frame">
+  <header class="hero" id="hero">
+    <div class="top">
+      <a class="logo" href="#/" aria-label="Provider review, overview"><i id="logo-ic"></i><span>Provider review</span></a>
+      <nav class="nav" aria-label="Main">
+        <a href="#/" id="nav-home">Overview</a><a href="#/providers" id="nav-prov">Providers</a><a href="#/about" id="nav-about">How it works</a>
+      </nav>
+      <div class="icons" id="icons"></div>
+    </div>
+    <div class="hb" id="hero-body"></div>
+  </header>
+  <div id="notice"></div>
+  <main id="app" tabindex="-1"></main>
+  <footer id="foot"></footer>
+</div>
+<div class="tip" id="tip" role="status"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script id="dashboard-data" type="application/json">/*__DATA__*/</script>
+<script>
+"use strict";
+const D = JSON.parse(document.getElementById("dashboard-data").textContent);
+const AI = D.ai || null;
+const P = D.providers, BY = Object.fromEntries(P.map(p => [p.id, p]));
+const M = D.metrics, MI = Object.fromEntries(M.map((m, i) => [m.key, i]));
+const QUEUE = P.filter(p => p.in_queue);
+const O = D.overview, N = P.length;
+const ACTION = {priority_audit: "Full audit", desk_review: "Desk review", monitor: "Monitor"};
+const ACTION_NOTE = {priority_audit: "Open a full audit: request records and review claims in detail.",
+  desk_review: "Review records remotely before deciding on a full audit.", monitor: "No action now; watch next cycle."};
+const REC_CLASS = {priority_audit: "pl-audit", desk_review: "pl-desk", monitor: "pl-mon"};
+const STATUS = ["Not started", "In review", "Referred", "Closed, no issue"];
+const STATUS_CLASS = ["pl-none", "pl-violet", "pl-pink", "pl-green"];
+const CARES = ["Hospital and outpatient", "Hospital only", "Outpatient only"];
+
+/* ---------- helpers ---------- */
+const $ = (sel, el = document) => el.querySelector(sel);
+function h(tag, attrs = {}, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v == null || v === false) continue;
+    if (k === "class") el.className = v;
+    else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+    else el.setAttribute(k, v === true ? "" : v);
+  }
+  for (const k of kids.flat()) if (k != null && k !== false) el.append(k.nodeType ? k : document.createTextNode(String(k)));
+  return el;
+}
+const SVGNS = "http://www.w3.org/2000/svg";
+function s(tag, attrs = {}, ...kids) {
+  const el = document.createElementNS(SVGNS, tag);
+  for (const [k, v] of Object.entries(attrs)) if (v != null) el.setAttribute(k, v);
+  for (const k of kids.flat()) if (k != null) el.append(k.nodeType ? k : document.createTextNode(String(k)));
+  return el;
+}
+/* icon paths are fixed strings in this file, never data */
+const ICONS = {
+  search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+  download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
+  arrow: '<path d="M7 17 17 7"/><path d="M8 7h9v9"/>',
+  right: '<path d="M5 12h14"/><path d="m13 6 6 6-6 6"/>',
+  chevd: '<path d="m6 9 6 6 6-6"/>', chevl: '<path d="m15 18-6-6 6-6"/>', chevr: '<path d="m9 18 6-6-6-6"/>',
+  calendar: '<rect x="3" y="4.5" width="18" height="17" rx="3"/><path d="M16 2.5v4M8 2.5v4M3 10h18"/>',
+  grid: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  file: '<path d="M14 2.5H6.5a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V8z"/><path d="M14 2.5V8h5.5"/><path d="M9 13h6M9 17h6"/>',
+  alert: '<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
+  sparkle: '<path d="M12 3c.6 4.6 2.5 6.6 7.5 7.5-5 .9-6.9 2.9-7.5 7.5-.6-4.6-2.5-6.6-7.5-7.5 5-.9 6.9-2.9 7.5-7.5z"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  list: '<path d="M9 6h12M9 12h12M9 18h12M4 6h.01M4 12h.01M4 18h.01"/>',
+  hospital: '<rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M12 8v8M8 12h8"/>',
+  user: '<path d="M19 20v-1.5a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4V20"/><circle cx="12" cy="7.5" r="3.5"/>',
+  login: '<path d="M15 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3"/><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/>',
+  pencil: '<path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  x: '<path d="M18 6 6 18M6 6l12 12"/>',
+  copy: '<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V5"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  send: '<path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/>',
+  shield: '<path d="M12 21.5s7.5-3.6 7.5-9.5V5.5L12 2.5l-7.5 3V12c0 5.9 7.5 9.5 7.5 9.5z"/><path d="m9 12 2 2 4-4"/>',
+  scale: '<path d="M12 3v18M7 21h10M5 7h14"/><path d="m5 7-3 7a3.5 3.5 0 0 0 6 0zM19 7l-3 7a3.5 3.5 0 0 0 6 0z"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/>',
+  book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/>',
+  trend: '<path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/>',
+  layers: '<path d="m12 2 10 5-10 5L2 7z"/><path d="m2 17 10 5 10-5M2 12l10 5 10-5"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  sort: '<path d="M7 4v16M3 8l4-4 4 4M17 20V4M21 16l-4 4-4-4"/>',
+  chart: '<path d="M3 3v18h18"/><path d="M8 17V11M13 17V7M18 17v-4"/>'
+};
+function icon(name, size = 18, sw = 1.9) {
+  const el = s("svg", {viewBox: "0 0 24 24", width: size, height: size, fill: "none", stroke: "currentColor",
+    "stroke-width": sw, "stroke-linecap": "round", "stroke-linejoin": "round", "aria-hidden": "true", focusable: "false"});
+  el.innerHTML = ICONS[name];
+  return el;
+}
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("prq:" + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem("prq:" + k, JSON.stringify(v)); } catch (e) {} }
+};
+const int = n => Math.round(n).toLocaleString("en-US");
+function money(v) {
+  if (v >= 1e6) return "$" + (v / 1e6).toFixed(v >= 1e7 ? 1 : 2) + "M";
+  if (v >= 1e4) return "$" + Math.round(v / 1e3) + "K";
+  return "$" + int(v);
+}
+function fmt(v, unit) {
+  if (v == null || Number.isNaN(v)) return "–";
+  switch (unit) {
+    case "usd": return money(v);
+    case "count": return int(v);
+    case "share": return (v * 100 < 10 && v > 0 ? (v * 100).toFixed(1) : Math.round(v * 100)) + "%";
+    case "days": return (Math.abs(v - Math.round(v)) < .05 ? Math.round(v) : v.toFixed(1)) + (Math.abs(v - 1) < 1e-9 ? " day" : " days");
+    case "years": return v.toFixed(1) + " years";
+    case "flag": return v >= .5 ? "Yes" : "No";
+    default: return v.toFixed(2);
+  }
+}
+const metric = (p, key) => ({v: p.v[MI[key]], pct: p.pct[MI[key]]});
+const peerWord = care => care === "Outpatient only" ? "similar outpatient providers" : "similar hospitals";
+function compare(pct, care) {
+  if (pct >= 99.5) return `higher than almost all ${peerWord(care)}`;
+  if (pct <= .5) return `lower than almost all ${peerWord(care)}`;
+  if (pct >= 50) return `higher than ${Math.floor(pct)}% of ${peerWord(care)}`;
+  return `lower than ${Math.floor(100 - pct)}% of ${peerWord(care)}`;
+}
+const rankShort = pct => pct >= 50 ? `Top ${Math.max(1, Math.ceil(100 - pct))}%` : `Bottom ${Math.max(1, Math.ceil(pct))}%`;
+function toast(msg) {
+  const t = $("#toast"); t.replaceChildren(icon("check", 16, 2.4), msg); t.classList.add("on");
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("on"), 2200);
+}
+const statusOf = id => store.get("status:" + id, 0);
+const ai = id => (AI && AI.providers && AI.providers[id]) || null;
+const recPill = p => p.action ? h("span", {class: "pl pl-dot " + REC_CLASS[p.action]}, ACTION[p.action]) : h("span", {class: "pl pl-none"}, "Not in queue");
+const statusPill = st => h("span", {class: "pl " + STATUS_CLASS[st]}, STATUS[st]);
+function avatar(p, size = 36, round = true) {
+  const cls = p.care === "Outpatient only" ? "av-o" : p.care === "Hospital only" ? "av-i" : "av-h";
+  return h("span", {class: (round ? "av " : "big-av ") + cls, style: size !== 36 ? `width:${size}px;height:${size}px` : null, "aria-hidden": "true"},
+    icon(p.care === "Outpatient only" ? "user" : "hospital", Math.round(size * .47)));
+}
+const label = k => D.driver_names[k].label;
+const nice = d => { const [y, m, dd] = String(d).split("-").map(Number); return new Date(Date.UTC(y, m - 1, dd)).toLocaleDateString("en-GB", {day: "numeric", month: "short", year: "numeric", timeZone: "UTC"}); };
+const cycleText = () => { const c = (D.meta && D.meta.cycle) || `claims ${nice(O.period.from)} to ${nice(O.period.to)}`; return c.charAt(0).toUpperCase() + c.slice(1); };
+function greeting() { const hr = new Date().getHours(); return hr < 12 ? "Good morning" : hr < 18 ? "Good afternoon" : "Good evening"; }
+const nextToReview = () => QUEUE.find(q => statusOf(q.id) === 0) || null;
+const sizeVerdict = p => p.in_queue ? (p.unusual_without_size ? "Unusual beyond size" : "Mainly size") : `Rank ${int(p.size_free_rank)} without size`;
+function logEvent(id, k, v) { const l = store.get("log", []); l.unshift({id, k, v, t: Date.now()}); store.set("log", l.slice(0, 40)); }
+function ago(t) {
+  const sec = (Date.now() - t) / 1000;
+  if (sec < 60) return "just now"; if (sec < 3600) return Math.floor(sec / 60) + "m ago"; if (sec < 86400) return Math.floor(sec / 3600) + "h ago";
+  return new Date(t).toLocaleDateString("en-GB", {day: "numeric", month: "short"});
+}
+function sel(attrs, options) { return h("span", {class: "sel"}, h("select", attrs, options), icon("chevd", 16, 2.2)); }
+
+/* ---------- code-written fallback text (used when the agent has not written a page) ---------- */
+function fallbackHeadline() { return `${O.queue_unusual_without_size} of this cycle's ${O.queue_size} queued providers bill unusually even when their size is set aside.`; }
+function fallbackSummary(p) {
+  const top = p.drivers.filter(d => d[1]).slice(0, 2).map(d => label(d[0]).toLowerCase());
+  const lead = p.in_queue ? `Ranked ${p.rank} of ${int(N)} and in this cycle's review queue.` :
+    `Ranked ${p.rank} of ${int(N)}; not in this cycle's review queue.`;
+  const why = top.length ? ` The ranking is pushed up mainly by ${top.join(" and ")}.` : "";
+  const size = p.in_queue ? (p.unusual_without_size ? " It would stay in the queue even if its size were ignored, so how it bills looks unusual, not only how much."
+    : " It would drop out of the queue if its size were ignored, so its rank mostly reflects how large it is.") : "";
+  return lead + why + size;
+}
+function fallbackReason(p, d) {
+  const n = D.driver_names[d[0]];
+  if (n.size) return d[1] ? "Bigger providers score higher on this, so on its own it says more about size than about how the provider bills."
+    : "This measure of size lowers the rank.";
+  if (!d[1]) return "This is in line with or better than similar providers, which lowers the rank.";
+  const pct = d[3];
+  if (pct >= 90) return "Unusually high for this type of provider. Worth checking in the claims and medical records.";
+  if (pct <= 10) return "Unusually low for this type of provider. Among providers flagged in the past, a low value here was more common.";
+  if (pct >= 60) return "Higher than most similar providers. Not unusual on its own, but it adds to the overall picture.";
+  if (pct <= 40) return "Lower than most similar providers. Not unusual on its own, but it adds to the overall picture.";
+  return "Close to typical for this type of provider; it adds only a little to the rank.";
+}
+function fallbackSizeNote(p) {
+  return p.in_queue ? (p.unusual_without_size
+    ? `Even with size set aside it would rank ${int(p.size_free_rank)} of ${int(N)}, so how it bills stands out, not only how much it bills.`
+    : `With size set aside it would rank ${int(p.size_free_rank)} of ${int(N)}, so it is in the queue mainly because it is large.`)
+    : `With size set aside it would rank ${int(p.size_free_rank)} of ${int(N)}.`;
+}
+
+/* ---------- charts ---------- */
+function rangeBar(p, key, value, dark) {
+  const isM = MI[key] != null;
+  const meta = isM ? M[MI[key]] : D.driver_names[key];
+  const q = isM ? D.peers[p.care].metrics[key].q : (D.peers[p.care].driver_q || {})[key];
+  if (!q) return null;
+  const v = value != null ? value : p.v[MI[key]], log = meta.log;
+  let lo = Math.min(q[0], v), hi = Math.max(q[4], v);
+  if (log) { const pos = [q[0], v].filter(x => x > 0); lo = Math.max(lo, pos.length ? Math.min(...pos) : 1); }
+  const tx = x => log ? Math.log10(Math.max(x, lo)) : x;
+  const a = tx(lo), b = tx(hi) === a ? a + 1 : tx(hi);
+  const X = x => 3 + (tx(x) - a) / (b - a) * 94;
+  const xv = X(v), hot = v < q[0] || v > q[4];
+  return h("div", {class: "rng" + (dark ? " rng-d" : ""), role: "img",
+    "aria-label": `${meta.label}: ${fmt(v, meta.unit)}. Typical for ${peerWord(p.care)}: ${fmt(q[1], meta.unit)} to ${fmt(q[3], meta.unit)}.`},
+    h("div", {class: "rng-t"},
+      X(q[0]) > 0.5 ? h("i", {class: "rng-out", style: `left:0;width:${X(q[0])}%`}) : null,
+      h("i", {class: "rng-out", style: `left:${X(q[4])}%;right:0`}),
+      h("i", {class: "rng-band", style: `left:${X(q[1])}%;width:${Math.max(1, X(q[3]) - X(q[1]))}%`}),
+      h("i", {class: "rng-med", style: `left:${X(q[2])}%`})),
+    h("div", {class: "rng-m" + (hot ? " hot" : "") + (xv < 10 ? " l" : xv > 90 ? " r" : ""), style: `left:${xv}%`}, h("span", {}, fmt(v, meta.unit))),
+    h("div", {class: "rng-l"}, h("span", {style: xv < 24 ? "visibility:hidden" : null}, fmt(lo, meta.unit)),
+      h("span", {style: xv > 76 ? "visibility:hidden" : null}, fmt(hi, meta.unit))));
+}
+function rangeLegend() {
+  return h("p", {class: "legend-line"},
+    h("span", {}, h("i", {style: "background:var(--band)"}), "middle half of similar providers"),
+    h("span", {}, h("i", {style: "background:var(--warm)"}), "outside the usual 80%"),
+    h("span", {}, "▲ this provider"));
+}
+
+function histogram(p, key) {
+  const m = M[MI[key]], hist = D.peers[p.care].metrics[key].hist, v = p.v[MI[key]];
+  const W = narrow() ? 400 : 720, H = narrow() ? 250 : 230, L = 46, R = 16, T = 30, B = 42;
+  if (!hist.edges.length) return h("p", {}, "No data for this measure.");
+  const e = hist.edges, c = hist.counts, maxC = Math.max(...c, 1);
+  const tx = x => hist.log ? Math.log10(Math.max(x, e[0])) : x;
+  const a = tx(e[0]), b = tx(e[e.length - 1]);
+  const X = x => L + (Math.min(Math.max(tx(x), a), b) - a) / (b - a) * (W - L - R);
+  const Y = n => T + (1 - n / maxC) * (H - T - B);
+  const g = s("svg", {viewBox: `0 0 ${W} ${H}`, role: "img",
+    "aria-label": `Distribution of ${m.label} among ${peerWord(p.care)}; this provider is at ${fmt(v, m.unit)}.`},
+    s("defs", {}, s("linearGradient", {id: "hg", x1: 0, x2: 0, y1: 0, y2: 1},
+      s("stop", {offset: "0", style: "stop-color:var(--panel-1);stop-opacity:.75"}),
+      s("stop", {offset: "1", style: "stop-color:var(--panel-1);stop-opacity:.12"}))));
+  for (let i = 0; i <= 4; i++) { const y = T + i * (H - T - B) / 4; g.append(s("line", {x1: L, x2: W - R, y1: y, y2: y, stroke: "var(--line)", "stroke-dasharray": i === 4 ? null : "3 5"})); }
+  const tv = tx(v);
+  c.forEach((n, i) => { if (!n) return; const x0 = X(e[i]) + 1, x1 = X(e[i + 1]) - 1;
+    const mine = tv >= tx(e[i]) && (tv < tx(e[i + 1]) || i === c.length - 1);
+    g.append(s("rect", {x: x0, y: Y(n), width: Math.max(1.5, x1 - x0), height: H - B - Y(n), rx: Math.min(5, (x1 - x0) / 2), fill: mine ? "var(--pink)" : "url(#hg)"})); });
+  const ticks = hist.log ? Array.from({length: Math.floor(b) - Math.ceil(a) + 1}, (_, i) => Math.pow(10, Math.ceil(a) + i))
+    : [0, .25, .5, .75, 1].map(f => a + f * (b - a));
+  ticks.forEach(val => g.append(s("text", {x: X(val), y: H - B + 20, "text-anchor": "middle"}, fmt(val, m.unit))));
+  g.append(s("text", {x: L - 8, y: T + 4, "text-anchor": "end"}, int(maxC)));
+  g.append(s("text", {x: L - 8, y: H - B + 4, "text-anchor": "end"}, "0"));
+  const px = X(v), right = px > W * .68;
+  g.append(s("line", {x1: px, x2: px, y1: T - 8, y2: H - B, stroke: "var(--ink)", "stroke-width": 2, "stroke-dasharray": "4 3"}));
+  g.append(s("circle", {cx: px, cy: T - 8, r: 4, fill: "var(--ink)"}));
+  g.append(s("text", {x: px + (right ? -10 : 10), y: T - 4, "text-anchor": right ? "end" : "start", style: "fill:var(--ink);font-weight:800;font-size:13px"}, `This provider: ${fmt(v, m.unit)}`));
+  g.append(s("text", {x: (L + W - R) / 2, y: H - 4, "text-anchor": "middle"}, `${m.label}${hist.log ? (narrow() ? " (×10 per mark)" : " (each mark is ten times the last)") : ""}`));
+  return g;
+}
+
+function sizeMap() {
+  const nw = narrow(), W = nw ? 400 : 760, H = nw ? 380 : 330, L = nw ? 52 : 64, R = 18, T = 18, B = 44, close = view.map === "queue";
+  const pay = (close ? QUEUE : P).map(p => metric(p, "total_reimb").v).filter(v => v > 0);
+  const xa = Math.log10(Math.min(...pay)) - (close ? .05 : 0), xb = Math.log10(Math.max(...pay)) + (close ? .05 : 0);
+  const yMax = close ? Math.max(...QUEUE.map(q => q.size_free_rank)) * 1.6 : N;
+  const X = v => L + (Math.log10(Math.max(v, Math.pow(10, xa))) - xa) / (xb - xa) * (W - L - R);
+  const Y = r => T + (Math.log10(Math.min(r, yMax)) / Math.log10(yMax)) * (H - T - B);
+  const svg = s("svg", {id: "size-map", viewBox: `0 0 ${W} ${H}`, role: "img",
+    "aria-label": "Map of providers by total payments and by rank when size is ignored. Queue providers are coloured by recommendation."});
+  const yq = Y(O.queue_size + .5);
+  svg.append(s("rect", {x: L, y: T, width: W - L - R, height: yq - T, rx: 10, fill: "var(--green-soft)"}));
+  svg.append(s("text", {x: L + 10, y: T + 17, style: "fill:var(--green-ink);font-weight:800"}, nw ? `Top ${O.queue_size} even ignoring size` : `Unusual even ignoring size (top ${O.queue_size} without size)`));
+  (close ? [1, 2, 5, 10, 20, 50] : [1, 10, 100, 1000]).filter(r => r <= yMax).forEach(r => {
+    svg.append(s("line", {x1: L, x2: W - R, y1: Y(r), y2: Y(r), stroke: "var(--line)", "stroke-dasharray": "3 5"}));
+    svg.append(s("text", {x: L - 8, y: Y(r) + 4, "text-anchor": "end"}, r === 1 ? "1st" : int(r)));
+  });
+  const xt = close ? [5e5, 1e6, 2e6, 3e6, 5e6].filter(v => Math.log10(v) >= xa && Math.log10(v) <= xb)
+    : Array.from({length: Math.floor(xb) - Math.ceil(xa) + 1}, (_, i) => Math.pow(10, Math.ceil(xa) + i));
+  for (const v of xt) svg.append(s("text", {x: X(v), y: H - B + 20, "text-anchor": "middle"}, money(v)));
+  svg.append(s("text", {x: (L + W - R) / 2, y: H - 6, "text-anchor": "middle"}, close || nw ? "Total payments →" + (close ? "" : " (×10 per step)") : "Total payments (each step is ten times larger) →"));
+  svg.append(s("text", {x: 14, y: (T + H - B) / 2, transform: `rotate(-90 14 ${(T + H - B) / 2})`, "text-anchor": "middle"}, "Rank if size is ignored (1st at top)"));
+  const tip = $("#tip");
+  const pts = (close ? P.filter(p => p.size_free_rank <= yMax && metric(p, "total_reimb").v >= Math.pow(10, xa)) : [...P]).sort((a, b) => a.in_queue - b.in_queue);
+  for (const p of pts) {
+    const v = metric(p, "total_reimb").v; if (!(v > 0)) continue;
+    const col = p.in_queue ? (p.action === "priority_audit" ? "var(--pink)" : p.action === "desk_review" ? "var(--amber)" : "var(--blue-ink)") : "var(--dot)";
+    const c = s("circle", {cx: X(v), cy: Y(p.size_free_rank), r: p.in_queue ? (close ? 8.5 : 7) : (close ? 4 : 2.8), fill: col,
+      stroke: p.in_queue ? "var(--card)" : "none", "stroke-width": 2, tabindex: p.in_queue ? 0 : null,
+      role: p.in_queue ? "link" : null, "aria-label": p.in_queue ? `${p.id}, rank ${p.rank}, open provider` : null, style: "cursor:pointer"});
+    const show = ev => { tip.textContent = `${p.id} · rank ${p.rank} of ${int(N)} · ${money(v)} paid · rank ${p.size_free_rank} if size ignored`;
+      tip.style.display = "block"; const r = ev.target.getBoundingClientRect();
+      tip.style.left = Math.max(8, Math.min(window.innerWidth - 310, r.left + 12)) + "px"; tip.style.top = (r.top - 44) + "px"; };
+    c.addEventListener("mouseenter", show); c.addEventListener("focus", show);
+    c.addEventListener("mouseleave", () => tip.style.display = "none"); c.addEventListener("blur", () => tip.style.display = "none");
+    c.addEventListener("click", () => go(p.id));
+    c.addEventListener("keydown", e => { if (e.key === "Enter") go(p.id); });
+    svg.append(c);
+    if (close && p.in_queue) svg.append(s("text", {x: X(v) + 12, y: Y(p.size_free_rank) + 4, style: "fill:var(--ink-2);font-size:11px;font-weight:700;pointer-events:none"}, p.rank));
+  }
+  return svg;
+}
+
+/* ---------- state ---------- */
+const narrow = () => window.innerWidth < 640;
+let redraws = [], wasNarrow = narrow();
+window.addEventListener("resize", () => { const n = narrow(); if (n !== wasNarrow) { wasNarrow = n; redraws.forEach(f => f()); } }, {passive: true});
+function go(id) { location.hash = "#/p/" + id; }
+const DEFAULT_T = () => ({mode: "queue", q: "", cares: [...CARES], recs: ["priority_audit", "desk_review", "monitor", "none"], focus: "", sort: "rank", dir: 1, limit: 24});
+const view = {map: "all", qf: "", t: DEFAULT_T(), cards: store.get("cards", true)};
+function openProviders(patch = {}) { view.t = Object.assign(DEFAULT_T(), patch); if (location.hash === "#/providers") route(); else location.hash = "#/providers"; }
+let timers = [];
+const later = (fn, ms) => timers.push(setTimeout(fn, ms));
+function hero(...kids) { $("#hero-body").replaceChildren(...kids); }
+
+/* ---------- overview ---------- */
+function overviewPage() {
+  const A = AI && AI.overview;
+  const started = QUEUE.filter(q => statusOf(q.id) > 0).length;
+  const nxt = nextToReview();
+  hero(h("div", {class: "hb-row"},
+    h("div", {}, h("h1", {}, greeting()), h("p", {class: "lead"}, (A && A.headline) || fallbackHeadline())),
+    h("div", {class: "hact"}, h("span", {class: "chip"}, icon("calendar", 18), cycleText()),
+      h("a", {class: "cta", href: "#/providers", onclick: e => { e.preventDefault(); openProviders(); }}, icon("plus", 17, 2.4), "Open the review queue"))));
+
+  const tr = O.track_record, diff = tr.top100_previously_flagged - tr.top100_payments_alone;
+  const meter = h("i");
+  later(() => meter.style.width = `${100 * started / QUEUE.length}%`, 60);
+  const trow = h("div", {class: "trow o1"},
+    h("button", {class: "act green", onclick: () => nxt ? go(nxt.id) : openProviders()}, icon("login", 24),
+      nxt ? (started ? "Continue review" : "Start review") : "Queue complete", h("small", {}, nxt ? `Rank ${nxt.rank} · ${nxt.id}` : "Every queue provider has a status")),
+    h("button", {class: "act black", onclick: exportCsv}, icon("download", 24), "Download list", h("small", {}, `CSV · all ${int(N)}`)),
+    statCard("Unusual beyond size", `Compared to ${O.queue_size - O.queue_unusual_without_size} queued mainly for size`,
+      h("b", {}, O.queue_unusual_without_size, h("small", {}, "/" + O.queue_size)), h("span", {class: "delta d-up"}, Math.round(100 * O.queue_unusual_without_size / O.queue_size) + "%")),
+    statCard("Flagged before, in top 100", `Compared to ${tr.top100_payments_alone} when sorted by payments alone`,
+      h("b", {}, tr.top100_previously_flagged), h("span", {class: "delta " + (diff >= 0 ? "d-up" : "d-down")}, (diff >= 0 ? "+" : "−") + Math.abs(diff))),
+    statCard("Your progress", `Compared to ${QUEUE.length} in this cycle's queue`,
+      h("b", {}, started, h("small", {}, "/" + QUEUE.length)), h("span", {class: "meter", role: "progressbar", "aria-label": "Queue progress",
+        "aria-valuemin": 0, "aria-valuemax": QUEUE.length, "aria-valuenow": started}, meter)));
+
+  const app = $("#app");
+  app.append(h("div", {class: "ov rise"},
+    h("div", {class: "stack"}, trow, checkCarousel(), queueTable(), mapCard()),
+    h("div", {class: "stack"}, trackCard(), insightsOverview(A), mixCard(), activityCard())),
+    h("div", {style: "height:16px"}), beforeCard(A));
+}
+function statCard(title, sub, big, extra) {
+  return h("div", {class: "card stat"}, h("h3", {}, title), h("p", {}, sub), h("div", {class: "big"}, big, extra));
+}
+function trackCard() {
+  const tr = O.track_record, chance = 100 * tr.flagged_in_test / O.providers_scored;
+  const bars = [{v: tr.top100_previously_flagged, t: String(tr.top100_previously_flagged), lab: "This ranking", cls: "f-black", me: true},
+    {v: tr.top100_payments_alone, t: String(tr.top100_payments_alone), lab: "Payments alone", cls: "f-pink", dp: tr.top100_payments_alone - tr.top100_previously_flagged},
+    {v: chance, t: "≈" + Math.round(chance), lab: "By chance", cls: "f-stripe"}];
+  return h("section", {class: "card o2", "aria-labelledby": "tr-h"},
+    h("div", {class: "ch"}, h("div", {}, h("h2", {class: "ct", id: "tr-h"}, "Track record"),
+      h("p", {class: "cs"}, "Providers flagged before, among the top 100 on held-out test data")), h("span", {class: "pl pl-white"}, "of 100")),
+    h("div", {class: "bars", role: "img", "aria-label": `Of the top 100: ${bars[0].t} flagged before with this ranking, ${bars[1].t} when sorted by payments alone, about ${Math.round(chance)} by chance.`},
+      bars.map(b => { const f = h("div", {class: "fill " + b.cls}, b.dp != null ? h("span", {class: "dp"}, (b.dp >= 0 ? "+" : "−") + Math.abs(b.dp)) : null);
+        later(() => f.style.height = `${Math.max(2, b.v)}%`, 80);
+        return h("div", {class: "bcol" + (b.me ? " me" : "")}, h("div", {class: "v"}, b.t), h("div", {class: "plot"}, f), h("div", {class: "lab"}, b.lab)); })));
+}
+function insightsOverview(A) {
+  const o = O, ub = o.actions_unusual_beyond_size;
+  const acts = ((A && A.actions) || [
+    {action: "priority_audit", why: `${ub.priority_audit} of these ${o.actions.priority_audit} bill unusually even when their size is set aside.`},
+    {action: "desk_review", why: `${ub.desk_review} of these ${o.actions.desk_review} also bill unusually beyond their size; the rest rank high mainly because they are large.`},
+    {action: "monitor", why: "No action this cycle; check again next cycle."}]).filter(a => o.actions[a.action] > 0);
+  const how = (A && A.how_to_read) || `Rank 1 is the provider whose billing looks most like providers flagged in the past. On earlier data, ${o.track_record.top100_previously_flagged} of the top 100 had been flagged before, against ${o.track_record.top100_payments_alone} when providers were simply sorted by how much they were paid.`;
+  const q = [0, 0, 0, 0, o.queue_size];
+  const slides = [
+    h("div", {class: "icard"}, h("div", {class: "ih"}, h("span", {class: "ii"}, icon("alert", 18)),
+      h("div", {}, h("h4", {}, A ? "This cycle" : "This cycle's queue"), h("p", {class: "isub"}, `${o.queue_unusual_without_size} of ${o.queue_size} unusual beyond size`))),
+      h("p", {class: "ib2"}, (A && A.summary) || `The ranking puts ${int(o.providers_scored)} providers in order of how closely their billing resembles providers flagged in the past. The top ${o.queue_size} form this cycle's review queue. A high rank is a reason to look, not evidence of wrongdoing.`),
+      countBar(o.queue_unusual_without_size, o.queue_size)),
+    ...acts.map(a => h("div", {class: "icard"}, h("div", {class: "ih"}, h("span", {class: "ii"}, icon("sparkle", 18)),
+      h("div", {}, h("h4", {}, `${ACTION[a.action]} · ${o.actions[a.action]} provider${o.actions[a.action] === 1 ? "" : "s"}`), h("p", {class: "isub"}, ACTION_NOTE[a.action]))),
+      h("p", {class: "ib2"}, a.why))),
+    h("div", {class: "icard"}, h("div", {class: "ih"}, h("span", {class: "ii"}, icon("book", 18)),
+      h("div", {}, h("h4", {}, "How to read the ranking"), h("p", {class: "isub"}, "A rank is a reason to look"))), h("p", {class: "ib2"}, how))];
+  void q;
+  return h("section", {class: "ins o2", "aria-labelledby": "ins-h"},
+    h("div", {class: "ch"}, h("h2", {class: "ct", id: "ins-h"}, A ? "AI insights" : "Insights"),
+      h("span", {class: "badge"}, A ? "Written by AI, checked" : "Standard wording")),
+    carousel(slides));
+}
+function countBar(n, of) {
+  const x = 3 + 94 * n / of;
+  return h("div", {class: "rng rng-d", role: "img", "aria-label": `${n} of ${of}`},
+    h("div", {class: "rng-t"}, h("i", {class: "rng-band", style: `left:3%;width:${x - 3}%`})),
+    h("div", {class: "rng-m" + (x > 90 ? " r" : ""), style: `left:${x}%`}, h("span", {}, `${n} of ${of}`)),
+    h("div", {class: "rng-l"}, h("span", {}, "0"), h("span", {style: x > 76 ? "visibility:hidden" : null}, String(of))));
+}
+function carousel(slides) {
+  const wrap = h("div", {class: "slides", "aria-roledescription": "carousel"});
+  const segs = h("div", {class: "segs", role: "tablist", "aria-label": "Insights"});
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let i = 0, t = null, stopped = reduce;
+  slides.forEach((sl, k) => { sl.classList.add("slide"); sl.setAttribute("role", "tabpanel"); sl.setAttribute("aria-label", `${k + 1} of ${slides.length}`); wrap.append(sl);
+    segs.append(h("button", {role: "tab", "aria-label": `Insight ${k + 1} of ${slides.length}`, onclick: () => { stopped = true; segs.classList.add("still"); show(k); }})); });
+  const DUR = 8000;
+  segs.style.setProperty("--dur", DUR + "ms");
+  function show(k) {
+    i = k; clearTimeout(t);
+    slides.forEach((sl, j) => sl.classList.toggle("on", j === k));
+    [...segs.children].forEach((b, j) => { b.classList.remove("on"); b.classList.toggle("done", j < k); b.setAttribute("aria-selected", String(j === k)); });
+    void segs.offsetWidth; segs.children[k].classList.add("on");
+    if (!stopped && slides.length > 1) { t = setTimeout(() => { if (!paused) show((i + 1) % slides.length); else wait(); }, DUR); timers.push(t); }
+  }
+  let paused = false;
+  function wait() { t = setTimeout(() => paused ? wait() : show((i + 1) % slides.length), 600); timers.push(t); }
+  const box = h("div", {}, wrap, segs);
+  box.addEventListener("mouseenter", () => { paused = true; segs.classList.add("paused"); });
+  box.addEventListener("mouseleave", () => { paused = false; segs.classList.remove("paused"); });
+  box.addEventListener("focusin", () => { paused = true; segs.classList.add("paused"); });
+  box.addEventListener("focusout", () => { paused = false; segs.classList.remove("paused"); });
+  if (reduce) segs.classList.add("still");
+  show(0);
+  return box;
+}
+function checkCarousel() {
+  const list = QUEUE.filter(p => p.recommendation_check);
+  if (!list.length) return null;
+  const rail = h("div", {class: "rail", tabindex: 0, "aria-label": "Recommendations to double-check"});
+  const prev = h("button", {class: "circ", "aria-label": "Previous", onclick: () => step(-1)}, icon("chevl", 18));
+  const next = h("button", {class: "circ", "aria-label": "Next", onclick: () => step(1)}, icon("chevr", 18));
+  function step(d) { const c = rail.firstElementChild; if (!c) return; rail.scrollBy({left: d * (c.getBoundingClientRect().width + 12), behavior: "smooth"}); }
+  function upd() { prev.disabled = rail.scrollLeft < 4; next.disabled = rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 4; }
+  rail.addEventListener("scroll", () => requestAnimationFrame(upd));
+  list.forEach(p => { const b = p.beyond[0];
+    rail.append(h("a", {class: "rc", href: "#/p/" + p.id},
+      h("div", {class: "who"}, avatar(p, 44), h("div", {}, h("b", {}, p.id),
+        b ? h("p", {class: "m"}, label(b[0]) + " ", h("b", {}, fmt(b[1], D.driver_names[b[0]].unit))) : h("p", {class: "m"}, p.care))),
+      h("div", {class: "ft"}, h("span", {class: "pl pl-white"}, p.recommendation_check === "unusual_but_desk" ? "Desk review → audit?" : "Audit → size only?"),
+        h("span", {}, `Rank ${p.rank}`)))); });
+  later(upd, 50);
+  window.addEventListener("resize", upd, {passive: true});
+  return h("section", {class: "card o3", "aria-labelledby": "dc-h"},
+    h("div", {class: "ch"}, h("div", {}, h("h2", {class: "ct", id: "dc-h"}, "Recommendations to double-check", h("span", {class: "count-chip"}, list.length)),
+      h("p", {class: "cs"}, "Desk review was suggested, but billing looks unusual even when size is set aside. Decide whether a full audit is needed.")),
+      h("div", {class: "row"}, prev, next, h("button", {class: "btn pill sm", onclick: () => openProviders({focus: "check"})}, "View all", icon("right", 16)))),
+    rail);
+}
+function queueTable() {
+  const tbody = h("tbody");
+  const FILTERS = {"": [`All ${QUEUE.length}`, () => true], audit: ["Full audit", p => p.action === "priority_audit"],
+    desk: ["Desk review", p => p.action === "desk_review"], check: ["To double-check", p => !!p.recommendation_check],
+    size: ["Mainly size", p => !p.unusual_without_size]};
+  function fill() {
+    const f = FILTERS[view.qf][1];
+    const rows = QUEUE.filter(f);
+    tbody.replaceChildren(...(rows.length ? rows.map(p => providerRow(p, true)) : [h("tr", {}, h("td", {colspan: 9}, h("p", {class: "empty"}, "No queue providers match.")))]));
+  }
+  const pick = sel({"aria-label": "Show in queue", onchange: e => { view.qf = e.target.value; fill(); }},
+    Object.entries(FILTERS).map(([k, [lab]]) => h("option", {value: k, selected: view.qf === k}, lab)));
+  fill();
+  return h("section", {class: "card tcard o4", "aria-labelledby": "q-h"},
+    h("div", {class: "ch"}, h("div", {}, h("h2", {class: "ct", id: "q-h"}, "Review queue"), h("p", {class: "cs"}, `The ${QUEUE.length} providers ranked highest this cycle. Select a row to open the case.`)), pick),
+    h("div", {class: "tw"}, h("table", {}, h("caption", {class: "sr"}, "Review queue"), tableHead(null), tbody)));
+}
+const COLS = [["rank", "Rank", ""], ["id", "Provider", ""], ["care", "Type of care", "c-care"], ["pay", "Total paid", "num c-pay"],
+  ["claims", "Claims", "num c-claims"], [null, "Stands out beyond size", "c-why"], ["sfr", "If size ignored", "num c-sfr"], ["action", "Recommendation", ""], [null, "Status", "c-status"], [null, "", ""]];
+function tableHead(onSort, t) {
+  return h("thead", {}, h("tr", {}, COLS.filter(c => onSort || c[0] !== "claims").map(([k, lab, cl]) => {
+    const th = h("th", {class: cl, scope: "col", "aria-sort": onSort && k ? (t.sort === k ? (t.dir > 0 ? "ascending" : "descending") : "none") : null});
+    th.append(onSort && k ? h("button", {onclick: () => onSort(k)}, lab) : lab ? lab : h("span", {class: "sr"}, "Open"));
+    return th;
+  })));
+}
+function providerRow(p, compact) {
+  const b = p.beyond[0], st = statusOf(p.id);
+  return h("tr", {onclick: e => { if (!e.target.closest("a")) go(p.id); }},
+    h("td", {class: "rk"}, "#" + p.rank),
+    h("td", {}, h("a", {class: "who", href: "#/p/" + p.id, style: "text-decoration:none"}, avatar(p, 34), h("div", {}, h("b", {}, p.id), compact ? h("small", {}, p.care) : null))),
+    h("td", {class: "c-care"}, p.care),
+    h("td", {class: "num c-pay"}, money(metric(p, "total_reimb").v)),
+    compact ? null : h("td", {class: "num c-claims"}, int(metric(p, "n_claims").v)),
+    h("td", {class: "c-why why"}, b ? [label(b[0]) + " ", h("b", {}, fmt(b[1], D.driver_names[b[0]].unit))] : "–"),
+    h("td", {class: "num c-sfr"}, p.in_queue && p.unusual_without_size ? h("span", {class: "beyond-y"}, int(p.size_free_rank)) : int(p.size_free_rank)),
+    h("td", {}, recPill(p), p.recommendation_check ? h("span", {class: "flag"}, "Double-check") : null),
+    h("td", {class: "c-status"}, statusPill(st)),
+    h("td", {}, h("a", {class: "arrow", href: "#/p/" + p.id, "aria-label": `Open ${p.id}`}, icon("arrow", 17))));
+}
+function mapCard() {
+  const box = h("div", {class: "map"}, sizeMap());
+  redraws.push(() => box.replaceChildren(sizeMap()));
+  const seg = h("div", {class: "seg", role: "group", "aria-label": "Map view"});
+  [["all", "All providers"], ["queue", "Queue close-up"]].forEach(([k, lab]) => seg.append(h("button", {"aria-pressed": String(view.map === k),
+    onclick: e => { view.map = k; box.replaceChildren(sizeMap()); [...seg.children].forEach(b => b.setAttribute("aria-pressed", String(b === e.currentTarget))); }}, lab)));
+  return h("section", {class: "card o6", "aria-labelledby": "map-h"},
+    h("div", {class: "ch"}, h("div", {}, h("h2", {class: "ct", id: "map-h"}, "Size or behaviour?"),
+      h("p", {class: "cs"}, "Each provider placed by how much it was paid and where it would rank if size were ignored. Dots in the green band bill unusually even for their size; those below it are in the queue mainly because they are large. Select a dot to open it.")),
+      h("div", {class: "row"}, h("div", {class: "dots"}, h("span", {}, h("i", {style: "background:var(--pink)"}), "Full audit"),
+        h("span", {}, h("i", {style: "background:var(--amber)"}), "Desk review"), h("span", {}, h("i", {style: "background:var(--dot)"}), "Not in queue")), seg)),
+    box);
+}
+function mixCard() {
+  const items = [
+    {k: "audit", n: QUEUE.filter(p => p.action === "priority_audit").length, lab: "Full audit", fill: "var(--solid)", ink: "var(--solid-ink)", go: {recs: ["priority_audit"]}},
+    {k: "check", n: QUEUE.filter(p => p.action === "desk_review" && p.recommendation_check).length, lab: "Desk review, double-check", fill: "var(--violet)", ink: "#fff", go: {focus: "check"}},
+    {k: "size", n: QUEUE.filter(p => p.action === "desk_review" && !p.recommendation_check).length, lab: "Desk review, mainly size", fill: "var(--lav)", ink: "var(--lav-ink)", go: {recs: ["desk_review"], focus: "size"}},
+    {k: "mon", n: QUEUE.filter(p => p.action === "monitor").length, lab: "Monitor", fill: "var(--blue-soft)", ink: "var(--blue-ink)", go: {recs: ["monitor"]}}].filter(x => x.n > 0);
+  const tot = QUEUE.length, sorted = [...items].sort((a, b) => b.n - a.n).slice(0, 3);
+  const R0 = 96, spots = [[178, 102], null, null];
+  const r = sorted.map(x => R0 * Math.sqrt(x.n / sorted[0].n));
+  if (sorted[1]) spots[1] = [Math.max(r[1] + 6, 96), 292 - r[1] - 6];
+  if (sorted[2]) spots[2] = [326 - r[2] - 4, 292 - r[2] - 18];
+  const svg = s("svg", {class: "bub", viewBox: "0 0 330 296", role: "group", "aria-label": "Queue mix by recommendation"});
+  sorted.forEach((x, i) => { const [cx, cy] = spots[i], pct = Math.round(100 * x.n / tot);
+    const g = s("g", {tabindex: 0, role: "button", "aria-label": `${x.lab}: ${x.n} of ${tot}, ${pct}%. Show them.`},
+      s("circle", {cx, cy, r: r[i], fill: x.fill, stroke: i ? "var(--card)" : "none", "stroke-width": 5}),
+      s("text", {x: cx, y: cy + (r[i] > 60 ? 6 : 4), "text-anchor": "middle", style: `fill:${x.ink};font-weight:800;font-size:${r[i] > 60 ? 28 : 21}px`}, pct + "%"),
+      s("text", {x: cx, y: cy + (r[i] > 60 ? 26 : 20), "text-anchor": "middle", style: `fill:${x.ink};font-size:${r[i] > 60 ? 11 : 10}px;opacity:.85`}, x.lab.split(",")[0]));
+    g.addEventListener("click", () => openProviders(x.go));
+    g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openProviders(x.go); } });
+    svg.append(g); });
+  return h("section", {class: "card o5", "aria-labelledby": "mix-h"},
+    h("div", {class: "ch"}, h("div", {}, h("h2", {class: "ct", id: "mix-h"}, "Queue mix"), h("p", {class: "cs"}, `How this cycle's ${tot} recommendations split`))),
+    svg, h("div", {class: "legend"}, items.map(x => h("button", {onclick: () => openProviders(x.go)}, h("i", {style: `background:${x.fill}`}), x.lab, h("b", {}, x.n)))));
+}
+function activityCard() {
+  const log = store.get("log", []).filter(e => BY[e.id]);
+  const referred = QUEUE.filter(q => statusOf(q.id) === 2).length;
+  const ICON_OF = e => e.k === "note" ? ["pencil", "vi"] : e.v === 2 ? ["send", "hot"] : e.v === 3 ? ["check", "ok"] : e.v === 1 ? ["clock", "vi"] : ["file", ""];
+  return h("section", {class: "card o5", "aria-labelledby": "act-h"},
+    h("div", {class: "ch"}, h("h2", {class: "ct", id: "act-h"}, "Recent activity"), referred ? h("span", {class: "crit"}, `${referred} referred`) : null),
+    log.length ? h("ul", {class: "acts"}, log.slice(0, 5).map(e => { const [ic, cls] = ICON_OF(e), p = BY[e.id];
+      return h("li", {}, h("a", {href: "#/p/" + e.id}, h("span", {class: "ai " + cls}, icon(ic, 18)),
+        h("div", {}, h("b", {}, e.k === "note" ? `Note on ${e.id}` : `${e.id} marked ${STATUS[e.v].toLowerCase()}`),
+          h("small", {}, `Rank ${p.rank} · ${p.action ? ACTION[p.action] : "not in queue"}`)), h("span", {class: "t"}, ago(e.t)))); }))
+      : h("p", {class: "empty"}, "Nothing yet. Status changes and notes you make on provider pages appear here. They stay in this browser only."));
+}
+function beforeCard(A) {
+  return h("section", {class: "card", "aria-labelledby": "bya-h"},
+    h("div", {class: "ch"}, h("div", {}, h("h2", {class: "ct", id: "bya-h"}, "Before you act"), h("p", {class: "cs"}, "What the ranking can and cannot tell you."))),
+    h("div", {class: "cols3"},
+      h("div", {}, h("h3", {}, icon("alert", 17), "Watch out for"), h("ul", {}, ((A && A.watch_out_for) || [
+        "Large hospitals rank high partly because they are large. Check the size-or-behaviour verdict on each provider.",
+        "A provider treating sicker patients can look unusual for legitimate reasons.",
+        "The ranking learns from past flags, so it can miss schemes no one has flagged before."]).map(t => h("li", {}, t)))),
+      h("div", {}, h("h3", {}, icon("info", 17), "Limits of this ranking"), h("ul", {}, ((A && A.caveats) ? A.caveats.map(c => c.text) : [
+        "A flag means a provider was previously suspected, not that fraud was proven.",
+        "How the past flags were assigned is not documented.",
+        "The claims come from a public, probably synthetic, Medicare dataset (2008 to 2009), so this is a demonstration.",
+        "A person decides every case. The ranking never denies or delays a payment."]).map(t => h("li", {}, t)))),
+      h("div", {}, h("h3", {}, icon("book", 17), "Words used here"), (A && A.glossary && A.glossary.length)
+        ? h("dl", {class: "gloss"}, A.glossary.flatMap(g => [h("dt", {}, g.term), h("dd", {}, g.meaning)]))
+        : h("dl", {class: "gloss"}, [["Rank", `Position out of ${int(N)}; 1 looks most like providers flagged before.`],
+          ["Rank if size ignored", "Where the provider would rank if how large it is were set aside."],
+          ["Full audit", ACTION_NOTE.priority_audit], ["Desk review", ACTION_NOTE.desk_review]].flatMap(([a, b]) => [h("dt", {}, a), h("dd", {}, b)])))));
+}
+
+/* ---------- providers list ---------- */
+const PRESETS = [
+  {lab: "Review queue", n: () => QUEUE.length, ic: ["list", "ic-violet"], patch: {}},
+  {lab: "Full audit", n: () => O.actions.priority_audit, ic: ["shield", "ic-pink"], patch: {recs: ["priority_audit"]}},
+  {lab: "Desk review", n: () => O.actions.desk_review, ic: ["file", "ic-amber"], patch: {recs: ["desk_review"]}},
+  {lab: "To double-check", n: () => O.recommendations_to_check, ic: ["alert", "ic-green"], patch: {focus: "check"}}];
+const sameT = (a, b) => ["mode", "q", "focus"].every(k => a[k] === b[k]) && ["cares", "recs"].every(k => [...a[k]].sort().join() === [...b[k]].sort().join());
+function applyFilters(t) {
+  let r = P.filter(p => t.mode === "queue" ? p.in_queue : t.mode === "top100" ? p.rank <= 100 : true);
+  if (t.q) r = r.filter(p => p.id.includes(t.q));
+  r = r.filter(p => t.cares.includes(p.care) && t.recs.includes(p.action || "none"));
+  if (t.focus === "check") r = r.filter(p => !!p.recommendation_check);
+  if (t.focus === "beyond") r = r.filter(p => p.size_free_rank <= O.queue_size || (p.in_queue && p.unusual_without_size));
+  if (t.focus === "size") r = r.filter(p => p.in_queue && !p.unusual_without_size);
+  const key = {rank: p => p.rank, id: p => p.id, care: p => p.care, pay: p => metric(p, "total_reimb").v,
+    claims: p => metric(p, "n_claims").v, sfr: p => p.size_free_rank, action: p => p.action ? Object.keys(ACTION).indexOf(p.action) : 9}[t.sort];
+  return r.sort((a, b) => (key(a) > key(b) ? 1 : key(a) < key(b) ? -1 : a.rank - b.rank) * t.dir);
+}
+function providersPage() {
+  const t = view.t;
+  const tiles = PRESETS.map(pr => h("button", {class: "tile", "aria-pressed": "false", onclick: () => { view.t = Object.assign(DEFAULT_T(), pr.patch); route(); }},
+    h("span", {class: "lab"}, pr.lab), h("span", {class: "num"}, pr.n()), h("span", {class: "ic " + pr.ic[1]}, icon(pr.ic[0], 17))));
+  hero(h("div", {class: "hb-row"}, h("div", {}, h("h1", {}, "Providers"),
+    h("p", {class: "lead"}, `All ${int(N)} providers, ranked by how closely their billing resembles providers flagged in the past. Choose a tile to filter, or select a provider to see why it ranks there.`))),
+    h("div", {class: "tiles"}, tiles));
+
+  const radio = (name, val, lab, cur, n, on) => h("label", {class: "opt"}, h("input", {type: "radio", name, value: val, checked: cur === val, onchange: () => on(val)}), lab, n != null ? h("small", {}, n) : null);
+  const box = (lab, checked, on, n) => h("label", {class: "opt"}, h("input", {type: "checkbox", checked, onchange: e => on(e.target.checked)}), lab, n != null ? h("small", {}, n) : null);
+  const toggleIn = (arr, v, on) => on ? (arr.includes(v) ? arr : arr.concat(v)) : arr.filter(x => x !== v);
+  const careN = c => P.filter(p => p.care === c).length;
+  const form = h("form", {onsubmit: e => e.preventDefault()},
+    h("fieldset", {class: "fg"}, h("legend", {}, "Show"),
+      radio("mode", "queue", "Review queue", t.mode, QUEUE.length, v => { t.mode = v; t.limit = 24; refresh(); }),
+      radio("mode", "top100", "Top 100", t.mode, 100, v => { t.mode = v; t.limit = 24; refresh(); }),
+      radio("mode", "all", "All providers", t.mode, int(N), v => { t.mode = v; t.limit = 24; refresh(); })),
+    h("fieldset", {class: "fg"}, h("legend", {}, "Recommendation"),
+      [["priority_audit", "Full audit"], ["desk_review", "Desk review"], ["monitor", "Monitor"], ["none", "Not in queue"]]
+        .filter(([k]) => k !== "monitor" || O.actions.monitor > 0)
+        .map(([k, lab]) => box(lab, t.recs.includes(k), on => { t.recs = toggleIn(t.recs, k, on); refresh(); }))),
+    h("fieldset", {class: "fg"}, h("legend", {}, "Type of care"),
+      CARES.map(c => box(c, t.cares.includes(c), on => { t.cares = toggleIn(t.cares, c, on); refresh(); }, careN(c)))),
+    h("fieldset", {class: "fg"}, h("legend", {}, "Focus"),
+      radio("focus", "", "Everything", t.focus, null, v => { t.focus = v; refresh(); }),
+      radio("focus", "check", "To double-check", t.focus, null, v => { t.focus = v; refresh(); }),
+      radio("focus", "beyond", "Unusual beyond size", t.focus, null, v => { t.focus = v; refresh(); }),
+      radio("focus", "size", "Queued mainly for size", t.focus, null, v => { t.focus = v; refresh(); })),
+    h("label", {class: "switch"}, "Card view", h("input", {type: "checkbox", role: "switch", checked: view.cards,
+      onchange: e => { view.cards = e.target.checked; store.set("cards", view.cards); t.limit = view.cards ? 24 : 100; refresh(); }})),
+    h("button", {class: "reset", type: "button", onclick: () => { view.t = DEFAULT_T(); view.t.mode = t.mode; route(); }}, "Reset filters"));
+
+  const search = h("input", {id: "q", type: "search", placeholder: "Find a provider ID", "aria-label": "Find a provider ID", value: t.q,
+    oninput: e => { t.q = e.target.value.trim().toUpperCase(); t.limit = view.cards ? 24 : 100; refresh(); }});
+  const sortSel = sel({"aria-label": "Sort by", onchange: e => { t.sort = e.target.value; t.dir = (t.sort === "pay" || t.sort === "claims") ? -1 : 1; refresh(); }},
+    [["rank", "Sort: rank"], ["pay", "Sort: total paid"], ["claims", "Sort: claims"], ["sfr", "Sort: rank if size ignored"], ["action", "Sort: recommendation"], ["id", "Sort: provider ID"]]
+      .map(([v, lab]) => h("option", {value: v, selected: t.sort === v}, lab)));
+  const dirBtn = h("button", {class: "circ", type: "button", "aria-label": "Reverse order", title: "Reverse order", onclick: () => { t.dir = -t.dir; refresh(); }}, icon("sort", 17));
+  const cnt = h("span", {class: "cnt", "aria-live": "polite"});
+  const res = h("div", {});
+  const more = h("button", {class: "btn pill more", onclick: () => { t.limit += view.cards ? 24 : 200; refresh(); }}, "Show more");
+  function onSort(k) { t.dir = t.sort === k ? -t.dir : (k === "pay" || k === "claims" ? -1 : 1); t.sort = k; sortSel.querySelector("select").value = k; refresh(); }
+  function refresh() {
+    tiles.forEach((b, i) => b.setAttribute("aria-pressed", String(sameT(t, Object.assign(DEFAULT_T(), PRESETS[i].patch)))));
+    const all = applyFilters(t), show = all.slice(0, t.limit);
+    cnt.textContent = `${int(all.length)} provider${all.length === 1 ? "" : "s"}`;
+    if (!all.length) res.replaceChildren(h("p", {class: "empty"}, "No providers match these filters. Try widening them or ", h("button", {class: "reset", style: "margin:0", onclick: () => { view.t = DEFAULT_T(); view.t.mode = "all"; route(); }}, "show everyone"), "."));
+    else if (view.cards) res.replaceChildren(h("div", {class: "cards"}, show.map(providerCard)));
+    else res.replaceChildren(h("div", {class: "card tcard"}, h("div", {class: "tw"}, h("table", {}, h("caption", {class: "sr"}, "Providers"), tableHead(onSort, t), h("tbody", {}, show.map(p => providerRow(p, false)))))));
+    more.style.display = all.length > t.limit ? "" : "none";
+  }
+  $("#app").append(h("div", {class: "lay rise"},
+    h("aside", {class: "card filters", "aria-label": "Filters"}, h("h2", {}, "Filters"), form),
+    h("section", {"aria-label": "Results"}, h("div", {class: "bar2"}, h("label", {class: "search"}, icon("search", 17), search), sortSel, dirBtn, cnt,
+      h("button", {class: "btn sm", onclick: exportCsv}, icon("download", 16), "CSV")), res, more)));
+  refresh();
+}
+function providerCard(p) {
+  const pay = metric(p, "total_reimb"), st = statusOf(p.id);
+  const items = p.beyond.slice(0, 2);
+  return h("article", {class: "oc", onclick: e => { if (!e.target.closest("a")) go(p.id); }},
+    h("div", {class: "hd"}, h("div", {class: "who"}, avatar(p, 40), h("div", {}, h("b", {}, p.id), h("small", {}, `Rank ${p.rank} · ${p.care}`))), recPill(p)),
+    h("div", {class: "subs"}, h("div", {class: "subc"}, h("span", {}, "Total paid"), h("b", {}, money(pay.v))),
+      h("div", {class: "subc"}, h("span", {}, "If size ignored"), h("b", {class: p.in_queue && p.unusual_without_size ? "beyond-y" : ""}, "Rank " + int(p.size_free_rank)))),
+    items.length ? h("div", {class: "items"}, items.map(b => h("div", {class: "item"}, h("span", {class: "ii"}, icon("sparkle", 15)),
+      h("div", {}, h("b", {}, label(b[0])), h("small", {}, fmt(b[1], D.driver_names[b[0]].unit))), h("span", {class: "pc"}, rankShort(b[2]))))) : null,
+    p.beyond.length > 2 ? h("p", {class: "plus"}, `+${p.beyond.length - 2} more`) : null,
+    p.recommendation_check ? h("div", {class: "notes warn"}, h("span", {}, "Double-check"), p.recommendation_check === "unusual_but_desk" ? "Desk review suggested, but unusual beyond size." : "Full audit suggested, but ranks high mainly for size.")
+      : h("div", {class: "notes"}, h("span", {}, st ? "Your status: " + STATUS[st] : "Size check"), sizeVerdict(p)),
+    h("a", {class: "btn wide", href: "#/p/" + p.id}, "Open case", icon("arrow", 16)));
+}
+function exportCsv() {
+  const head = ["rank", "provider", "type_of_care", "total_payments", "claims", "rank_if_size_ignored", "recommendation", "your_status"];
+  const lines = [head.join(",")].concat(P.map(p => [p.rank, p.id, `"${p.care}"`, Math.round(metric(p, "total_reimb").v),
+    Math.round(metric(p, "n_claims").v), p.size_free_rank, p.action ? ACTION[p.action] : "Not in queue", STATUS[statusOf(p.id)]].join(",")));
+  const a = h("a", {href: URL.createObjectURL(new Blob([lines.join("\n")], {type: "text/csv"})), download: "provider_ranking.csv"});
+  document.body.append(a); a.click(); a.remove(); toast("Ranking downloaded");
+}
+
+/* ---------- provider page ---------- */
+function providerPage(id) {
+  const p = BY[id];
+  if (!p) {
+    hero(h("div", {class: "crumbs"}, h("a", {href: "#/providers"}, icon("grid", 16), "Providers"), icon("chevr", 14), h("b", {}, id)),
+      h("h1", {}, `${id} is not in this ranking`), h("p", {class: "lead"}, `This dashboard covers the ${int(N)} providers scored this cycle. Check the ID, or search the full list.`));
+    $("#app").append(h("div", {class: "card"}, h("button", {class: "btn solid", onclick: () => openProviders({mode: "all", q: id.toUpperCase()})}, icon("search", 16), "Search all providers")));
+    return;
+  }
+  const A = ai(id);
+  const qi = QUEUE.findIndex(q => q.id === id);
+  const prev = qi > 0 ? QUEUE[qi - 1] : null, next = qi >= 0 && qi < QUEUE.length - 1 ? QUEUE[qi + 1] : null;
+  const pay = metric(p, "total_reimb"), cl = metric(p, "n_claims");
+  const stVal = h("b", {}, statusPill(statusOf(id)));
+  const statusSel = h("select", {id: "status", "aria-label": "Your status", onchange: e => {
+    const v = +e.target.value; store.set("status:" + id, v); logEvent(id, "status", v);
+    stVal.replaceChildren(statusPill(v)); toast(`Marked ${STATUS[v].toLowerCase()}`); }},
+    STATUS.map((st, i) => h("option", {value: i, selected: statusOf(id) === i}, st)));
+  const navBtn = (q, dir) => q ? h("a", {class: "ib light", href: "#/p/" + q.id, "aria-label": `${dir === "l" ? "Previous" : "Next"} in queue: rank ${q.rank}`, title: `${dir === "l" ? "Previous" : "Next"}: rank ${q.rank} (${dir === "l" ? "←" : "→"})`}, icon(dir === "l" ? "chevl" : "chevr", 18))
+    : h("span", {class: "ib light", "aria-disabled": "true"}, icon(dir === "l" ? "chevl" : "chevr", 18));
+  hero(h("div", {class: "crumbs"}, h("a", {href: "#/providers"}, icon("grid", 16), "Providers"), icon("chevr", 14),
+      p.in_queue ? [h("a", {href: "#/providers", onclick: e => { e.preventDefault(); openProviders(); }}, "Review queue"), icon("chevr", 14)] : null, h("b", {}, p.id)),
+    h("div", {class: "hb-row"},
+      h("div", {}, h("h1", {}, p.id, h("span", {class: "pls"}, recPill(p))),
+        h("p", {class: "lead"}, `${p.care} · rank ${p.rank} of ${int(N)}${p.action ? " · recommendation from the AI case reviewer; you make the decision" : ""}`)),
+      h("div", {class: "hact"},
+        h("label", {class: "wpill"}, icon("clock", 17), h("span", {class: "sr"}, "Your status"), statusSel, icon("chevd", 15, 2.2)),
+        qi >= 0 ? [navBtn(prev, "l"), navBtn(next, "r")] : null,
+        h("button", {class: "cta", onclick: () => copySummary(p)}, icon("copy", 17), "Copy case summary"))),
+    h("div", {class: "tiles"},
+      tile("Overall rank", p.rank, `of ${int(N)}`, "trend", "ic-violet"),
+      tile("Total paid", money(pay.v), "", "chart", "ic-pink"),
+      tile("Claims", int(cl.v), "", "file", "ic-amber"),
+      tile("Rank if size ignored", int(p.size_free_rank), sizeVerdict(p).startsWith("Rank") ? "" : sizeVerdict(p).toLowerCase(), "scale", "ic-green")));
+
+  const app = $("#app");
+  const pgrid = h("div", {class: "pg rise"});
+  // profile (patient card)
+  pgrid.append(h("section", {class: "card prof", "aria-label": "Provider profile"},
+    h("div", {class: "pic"}, avatar(p, 84, false), h("div", {}, h("h2", {}, p.id), h("p", {class: "mrn"}, `Rank ${p.rank} of ${int(N)}`))),
+    h("div", {class: "subs"},
+      h("div", {class: "subc"}, h("span", {}, "Type of care"), h("b", {title: p.care}, p.care)),
+      h("div", {class: "subc"}, h("span", {}, "Recommendation"), h("b", {}, recPill(p))),
+      h("div", {class: "subc"}, h("span", {}, "Your status"), stVal),
+      h("div", {class: "subc"}, h("span", {}, "Patients"), h("b", {}, int(metric(p, "n_bene").v))),
+      h("div", {class: "subc"}, h("span", {}, "Payment per claim"), h("b", {}, money(metric(p, "reimb_per_claim").v))),
+      h("div", {class: "subc"}, h("span", {}, "Size check"), h("b", {class: p.in_queue && p.unusual_without_size ? "beyond-y" : ""}, p.in_queue ? sizeVerdict(p) : "Not assessed"))),
+    h("p", {class: "last"}, "Claims period: ", h("b", {}, `${nice(O.period.from)} to ${nice(O.period.to)}`))));
+  // summary
+  pgrid.append(h("section", {class: "card", "aria-labelledby": "sum-h"},
+    h("div", {class: "ch"}, h("h2", {class: "ct", id: "sum-h"}, "Summary")),
+    h("p", {class: "lede"}, (A && A.summary) || fallbackSummary(p)),
+    h("div", {class: "facts"},
+      h("div", {class: "subc"}, h("span", {}, "Paid over the period"), h("b", {}, money(pay.v)), h("em", {}, compare(pay.pct, p.care))),
+      h("div", {class: "subc"}, h("span", {}, "Claims"), h("b", {}, int(cl.v)), h("em", {}, compare(cl.pct, p.care)))),
+    p.action ? h("div", {class: "recn"}, recPill(p), h("span", {}, ACTION_NOTE[p.action])) : null,
+    p.recommendation_check === "unusual_but_desk" ? h("div", {class: "callout", role: "note"}, icon("alert", 18), h("div", {}, h("b", {}, "Double-check this recommendation"),
+      "Desk review was suggested, but this provider's billing looks unusual even when its size is set aside. Consider whether a full audit is warranted.")) :
+    p.recommendation_check === "size_but_audit" ? h("div", {class: "callout", role: "note"}, icon("alert", 18), h("div", {}, h("b", {}, "Double-check this recommendation"),
+      "A full audit was suggested, but this provider ranks high mainly because it is large. Check that size alone is not driving the referral.")) : null));
+  // insights panel
+  pgrid.append(insightsPanel(p, A));
+  // checklist (lab reports list)
+  const checks = A && A.what_to_check && A.what_to_check.length ? A.what_to_check : defaultChecks(p);
+  const prog = h("span", {class: "prog"});
+  const updProg = () => { prog.textContent = `${store.get("checks:" + id, []).filter(i => i < checks.length).length} of ${checks.length} done`; };
+  updProg();
+  const done = store.get("checks:" + id, []);
+  pgrid.append(h("section", {class: "card", "aria-labelledby": "chk-h"},
+    h("div", {class: "ch"}, h("div", {}, h("h2", {class: "ct", id: "chk-h"}, "What to check"), h("p", {class: "cs"}, "Ticks are saved in this browser only.")), prog),
+    h("ul", {class: "list"}, checks.map((c, i) => h("li", {}, h("label", {class: "chk"},
+      h("input", {type: "checkbox", checked: done.includes(i), onchange: e => {
+        const cur = new Set(store.get("checks:" + id, [])); e.target.checked ? cur.add(i) : cur.delete(i); store.set("checks:" + id, [...cur]); updProg(); }}),
+      h("span", {class: "ai"}, icon("check", 18, 2.2)), h("span", {}, c)))))));
+  // patterns (reports list)
+  pgrid.append(h("section", {class: "card", "aria-labelledby": "pat-h"},
+    h("div", {class: "ch"}, h("div", {}, h("h2", {class: "ct", id: "pat-h"}, "Patterns it resembles"),
+      h("p", {class: "cs"}, "Known schemes whose warning signs match this provider. A match is a lead, not a finding."))),
+    p.patterns && p.patterns.length ? h("ul", {class: "list"}, p.patterns.map((t, i) => h("li", {}, h("details", {class: "pat", open: i === 0},
+      h("summary", {}, h("span", {class: "ai"}, icon("file", 18)), h("div", {}, h("b", {}, t.title), h("small", {}, `Playbook pattern ${t.id}`)), h("span", {class: "chev"}, icon("chevd", 18))),
+      h("p", {}, (A && A.patterns && A.patterns[t.id]) || t.text)))))
+      : h("p", {class: "empty"}, p.in_queue ? "No playbook pattern was matched for this provider." : "Pattern matching runs only for providers in the review queue.")));
+  // beyond size
+  pgrid.append(h("section", {class: "card full", "aria-labelledby": "bey-h"},
+    h("div", {class: "ch"}, h("div", {}, h("h2", {class: "ct", id: "bey-h"}, "What stands out beyond size"),
+      h("p", {class: "cs"}, `When size is set aside, these measures do most to keep this provider high (rank ${int(p.size_free_rank)} of ${int(N)}). They describe how it bills, not how much, and are the best leads for a review.`)),
+      p.beyond.length ? rangeLegend() : null),
+    p.beyond.length ? h("div", {class: "fts"}, p.beyond.map(b => {
+      const n = D.driver_names[b[0]], txt = A && A.beyond && A.beyond[b[0]];
+      return h("div", {class: "ftile"}, h("div", {class: "fh"}, h("i", {}, icon("sparkle", 15)), n.label),
+        h("div", {class: "fv"}, fmt(b[1], n.unit)), h("div", {class: "fc"}, compare(b[2], p.care)),
+        rangeBar(p, b[0], b[1]), h("p", {class: "fw"}, txt || fallbackReason(p, [b[0], 1, b[1], b[2]])));
+    })) : h("p", {class: "empty"}, "Nothing stands out once size is set aside: this provider ranks where it does because of its size.")));
+  // overall drivers
+  pgrid.append(h("section", {class: "card full", "aria-labelledby": "why-h"},
+    h("div", {class: "ch"}, h("div", {}, h("h2", {class: "ct", id: "why-h"}, "Why it ranks here overall"),
+      h("p", {class: "cs"}, `The five measures that moved this provider's overall rank most, including size, compared with ${peerWord(p.care)} (${int(O.peer_counts[p.care])} in the reference group).`)), rangeLegend()),
+    h("ul", {class: "frows"}, p.drivers.map(d => {
+      const n = D.driver_names[d[0]], txt = A && A.reasons && A.reasons[d[0]];
+      const bar = rangeBar(p, d[0], d[2]);
+      return h("li", {class: "frow"},
+        h("div", {}, h("div", {class: "nm"}, n.label), h("div", {class: "row"}, h("span", {class: "pl " + (d[1] ? "pl-pink" : "pl-green")}, d[1] ? "Pushes rank up" : "Pulls rank down"),
+          n.size ? h("span", {class: "pl pl-none"}, "Reflects size") : null)),
+        h("div", {}, h("div", {class: "vl"}, fmt(d[2], n.unit)), h("div", {class: "cp"}, compare(d[3], p.care)), bar || h("p", {class: "cp"}, "See all measures under Explore the data.")),
+        h("p", {class: "ex"}, txt || fallbackReason(p, d)));
+    }))));
+  // explore + next
+  pgrid.append(exploreSection(p));
+  pgrid.append(nextCard(p, next));
+  app.append(pgrid);
+}
+function tile(lab, num, small, ic, cls) {
+  return h("div", {class: "tile"}, h("span", {class: "lab"}, lab), h("span", {class: "num", title: `${num} ${small}`.trim()}, num, small ? h("small", {}, small) : null),
+    h("span", {class: "ic " + cls}, icon(ic, 17)));
+}
+function insightsPanel(p, A) {
+  const b = p.beyond[0];
+  const cards = [];
+  if (b) { const n = D.driver_names[b[0]];
+    cards.push(h("div", {class: "icard"}, h("div", {class: "ih"}, h("span", {class: "ii"}, icon("alert", 18)),
+      h("div", {}, h("h4", {}, `${n.label} is ${compare(b[2], p.care)}`), h("p", {class: "isub"}, `${fmt(b[1], n.unit)} · stands out most beyond size`))),
+      rangeBar(p, b[0], b[1], true))); }
+  cards.push(h("div", {class: "icard"}, h("div", {class: "ih"}, h("span", {class: "ii"}, icon("sparkle", 18)),
+    h("div", {}, h("h4", {}, p.in_queue ? (p.unusual_without_size ? "How it bills stands out, not only its size" : "Mainly in the queue because it is large") : "Outside this cycle's queue"),
+      h("p", {class: "ib2"}, A && A.size_note ? A.size_note : fallbackSizeNote(p))))));
+  cards.push(h("div", {class: "icard"}, h("div", {class: "ih"}, h("span", {class: "ii"}, icon("sparkle", 18)),
+    h("div", {}, h("h4", {}, "Keep in mind"), h("ul", {}, (A && A.cautions && A.cautions.length ? A.cautions : [
+      "A high rank means this provider's billing resembles providers flagged in the past. It is not evidence of fraud.",
+      "Comparisons are with providers giving the same type of care; a provider with an unusual specialty can look unusual for good reasons.",
+      "Data covers claims from 2008 to 2009 in a public benchmark dataset."]).map(t => h("li", {}, t)))))));
+  const noteBox = h("div", {});
+  function drawNote(editing) {
+    const n = store.get("note:" + p.id, null);
+    if (editing) {
+      const ta = h("textarea", {"aria-label": "Your note", placeholder: "What did you find? Saved in this browser only."}, n ? n.text : "");
+      const save = () => { const v = ta.value.trim();
+        if (v) { store.set("note:" + p.id, {text: v, t: Date.now()}); logEvent(p.id, "note"); toast("Note saved"); }
+        else { try { localStorage.removeItem("prq:note:" + p.id); } catch (e) {} }
+        drawNote(false); };
+      noteBox.replaceChildren(h("div", {class: "note"}, ta, h("div", {class: "row", style: "margin-top:10px"},
+        h("button", {class: "btn solid sm pill", onclick: save}, icon("check", 15, 2.4), "Save note"),
+        h("button", {class: "btn sm pill", onclick: () => drawNote(false)}, "Cancel"))));
+      ta.focus();
+    } else if (n) {
+      noteBox.replaceChildren(h("div", {class: "note"}, h("p", {}, n.text), h("div", {class: "nf"}, h("span", {}, "Your note · " + ago(n.t)),
+        h("button", {class: "circ", "aria-label": "Edit note", onclick: () => drawNote(true)}, icon("pencil", 15)))),
+        h("div", {class: "row", style: "margin-top:12px"}, h("button", {class: "btn pill sm", onclick: () => drawNote(true)}, icon("pencil", 15), "Edit note"),
+          h("button", {class: "circ", "aria-label": "Delete note", onclick: () => { try { localStorage.removeItem("prq:note:" + p.id); } catch (e) {} toast("Note deleted"); drawNote(false); }}, icon("x", 16))));
+    } else noteBox.replaceChildren(h("div", {class: "row", style: "margin-top:12px"}, h("button", {class: "btn pill sm", onclick: () => drawNote(true)}, icon("plus", 15, 2.4), "Add note"),
+      h("span", {style: "font-size:12.5px;opacity:.8"}, "Notes stay in this browser and go into the copied summary.")));
+  }
+  drawNote(false);
+  return h("section", {class: "ins panel", "aria-labelledby": "pins-h"},
+    h("div", {class: "ch"}, h("h2", {class: "ct", id: "pins-h"}, A ? "AI insights" : "Insights"), h("span", {class: "badge"}, A ? "Written by AI, checked" : "Standard wording")),
+    cards, noteBox);
+}
+function defaultChecks(p) {
+  const out = [], ks = p.drivers.filter(d => d[1]).map(d => d[0]);
+  if (ks.some(k => /los/.test(k))) out.push("Pull the longest hospital stays and confirm the medical records support each day billed.");
+  if (ks.some(k => /reimb|n_claims|n_ip/.test(k))) out.push("Compare payments with the provider's size and bed count before treating volume as a concern.");
+  if (ks.some(k => /diag|dgc|admit/.test(k))) out.push("Sample claims and check the diagnoses match the treatment billed.");
+  if (ks.some(k => /bene|attending/.test(k))) out.push("Check whether the same patients or doctors appear on an unusual number of claims.");
+  if (ks.some(k => /dup/.test(k))) out.push("Look for claims billed twice for the same patient, date and amount.");
+  out.push("Record what you find so confirmed and cleared cases can improve the next ranking.");
+  return out;
+}
+function exploreSection(p) {
+  const sec = h("section", {class: "card two", "aria-labelledby": "exp-h"});
+  const pick = store.get("explore", (p.drivers.find(d => MI[d[0]] != null) || [])[0] || "total_reimb");
+  let key = MI[pick] != null ? pick : "total_reimb";
+  const chart = h("div", {class: "hist"}), note = h("p", {class: "hist-note"});
+  const tabs = h("div", {class: "tabs", role: "tablist", "aria-label": "Measure"});
+  function show(k, focus) {
+    key = k; store.set("explore", k);
+    [...tabs.children].forEach(b => { const on = b.dataset.k === k; b.setAttribute("aria-selected", String(on)); b.tabIndex = on ? 0 : -1; if (on && focus) { b.focus(); b.scrollIntoView({block: "nearest", inline: "nearest"}); } });
+    const m = M[MI[k]], mv = metric(p, k);
+    note.textContent = `${m.help} This provider: ${fmt(mv.v, m.unit)}, ${compare(mv.pct, p.care)}.`;
+    chart.replaceChildren(histogram(p, k));
+  }
+  M.forEach(m => tabs.append(h("button", {role: "tab", "data-k": m.key, "aria-selected": "false", onclick: () => show(m.key)}, m.label)));
+  tabs.addEventListener("keydown", e => { if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return; e.preventDefault(); e.stopPropagation();
+    const i = MI[key] + (e.key === "ArrowRight" ? 1 : -1); show(M[(i + M.length) % M.length].key, true); });
+  sec.append(h("div", {class: "ch"}, h("div", {}, h("h2", {class: "ct", id: "exp-h"}, "Explore the data"),
+    h("p", {class: "cs"}, `How this provider compares with ${int(O.peer_counts[p.care])} ${peerWord(p.care)} on each measure. Bars show how many similar providers have each value; the pink bar and dashed line are this provider.`))),
+    tabs, note, chart);
+  const tbl = h("table", {class: "mtable"},
+    h("thead", {}, h("tr", {}, h("th", {scope: "col"}, "Measure"), h("th", {scope: "col", class: "num"}, "This provider"),
+      h("th", {scope: "col"}, "Compared with similar providers"), h("th", {scope: "col", class: "c-care"}, "Typical range"))),
+    h("tbody", {}, M.map(m => { const mv = metric(p, m.key), q = D.peers[p.care].metrics[m.key].q;
+      return h("tr", {}, h("td", {}, h("div", {style: "font-weight:700"}, m.label), h("div", {class: "cs", style: "margin:0"}, m.help)),
+        h("td", {class: "num", style: "font-weight:800;white-space:nowrap"}, fmt(mv.v, m.unit)),
+        h("td", {}, rangeBar(p, m.key), h("div", {class: "cs", style: "margin:0"}, compare(mv.pct, p.care))),
+        h("td", {class: "c-care cs", style: "white-space:nowrap"}, `${fmt(q[1], m.unit)} to ${fmt(q[3], m.unit)}`)); })));
+  sec.classList.add("tcard");
+  sec.append(h("details", {class: "all"}, h("summary", {}, "All measures in a table"), rangeLegend(), h("div", {class: "tw"}, tbl)));
+  show(key);
+  redraws.push(() => chart.replaceChildren(histogram(p, key)));
+  return sec;
+}
+function nextCard(p, next) {
+  const q = next || (p.in_queue ? null : nextToReview());
+  const c = h("section", {class: "card room", "aria-labelledby": "nx-h"});
+  if (!q) {
+    c.append(h("div", {class: "img"}, h("b", {}, "✓"), h("small", {}, "")), h("h3", {id: "nx-h"}, "End of the queue"),
+      h("p", {class: "ty"}, "This is the last provider in this cycle's queue."), h("div", {style: "height:14px"}),
+      h("button", {class: "btn solid wide", onclick: () => openProviders()}, "Back to the queue", icon("arrow", 16)));
+    return c;
+  }
+  c.append(h("div", {class: "img"}, h("div", {style: "position:relative;z-index:1"}, h("small", {}, next ? "Next in queue" : "Next to review"), h("b", {}, "#" + q.rank)), avatar(q, 48)),
+    h("div", {class: "row", style: "justify-content:space-between;margin-top:14px"}, h("h3", {id: "nx-h", style: "margin:0"}, q.id), recPill(q)),
+    h("p", {class: "ty"}, q.care),
+    h("div", {class: "subs"}, h("div", {class: "subc"}, h("span", {}, "Total paid"), h("b", {}, money(metric(q, "total_reimb").v))),
+      h("div", {class: "subc"}, h("span", {}, "If size ignored"), h("b", {}, "Rank " + int(q.size_free_rank))),
+      h("div", {class: "subc full"}, h("span", {}, "Your status"), h("b", {}, STATUS[statusOf(q.id)]))),
+    h("a", {class: "btn solid wide", href: "#/p/" + q.id}, next ? "Open next" : "Open", icon("arrow", 16)));
+  return c;
+}
+function copySummary(p) {
+  const A = ai(p.id), note = store.get("note:" + p.id, null);
+  const lines = [`${p.id} (${p.care}) - rank ${p.rank} of ${N}`,
+    `Recommendation: ${p.action ? ACTION[p.action] : "Not in queue"}`,
+    `Rank if size is ignored: ${p.size_free_rank}`,
+    `Your status: ${STATUS[statusOf(p.id)]}`,
+    ...(p.recommendation_check ? ["Note: recommendation flagged to double-check against the size check."] : []),
+    "", (A && A.summary) || fallbackSummary(p), "", "Stands out beyond size:",
+    ...p.beyond.map(b => `- ${label(b[0])}: ${fmt(b[1], D.driver_names[b[0]].unit)} (${compare(b[2], p.care)})`),
+    "", "Main reasons overall:",
+    ...p.drivers.map(d => `- ${label(d[0])}: ${fmt(d[2], D.driver_names[d[0]].unit)} (${compare(d[3], p.care)})`),
+    ...(note ? ["", "Reviewer note:", note.text] : []),
+    "", "This ranking identifies providers to review; it is not evidence of fraud."];
+  const txt = lines.join("\n");
+  (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => toast("Case summary copied"),
+    () => { const t = h("textarea", {}, txt); document.body.append(t); t.select(); try { document.execCommand("copy"); toast("Case summary copied"); } catch (e) {} t.remove(); });
+}
+
+/* ---------- about ---------- */
+function aboutPage() {
+  hero(h("h1", {}, "How it works"), h("p", {class: "lead"}, "A short guide for reviewers. No technical background needed."));
+  const o = O;
+  const items = [
+    ["list", "What the ranking is", `Each provider's claims are summarised into measures such as total payments, length of hospital stays and claims per patient. A model trained on providers flagged in the past puts all ${int(o.providers_scored)} providers in order, so the most similar to past flags come first.`],
+    ["alert", "What it is not", "It is not a fraud finding. Past flags were suspicions, and how they were assigned is not documented. Every case needs a person to review the records and decide."],
+    ["scale", "Why size matters", "Large hospitals bill more of everything, and past flags were more common among large providers. So the dashboard also shows each provider's rank with size set aside. A provider that stays near the top without size bills unusually for its size; one that drops out is in the queue mainly because it is big."],
+    ["trend", "How well it has done", `On providers held back for testing, ${o.track_record.top100_previously_flagged} of the top 100 had been flagged before, compared with ${o.track_record.top100_payments_alone} when providers were simply sorted by how much they were paid. ${o.track_record.flagged_in_test} of the ${int(o.providers_scored)} test providers had been flagged.`],
+    ["sparkle", "Where the words come from", "Numbers, ranks and charts are calculated directly from the claims. The plain-language explanations for queue providers are written by AI agents and checked automatically: every number they state must match the data, recommendations must not change, and technical terms are not allowed. Panels say whether their text was written by AI or is standard wording."],
+    ["pencil", "Your notes", "Status, checklist ticks and notes are kept in this browser only. They are not shared or sent anywhere."],
+    ["book", "Data", `Public Medicare benchmark data (Kaggle), claims from ${nice(o.period.from)} to ${nice(o.period.to)}. It appears to be synthetic, so this dashboard is a demonstration.`]];
+  $("#app").append(h("div", {class: "about rise"}, items.map(([ic, t, b]) => h("section", {class: "card"}, h("span", {class: "ai"}, icon(ic, 20)), h("div", {}, h("h3", {}, t), h("p", {}, b))))));
+}
+
+/* ---------- shell and router ---------- */
+function buildShell() {
+  $("#logo-ic").append(icon("shield", 18, 2.1));
+  const toCheck = () => QUEUE.filter(p => p.recommendation_check && statusOf(p.id) === 0).length;
+  const bell = h("button", {class: "ib", onclick: () => openProviders({focus: "check"})}, icon("bell", 18));
+  const searchBtn = h("button", {class: "ib", "aria-label": "Find a provider", title: "Find a provider (/)", onclick: focusSearch}, icon("search", 18));
+  const dl = h("button", {class: "ib", "aria-label": "Download the ranking as CSV", title: "Download the ranking (CSV)", onclick: exportCsv}, icon("download", 18));
+  $("#icons").append(searchBtn, bell, dl);
+  buildShell.bell = () => { const n = toCheck(); bell.querySelector(".badge")?.remove(); if (n) bell.append(h("span", {class: "badge", "aria-hidden": "true"}, n));
+    bell.setAttribute("aria-label", `${n} recommendation${n === 1 ? "" : "s"} to double-check, not yet started`); bell.title = bell.getAttribute("aria-label"); };
+  const meta = D.meta || {};
+  $("#foot").append(h("span", {}, `Prepared ${meta.generated || ""}. ${meta.ai_note || "Plain-language explanations: not generated; showing standard wording."}`),
+    h("span", {}, "This dashboard ranks providers for review. It does not decide outcomes, and no payment is denied or delayed because of it."));
+  const notice = !AI ? "Plain-language explanations have not been generated for this build. Numbers and charts are complete; wording is standard system text."
+    : (meta.checks_failed && meta.checks_failed.length) ? `Some AI-written text failed automatic checks (${meta.checks_failed.join(", ")}); that text has been replaced with standard system wording.` : null;
+  if (notice) $("#notice").append(h("div", {class: "notice", role: "note"}, icon("info", 18), h("span", {}, notice)));
+}
+function focusSearch() {
+  if (location.hash !== "#/providers") { view.t = Object.assign(DEFAULT_T(), {mode: "all"}); location.hash = "#/providers"; setTimeout(() => $("#q") && $("#q").focus(), 30); }
+  else $("#q").focus();
+}
+function route() {
+  timers.forEach(clearTimeout); timers = []; redraws = [];
+  const app = $("#app"), hsh = location.hash || "#/";
+  $("#tip").style.display = "none";
+  app.replaceChildren();
+  const m = hsh.match(/^#\/p\/([A-Za-z0-9]+)$/);
+  const page = m ? "prov" : hsh === "#/providers" ? "list" : hsh === "#/about" ? "about" : "home";
+  [["nav-home", "home"], ["nav-prov", "list"], ["nav-about", "about"]].forEach(([nid, pg]) => {
+    const on = pg === page || (pg === "list" && page === "prov"); const a = $("#" + nid);
+    if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+  if (page === "prov") { providerPage(m[1]); document.title = `${m[1]} · Provider review`; }
+  else if (page === "list") { providersPage(); document.title = "Providers · Provider review"; }
+  else if (page === "about") { aboutPage(); document.title = "How it works · Provider review"; }
+  else { overviewPage(); document.title = "Provider review queue"; }
+  buildShell.bell();
+  window.scrollTo(0, 0);
+  app.focus({preventScroll: true});
+}
+buildShell();
+window.addEventListener("hashchange", route);
+document.addEventListener("keydown", e => {
+  if (e.target.closest("input,select,textarea,[role=tablist]") || e.altKey || e.ctrlKey || e.metaKey) return;
+  if (e.key === "/") { e.preventDefault(); focusSearch(); return; }
+  const m = location.hash.match(/^#\/p\/([A-Za-z0-9]+)$/); if (!m) return;
+  const i = QUEUE.findIndex(q => q.id === m[1]); if (i < 0) return;
+  if (e.key === "ArrowRight" && i < QUEUE.length - 1) go(QUEUE[i + 1].id);
+  if (e.key === "ArrowLeft" && i > 0) go(QUEUE[i - 1].id);
+});
+route();
+</script>
+</body>
+</html>

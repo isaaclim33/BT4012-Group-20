@@ -1,0 +1,3 @@
+condition,briefs,schema_valid,drivers,drivers_faithful,citations,citations_exist,citations_supported,says_confirmed,input_tokens,output_tokens
+with retrieval,20,1.0,98,98,44,44,44,0,55811,14683
+without retrieval,20,1.0,100,100,0,0,0,0,34859,11501

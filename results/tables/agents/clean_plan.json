@@ -1,0 +1,256 @@
+{
+  "steps": [
+    {
+      "column": "PotentialFraud",
+      "action": "recode_binary",
+      "detail": "Yes->1, No->0",
+      "reason": "Target is a suspicion label of undocumented origin, so keep it as a binary label and report PR-AUC against it as suspicion rather than confirmed fraud."
+    },
+    {
+      "column": "Gender",
+      "action": "recode_binary",
+      "detail": "1->1, 2->0",
+      "reason": "Two-valued code, so a 0/1 flag is enough."
+    },
+    {
+      "column": "RenalDiseaseIndicator",
+      "action": "recode_binary",
+      "detail": "Y->1, 0->0",
+      "reason": "Mixed string encoding ('0' and 'Y') needs a consistent 0/1 flag."
+    },
+    {
+      "column": "ChronicCond_Alzheimer",
+      "action": "recode_binary",
+      "detail": "1->1, 2->0",
+      "reason": "The source codes use 1=yes and 2=no, so map 2 to 0."
+    },
+    {
+      "column": "ChronicCond_Heartfailure",
+      "action": "recode_binary",
+      "detail": "1->1, 2->0",
+      "reason": "Same 1/2 coding as the other chronic condition flags."
+    },
+    {
+      "column": "ChronicCond_KidneyDisease",
+      "action": "recode_binary",
+      "detail": "1->1, 2->0",
+      "reason": "Same 1/2 coding as the other chronic condition flags."
+    },
+    {
+      "column": "ChronicCond_Cancer",
+      "action": "recode_binary",
+      "detail": "1->1, 2->0",
+      "reason": "Same 1/2 coding as the other chronic condition flags."
+    },
+    {
+      "column": "ChronicCond_ObstrPulmonary",
+      "action": "recode_binary",
+      "detail": "1->1, 2->0",
+      "reason": "Same 1/2 coding as the other chronic condition flags."
+    },
+    {
+      "column": "ChronicCond_Depression",
+      "action": "recode_binary",
+      "detail": "1->1, 2->0",
+      "reason": "Same 1/2 coding as the other chronic condition flags."
+    },
+    {
+      "column": "ChronicCond_Diabetes",
+      "action": "recode_binary",
+      "detail": "1->1, 2->0",
+      "reason": "Same 1/2 coding as the other chronic condition flags."
+    },
+    {
+      "column": "ChronicCond_IschemicHeart",
+      "action": "recode_binary",
+      "detail": "1->1, 2->0",
+      "reason": "Same 1/2 coding as the other chronic condition flags."
+    },
+    {
+      "column": "ChronicCond_Osteoporasis",
+      "action": "recode_binary",
+      "detail": "1->1, 2->0",
+      "reason": "Same 1/2 coding as the other chronic condition flags."
+    },
+    {
+      "column": "ChronicCond_rheumatoidarthritis",
+      "action": "recode_binary",
+      "detail": "1->1, 2->0",
+      "reason": "Same 1/2 coding as the other chronic condition flags."
+    },
+    {
+      "column": "ChronicCond_stroke",
+      "action": "recode_binary",
+      "detail": "1->1, 2->0",
+      "reason": "Same 1/2 coding as the other chronic condition flags."
+    },
+    {
+      "column": "DOD",
+      "action": "missing_indicator",
+      "detail": "Create is_deceased = DOD not null; parse DOD as a date and drop the raw date after deriving the flag",
+      "reason": "Missing means the beneficiary is alive (99% missing by design), so imputing a date would be wrong."
+    },
+    {
+      "column": "DOB",
+      "action": "parse_date",
+      "detail": "Parse to date and derive beneficiary age at claim date",
+      "reason": "Age is more useful than a raw date string."
+    },
+    {
+      "column": "ClaimStartDt",
+      "action": "parse_date",
+      "detail": "Parse in inpatient and outpatient; derive claim duration and month",
+      "reason": "Dates are strings, and claims span Nov 2008 to Dec 2009, so a time-based split is needed for validation."
+    },
+    {
+      "column": "ClaimEndDt",
+      "action": "parse_date",
+      "detail": "Parse in inpatient and outpatient; ClaimEndDt minus ClaimStartDt gives duration",
+      "reason": "Dates are strings; needed for duration features."
+    },
+    {
+      "column": "AdmissionDt",
+      "action": "parse_date",
+      "detail": "Parse the inpatient admission date; derive length of stay with DischargeDt",
+      "reason": "Dates are strings; needed for stay features."
+    },
+    {
+      "column": "DischargeDt",
+      "action": "parse_date",
+      "detail": "Parse the inpatient discharge date",
+      "reason": "Dates are strings; needed for length of stay."
+    },
+    {
+      "column": "DeductibleAmtPaid",
+      "action": "impute",
+      "detail": "Inpatient: missing -> 0 plus a missing indicator; a single value of 1068 is present otherwise",
+      "reason": "Only one distinct value exists besides the 2.2% missing, which probably means no deductible was paid. Keep the indicator so the signal is not lost."
+    },
+    {
+      "column": "OperatingPhysician",
+      "action": "missing_indicator",
+      "detail": "Create has_operating_physician flag; leave the ID itself unimputed",
+      "reason": "Missing by design (41% inpatient, 82% outpatient) because many claims have no operating physician."
+    },
+    {
+      "column": "OtherPhysician",
+      "action": "missing_indicator",
+      "detail": "Create has_other_physician flag; leave the ID itself unimputed",
+      "reason": "Missing by design (88% inpatient, 62% outpatient)."
+    },
+    {
+      "column": "AttendingPhysician",
+      "action": "missing_indicator",
+      "detail": "Create a missing flag (0.3% missing); do not impute the ID",
+      "reason": "A missing physician is itself possibly informative; the share is tiny."
+    },
+    {
+      "column": "ClmProcedureCode_1",
+      "action": "missing_indicator",
+      "detail": "Inpatient: create has_procedure flag and procedure count across codes 1-6; keep codes as categorical, not float",
+      "reason": "Missing means no procedure was performed; the codes are identifiers, not numbers."
+    },
+    {
+      "column": "ClmProcedureCode_2",
+      "action": "missing_indicator",
+      "detail": "Fold into procedure count; do not impute",
+      "reason": "Missing means no additional procedure (86.5% missing)."
+    },
+    {
+      "column": "ClmProcedureCode_3",
+      "action": "missing_indicator",
+      "detail": "Fold into procedure count; do not impute",
+      "reason": "Missing by design (97.6% missing)."
+    },
+    {
+      "column": "ClmProcedureCode_4",
+      "action": "drop_column",
+      "detail": "Inpatient: drop after counting; 99.7% missing",
+      "reason": "Too sparse to carry its own signal; counted in the procedure count first."
+    },
+    {
+      "column": "ClmProcedureCode_5",
+      "action": "drop_column",
+      "detail": "Drop in inpatient and outpatient",
+      "reason": "Essentially empty (~100% missing, at most 6 values), so no usable signal."
+    },
+    {
+      "column": "ClmProcedureCode_6",
+      "action": "drop_column",
+      "detail": "Drop in inpatient and outpatient",
+      "reason": "100% missing, constant."
+    },
+    {
+      "column": "ClmDiagnosisCode_1",
+      "action": "missing_indicator",
+      "detail": "Outpatient: 2% missing; flag it and keep codes as categorical. Derive a diagnosis count across codes 1-10 for both claim types",
+      "reason": "Missing means no diagnosis was recorded; the count is a stronger signal than the sparse later codes."
+    },
+    {
+      "column": "ClmDiagnosisCode_10",
+      "action": "drop_column",
+      "detail": "Drop in inpatient and outpatient after counting",
+      "reason": "90-99.8% missing; its content is captured by the diagnosis count."
+    },
+    {
+      "column": "ClmAdmitDiagnosisCode",
+      "action": "missing_indicator",
+      "detail": "Outpatient: 79.7% missing, so create a has_admit_dx flag; keep the code as categorical for inpatient",
+      "reason": "Missing by design, since admit diagnoses mostly belong to inpatient stays."
+    },
+    {
+      "column": "Provider",
+      "action": "keep",
+      "detail": "Join key. Aggregate inpatient and outpatient claims to provider level (claim counts, reimbursement sums and means, distinct beneficiaries, physician counts) and join the labels on it; do not use raw IDs as features",
+      "reason": "The unit of modelling is the provider, so claim-level data must be rolled up. 5,410 labelled providers; some have no inpatient claims, so fill their inpatient aggregates with 0 plus an indicator."
+    },
+    {
+      "column": "BeneID",
+      "action": "keep",
+      "detail": "Join claims to beneficiary attributes; use it only as a key and to count distinct patients per provider",
+      "reason": "Identifier, not a predictor."
+    },
+    {
+      "column": "ClaimID",
+      "action": "drop_column",
+      "detail": "Drop after de-duplication checks",
+      "reason": "Unique identifier with no signal."
+    },
+    {
+      "column": "NoOfMonths_PartACov",
+      "action": "keep",
+      "detail": "Keep numeric; flag 0 months as a feature rather than imputing",
+      "reason": "0 months is a real value: no Part A coverage."
+    },
+    {
+      "column": "NoOfMonths_PartBCov",
+      "action": "keep",
+      "detail": "Keep numeric; no imputation",
+      "reason": "Real values; 0 months is meaningful."
+    },
+    {
+      "column": "IPAnnualReimbursementAmt",
+      "action": "keep",
+      "detail": "Keep zeros as real values; use in provider-level means",
+      "reason": "0 means no inpatient spending, not missing."
+    },
+    {
+      "column": "OPAnnualReimbursementAmt",
+      "action": "keep",
+      "detail": "Keep zeros as real values",
+      "reason": "Valid amounts."
+    },
+    {
+      "column": "State",
+      "action": "keep",
+      "detail": "Treat as categorical code, not numeric; use provider-level state mix",
+      "reason": "Numeric codes for geography with no ordering."
+    },
+    {
+      "column": "Race",
+      "action": "keep",
+      "detail": "Treat as categorical code, not numeric",
+      "reason": "Nominal code."
+    }
+  ]
+}

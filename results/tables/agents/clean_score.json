@@ -1,0 +1,16 @@
+{
+  "reference_items": 7,
+  "caught": 6,
+  "items": {
+    "recode chronic conditions 1/2": true,
+    "recode gender 1/2": true,
+    "recode renal 0/Y": true,
+    "drop constant inpatient deductible": false,
+    "parse dates": true,
+    "physician/procedure missing kept as indicator": true,
+    "DOD missing means alive": true
+  },
+  "structural_imputations_proposed": 0,
+  "errors": [],
+  "steps": 42
+}

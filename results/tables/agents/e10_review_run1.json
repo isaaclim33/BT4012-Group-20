@@ -1,0 +1,81 @@
+{
+  "verdicts": [
+    {
+      "feature": "top_attending_share",
+      "verdict": "ok",
+      "reason": "Computed from the provider's own claims; uses no labels or information from other providers."
+    },
+    {
+      "feature": "ppr_all_labels",
+      "verdict": "leak",
+      "reason": "PageRank is seeded on flagged providers including validation and test providers, so it uses their labels and the provider's own label can propagate back to it."
+    },
+    {
+      "feature": "reimb_zscore_global",
+      "verdict": "leak",
+      "reason": "Multiplying by the provider's label rank directly injects the label, and standardising with test-set statistics adds further contamination."
+    },
+    {
+      "feature": "net_nbr_fraud_share",
+      "verdict": "ok",
+      "reason": "Flags come only from training-fold providers and each training provider's own fold is excluded, so the provider's own label and validation/test labels are not used. Test providers should be scored with training-only flags."
+    },
+    {
+      "feature": "state_flag_rate",
+      "verdict": "leak",
+      "reason": "Computed over all 5,410 labelled providers, so it includes the provider's own label and the labels of validation and test providers."
+    },
+    {
+      "feature": "n_chronic_mean",
+      "verdict": "ok",
+      "reason": "Aggregates the provider's own beneficiaries' attributes; uses no label or post-audit information."
+    },
+    {
+      "feature": "audit_opened_flag",
+      "verdict": "leak",
+      "reason": "An investigation opened after the review period is information that exists only after an audit decision, and it is closely tied to the label."
+    },
+    {
+      "feature": "claims_per_bene",
+      "verdict": "ok",
+      "reason": "Ratio of the provider's own claims to its distinct beneficiaries; uses no label or outside information."
+    },
+    {
+      "feature": "ip_claim_share",
+      "verdict": "ok",
+      "reason": "Per-provider claim-mix ratio computed from the provider's own claims only."
+    },
+    {
+      "feature": "los_mean",
+      "verdict": "ok",
+      "reason": "Per-provider aggregate of inpatient length of stay; uses no label or post-audit information."
+    },
+    {
+      "feature": "reimb_per_claim",
+      "verdict": "ok",
+      "reason": "Per-provider ratio computed from the provider's own claims only."
+    },
+    {
+      "feature": "provider_flag_rate_smoothed",
+      "verdict": "leak",
+      "reason": "Target encoding of the provider's own PotentialFraud label fitted on all providers, so it contains the label directly."
+    },
+    {
+      "feature": "net_degree",
+      "verdict": "ok",
+      "reason": "Network degree is built from claims, not labels. Using claims of all providers is unsupervised structure and is acceptable, though it should be fixed consistently in deployment."
+    },
+    {
+      "feature": "dup_same_share",
+      "verdict": "ok",
+      "reason": "Computed from the provider's own claims; uses no label or post-audit information."
+    },
+    {
+      "feature": "diag_per_claim",
+      "verdict": "ok",
+      "reason": "Per-provider mean of diagnosis codes per claim; uses no label."
+    }
+  ],
+  "split_ok": true,
+  "split_comment": "A stratified provider-level split with an 80/20 development/test division, a test set opened once, and repeated CV inside development is sound. Each provider is in only one partition, so claims cannot cross splits. The CV folds must be applied to any label-derived features, such as the network fraud share, so they are built from training folds only. Given the 9.35% prevalence, PR-AUC and precision at about 100 providers should be reported. Time is not used in the split, which is acceptable for a provider ranking task."
+}

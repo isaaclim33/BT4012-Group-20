@@ -1,0 +1,4 @@
+retriever,recall_at_1,recall_at_3,mrr,queries
+bm25,0.85,1.0,0.925,20
+dense,0.8,0.85,0.8574999999999999,20
+hybrid,0.9,1.0,0.9333333333333332,20

@@ -1,0 +1,14 @@
+agent run started 2026-10-19T23:15:42
+checks passed: packages, data files, API key found (not printed)
+
+$ scripts/03_run_agents.py E11
+== E11
+  run 1: overview passed=True  pages passed 20/20  tokens {'input_tokens': 77013, 'output_tokens': 23207}
+  run 2: overview passed=True  pages passed 20/20  tokens {'input_tokens': 77013, 'output_tokens': 23275}
+  run 3: overview passed=True  pages passed 20/20  tokens {'input_tokens': 77013, 'output_tokens': 23238}
+== E11 done in 554s
+{'model': 'claude-sonnet-5-5', 'api_calls': 63, 'cache_hits': 0, 'input_tokens': 231039, 'output_tokens': 69720}
+
+step results: {'E11': True}
+
+Wrote agent_outputs_group20.zip: 287 files, scanned for the key, none found. Send this zip back.

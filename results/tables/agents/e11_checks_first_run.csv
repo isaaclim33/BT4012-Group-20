@@ -1,0 +1,65 @@
+part,run,reading_ease,words,numbers_stated,numbers_unsupported,unsupported_values,jargon_terms,says_proven_fraud,missing_caveats,actions_not_in_queue,too_long,passed,provider,wrong_provider,unknown_factors,unknown_patterns,factors_explained,factors_expected,mentions_double_check
+case-file summaries (input),0,43.7,1574,,,,,,,,,,,,,,,,
+overview,1,65.0,388,24.0,0.0,[],[],False,[],[],[],True,,,,,,,
+provider page,1,63.0,420,28.0,4.0,"[27.0, 31.0, 2008.0, 2009.0]",[],False,,,[],False,PRV56560,False,[],[],8.0,8.0,False
+provider page,1,63.7,457,31.0,0.0,[],[],False,,,[],True,PRV54742,False,[],[],8.0,8.0,False
+provider page,1,65.1,443,33.0,4.0,"[27.0, 31.0, 2008.0, 2009.0]",[],False,,,[],False,PRV54772,False,[],[],8.0,8.0,True
+provider page,1,65.3,419,34.0,0.0,[],[],False,,,[],True,PRV52985,False,[],[],8.0,8.0,False
+provider page,1,60.0,447,29.0,0.0,[],[],False,,,[],True,PRV52340,False,[],[],8.0,8.0,False
+provider page,1,64.3,419,37.0,0.0,[],[],False,,,[],True,PRV55435,False,[],[],8.0,8.0,True
+provider page,1,64.6,422,34.0,0.0,[],[],False,,,[],True,PRV51390,False,[],[],8.0,8.0,False
+provider page,1,58.1,425,22.0,0.0,[],[],False,,,[],True,PRV53797,False,[],[],8.0,8.0,True
+provider page,1,63.0,435,34.0,0.0,[],[],False,,,[],True,PRV52120,False,[],[],8.0,8.0,True
+provider page,1,61.0,446,38.0,2.0,"[2008.0, 2009.0]",[],False,,,[],False,PRV52590,False,[],[],8.0,8.0,True
+provider page,1,63.1,435,31.0,0.0,[],[],False,,,[],True,PRV51578,False,[],[],8.0,8.0,False
+provider page,1,63.2,418,30.0,0.0,[],[],False,,,[],True,PRV56416,False,[],[],8.0,8.0,True
+provider page,1,59.8,439,30.0,0.0,[],[],False,,,[],True,PRV53808,False,[],[],8.0,8.0,False
+provider page,1,64.8,421,31.0,0.0,[],[],False,,,[],True,PRV55215,False,[],[],8.0,8.0,False
+provider page,1,62.5,446,33.0,0.0,[],[],False,,,[],True,PRV57172,False,[],[],8.0,8.0,False
+provider page,1,62.2,430,33.0,0.0,[],[],False,,,[],True,PRV54258,False,[],[],8.0,8.0,True
+provider page,1,65.9,437,31.0,0.0,[],[],False,,,[],True,PRV55916,False,[],[],8.0,8.0,False
+provider page,1,63.7,427,39.0,4.0,"[27.0, 31.0, 2008.0, 2009.0]",[],False,,,[],False,PRV53385,False,[],[],8.0,8.0,False
+provider page,1,59.0,393,35.0,0.0,[],[],False,,,[],True,PRV55194,False,[],[],8.0,8.0,False
+provider page,1,67.6,410,41.0,0.0,[],[],False,,,[],True,PRV57548,False,[],[],8.0,8.0,False
+overview,2,65.2,366,26.0,0.0,[],[],False,[],[],[],True,,,,,,,
+provider page,2,69.5,471,35.0,4.0,"[27.0, 31.0, 2008.0, 2009.0]",[],False,,,[],False,PRV56560,False,[],[],8.0,8.0,False
+provider page,2,62.0,415,28.0,0.0,[],[],False,,,[],True,PRV54742,False,[],[],8.0,8.0,False
+provider page,2,65.8,419,32.0,0.0,[],[],False,,,[],True,PRV54772,False,[],[],8.0,8.0,True
+provider page,2,62.2,447,35.0,0.0,[],[],False,,,[],True,PRV52985,False,[],[],8.0,8.0,False
+provider page,2,65.2,451,32.0,0.0,[],[],False,,,[],True,PRV52340,False,[],[],8.0,8.0,False
+provider page,2,65.8,421,37.0,0.0,[],[],False,,,[],True,PRV55435,False,[],[],8.0,8.0,True
+provider page,2,60.8,420,30.0,0.0,[],[],False,,,[],True,PRV51390,False,[],[],8.0,8.0,False
+provider page,2,54.8,411,24.0,0.0,[],[],False,,,[],True,PRV53797,False,[],[],8.0,8.0,True
+provider page,2,62.5,474,34.0,0.0,[],[],False,,,[],True,PRV52120,False,[],[],8.0,8.0,True
+provider page,2,63.6,446,37.0,2.0,"[2008.0, 2009.0]",[],False,,,[],False,PRV52590,False,[],[],8.0,8.0,True
+provider page,2,62.4,428,32.0,0.0,[],[],False,,,[],True,PRV51578,False,[],[],8.0,8.0,False
+provider page,2,63.3,414,29.0,0.0,[],[],False,,,[],True,PRV56416,False,[],[],8.0,8.0,True
+provider page,2,58.5,426,31.0,0.0,[],[],False,,,[],True,PRV53808,False,[],[],8.0,8.0,False
+provider page,2,59.7,417,27.0,0.0,[],[],False,,,[],True,PRV55215,False,[],[],8.0,8.0,False
+provider page,2,64.5,493,32.0,0.0,[],[],False,,,[],True,PRV57172,False,[],[],8.0,8.0,False
+provider page,2,59.9,415,33.0,0.0,[],[],False,,,[],True,PRV54258,False,[],[],8.0,8.0,True
+provider page,2,60.3,428,37.0,0.0,[],[],False,,,[],True,PRV55916,False,[],[],8.0,8.0,False
+provider page,2,63.1,457,37.0,4.0,"[27.0, 31.0, 2008.0, 2009.0]",[],False,,,[],False,PRV53385,False,[],[],8.0,8.0,False
+provider page,2,59.5,400,34.0,0.0,[],[],False,,,[],True,PRV55194,False,[],[],8.0,8.0,False
+provider page,2,66.9,457,34.0,0.0,[],[],False,,,[],True,PRV57548,False,[],[],8.0,8.0,False
+overview,3,66.2,424,23.0,1.0,[1062.0],[],False,[],['monitor'],[],False,,,,,,,
+provider page,3,63.7,460,34.0,4.0,"[27.0, 31.0, 2008.0, 2009.0]",[],False,,,[],False,PRV56560,False,[],[],8.0,8.0,False
+provider page,3,65.8,461,31.0,0.0,[],[],False,,,[],True,PRV54742,False,[],[],8.0,8.0,False
+provider page,3,66.6,418,36.0,4.0,"[27.0, 31.0, 2008.0, 2009.0]",[],False,,,[],False,PRV54772,False,[],[],8.0,8.0,True
+provider page,3,62.0,410,37.0,0.0,[],[],False,,,[],True,PRV52985,False,[],[],8.0,8.0,False
+provider page,3,64.8,427,25.0,0.0,[],[],False,,,[],True,PRV52340,False,[],[],8.0,8.0,False
+provider page,3,64.3,421,33.0,0.0,[],[],False,,,[],True,PRV55435,False,[],[],8.0,8.0,True
+provider page,3,63.6,453,31.0,0.0,[],[],False,,,[],True,PRV51390,False,[],[],8.0,8.0,False
+provider page,3,56.6,438,23.0,0.0,[],[],False,,,[],True,PRV53797,False,[],[],8.0,8.0,True
+provider page,3,63.7,395,31.0,0.0,[],[],False,,,[],True,PRV52120,False,[],[],8.0,8.0,True
+provider page,3,58.7,421,39.0,2.0,"[2008.0, 2009.0]",[],False,,,[],False,PRV52590,False,[],[],8.0,8.0,True
+provider page,3,61.2,420,33.0,0.0,[],[],False,,,[],True,PRV51578,False,[],[],8.0,8.0,False
+provider page,3,64.6,428,33.0,0.0,[],[],False,,,[],True,PRV56416,False,[],[],8.0,8.0,True
+provider page,3,62.5,433,31.0,0.0,[],[],False,,,[],True,PRV53808,False,[],[],8.0,8.0,False
+provider page,3,60.9,419,27.0,0.0,[],[],False,,,[],True,PRV55215,False,[],[],8.0,8.0,False
+provider page,3,62.5,467,33.0,0.0,[],[],False,,,[],True,PRV57172,False,[],[],8.0,8.0,False
+provider page,3,66.8,419,32.0,0.0,[],[],False,,,[],True,PRV54258,False,[],[],8.0,8.0,True
+provider page,3,63.9,459,36.0,0.0,[],[],False,,,[],True,PRV55916,False,[],[],8.0,8.0,False
+provider page,3,61.0,422,35.0,0.0,[],[],False,,,[],True,PRV53385,False,[],[],8.0,8.0,False
+provider page,3,65.7,404,34.0,0.0,[],[],False,,,[],True,PRV55194,False,[],[],8.0,8.0,False
+provider page,3,64.6,431,40.0,0.0,[],[],False,,,[],True,PRV57548,False,[],[],8.0,8.0,False
