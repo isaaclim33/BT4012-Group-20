@@ -75,14 +75,14 @@ class LLMClient:
     def _key(self, payload: dict) -> str:
         return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()[:24]
 
-    def _raw(self, system: str, messages: list[dict], schema: dict) -> dict:
+    def _raw(self, system: str, messages: list[dict], schema: dict, effort: str | None = None) -> dict:
+        eff = effort or self.effort
         payload = {"model": self.model, "system": system, "messages": messages, "schema": schema,
-                   "effort": self.effort}
+                   "effort": eff}
         path = LLM_CACHE / f"{self._key(payload)}.json"
         if path.exists():
             cached = json.loads(path.read_text())
             self.cache_hits += 1
-            # token usage of the original call, so replayed runs report the same cost
             self.input_tokens += cached.get("usage", {}).get("input", 0)
             self.output_tokens += cached.get("usage", {}).get("output", 0)
             return cached["output"]
@@ -90,7 +90,7 @@ class LLMClient:
             raise LLMError(f"replay mode: no cached response {path.name}")
         resp = self._api().messages.create(
             model=self.model, max_tokens=self.max_tokens, system=system, messages=messages,
-            output_config={"effort": self.effort, "format": {"type": "json_schema", "schema": schema}},
+            output_config={"effort": eff, "format": {"type": "json_schema", "schema": schema}},
         )
         self.calls += 1
         self.input_tokens += resp.usage.input_tokens
@@ -108,12 +108,13 @@ class LLMClient:
         return output
 
     # ------------------------------------------------------------------ public
-    def structured(self, system: str, user: str, out: Type[BaseModel], tool_name: str = "result") -> BaseModel:
+    def structured(self, system: str, user: str, out: Type[BaseModel], tool_name: str = "result",
+                   effort: str | None = None) -> BaseModel:
         """tool_name is kept as a label for logging and tests; the API call uses output_config."""
         from anthropic import transform_schema
         schema = transform_schema(out)
         messages = [{"role": "user", "content": user}]
-        raw = self._raw(system, messages, schema)
+        raw = self._raw(system, messages, schema, effort=effort)
         try:
             return out.model_validate(raw)
         except ValidationError as err:
@@ -121,11 +122,79 @@ class LLMClient:
                 {"role": "assistant", "content": json.dumps(raw)},
                 {"role": "user", "content": f"Your output failed validation:\n{err}\nReturn a corrected result."},
             ]
-            raw = self._raw(system, messages, schema)
+            raw = self._raw(system, messages, schema, effort=effort)
             try:
                 return out.model_validate(raw)
             except ValidationError as err2:
                 raise LLMError(f"{out.__name__} failed validation twice: {err2}") from err2
+
+    def _raw_with_tools(self, system: str, messages: list[dict], tools: list[dict],
+                        effort: str | None = None) -> tuple[dict, str]:
+        """API call with tool definitions. Returns (response content blocks, stop_reason)."""
+        eff = effort or self.effort
+        payload = {"model": self.model, "system": system, "messages": messages,
+                   "tools": tools, "effort": eff}
+        path = LLM_CACHE / f"{self._key(payload)}.json"
+        if path.exists():
+            cached = json.loads(path.read_text())
+            self.cache_hits += 1
+            self.input_tokens += cached.get("usage", {}).get("input", 0)
+            self.output_tokens += cached.get("usage", {}).get("output", 0)
+            return cached["output"], cached.get("stop_reason", "end_turn")
+        if self.mode == "replay":
+            raise LLMError(f"replay mode: no cached response {path.name}")
+        resp = self._api().messages.create(
+            model=self.model, max_tokens=self.max_tokens, system=system,
+            messages=messages, tools=tools,
+            output_config={"effort": eff},
+        )
+        self.calls += 1
+        self.input_tokens += resp.usage.input_tokens
+        self.output_tokens += resp.usage.output_tokens
+        content = []
+        for b in resp.content:
+            if b.type == "text":
+                content.append({"type": "text", "text": b.text})
+            elif b.type == "tool_use":
+                content.append({"type": "tool_use", "id": b.id, "name": b.name, "input": b.input})
+            # thinking blocks are skipped — they don't affect the tool loop
+        path.write_text(json.dumps({"request": payload, "output": content,
+                                    "stop_reason": resp.stop_reason,
+                                    "usage": {"input": resp.usage.input_tokens,
+                                              "output": resp.usage.output_tokens}}, indent=1))
+        return content, resp.stop_reason
+
+    def react(self, system: str, user: str, tools: list[dict],
+              tool_executor, out: Type[BaseModel],
+              max_turns: int = 6, effort: str | None = None) -> tuple[BaseModel, list[dict]]:
+        """ReAct loop: the model calls tools until it's ready, then a final
+        structured() call produces the schema-validated output."""
+        messages = [{"role": "user", "content": user}]
+        trace = []
+        for turn in range(max_turns):
+            content, stop_reason = self._raw_with_tools(system, messages, tools, effort=effort)
+            tool_calls = [b for b in content if b["type"] == "tool_use"]
+            if not tool_calls:
+                break
+            messages.append({"role": "assistant", "content": content})
+            tool_results = []
+            for tc in tool_calls:
+                result = tool_executor(tc["name"], tc["input"])
+                trace.append({"tool": tc["name"], "input": tc["input"], "output": result})
+                tool_results.append({
+                    "type": "tool_result", "tool_use_id": tc["id"],
+                    "content": json.dumps(result),
+                })
+            messages.append({"role": "user", "content": tool_results})
+        else:
+            raise LLMError(f"react loop hit {max_turns} turns without finishing")
+        summary = "\n".join(
+            f"Tool {t['tool']}({json.dumps(t['input'])}): {json.dumps(t['output'])}"
+            for t in trace
+        )
+        final_user = (f"{user}\n\n<investigation>\n{summary}\n</investigation>\n"
+                      "Now write your final structured output using all the evidence above.")
+        return self.structured(system, final_user, out, effort=effort), trace
 
     def usage(self) -> dict:
         return {"model": self.model, "api_calls": self.calls, "cache_hits": self.cache_hits,

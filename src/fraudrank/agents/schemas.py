@@ -89,6 +89,9 @@ class ExperimentBatch(BaseModel):
 
 class CriticVerdict(BaseModel):
     chosen_run: int = Field(description="run id of the configuration to carry forward")
+    confidence: float = Field(ge=0.0, le=1.0,
+        description="0-1 confidence in chosen_run; 1.0 means clear-cut winner, "
+                    "0.5 means top configs too close to call or something looks off")
     stop: bool = Field(description="true if no further experiment is justified")
     concerns: list[str]
     next_experiments: list[ExperimentProposal] = Field(default_factory=list, max_length=3)

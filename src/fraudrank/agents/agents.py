@@ -56,17 +56,33 @@ def experiment_agent(llm: LLMClient, context: dict, run_tag: str = "") -> Experi
                           ExperimentBatch, "experiment_batch")
 
 
-def critic_agent(llm: LLMClient, context: dict, rounds_left: int, run_tag: str = "") -> CriticVerdict:
+def critic_agent(llm: LLMClient, context: dict, rounds_left: int, run_tag: str = "",
+                 tool_ctx: dict | None = None) -> CriticVerdict:
     system = ("You are a sceptical results reviewer. " + TASK +
-              " Pick the configuration to carry forward. Prefer a simpler model unless a more complex one "
-              "is better by more than one standard deviation of PR-AUC across folds. Flag any result "
-              f"that looks too good. You may request up to {rounds_left} more round(s) of experiments; "
-              "set stop=true if further search is unlikely to help. " + run_tag)
-    return llm.structured(system, f"<data>\n{json.dumps(context, indent=1)}\n</data>",
-                          CriticVerdict, "critic_verdict")
+              " Pick the configuration to carry forward. Use fold-level evidence to decide: "
+              "a config that wins a majority of folds is more trustworthy than one with a higher mean "
+              "but inconsistent fold performance. Between two configs with similar fold-win rates, "
+              "prefer the simpler model. Flag any result that looks too good. "
+              f"You may request up to {rounds_left} more round(s) of experiments; "
+              "set stop=true if further search is unlikely to help. "
+              "Rate your confidence in chosen_run (0-1): 1.0 means one config clearly wins most folds "
+              "and no reasonable reviewer would disagree; 0.5 means fold wins are split roughly evenly "
+              "or something looks off. " +
+              ("You can inspect the per-fold PR-AUC breakdown of any completed run. Compare fold-by-fold: "
+               "count how many folds each config wins to assess which is genuinely better vs lucky. "
+               if tool_ctx is not None else "") + run_tag)
+    user = f"<data>\n{json.dumps(context, indent=1)}\n</data>"
+    if tool_ctx is not None:
+        from .tools import CRITIC_TOOLS, execute_tool
+        executor = lambda name, params: execute_tool(name, params, tool_ctx)
+        result, _ = llm.react(system, user, CRITIC_TOOLS, executor, CriticVerdict,
+                              max_turns=3, effort="high")
+        return result
+    return llm.structured(system, user, CriticVerdict, "critic_verdict", effort="high")
 
 
-def case_file_agent(llm: LLMClient, evidence: dict, with_playbook: bool) -> CaseBrief:
+def case_file_agent(llm: LLMClient, evidence: dict, with_playbook: bool,
+                    tool_ctx: dict | None = None) -> CaseBrief:
     system = ("You are a fraud case analyst writing a brief for a Medicare investigator. " + TASK +
               " Use only the evidence provided: copy feature values, peer percentiles and SHAP values "
               "exactly as given. Choose 1-5 drivers from the evidence. " +
@@ -75,7 +91,14 @@ def case_file_agent(llm: LLMClient, evidence: dict, with_playbook: bool) -> Case
                "No playbook is available; leave typologies empty. ") +
               "The label means suspicion, not confirmed fraud: never state that fraud occurred. "
               f"{DATA_RULE}")
-    return llm.structured(system, f"<data>\n{json.dumps(evidence, indent=1)}\n</data>", CaseBrief, "case_brief")
+    user = f"<data>\n{json.dumps(evidence, indent=1)}\n</data>"
+    if tool_ctx is not None:
+        from .tools import CASE_FILE_TOOLS, execute_tool
+        executor = lambda name, params: execute_tool(name, params, tool_ctx)
+        result, _ = llm.react(system, user, CASE_FILE_TOOLS, executor, CaseBrief,
+                              max_turns=6, effort="high")
+        return result
+    return llm.structured(system, user, CaseBrief, "case_brief", effort="high")
 
 
 READER = ("program-integrity analysts at a Medicare review contractor. They decide which providers to open "
