@@ -39,7 +39,7 @@ FIX = {
         {"model": "logistic", "feature_set": "no_size", "imbalance": "class_weight", "params": {"C": 0.3},
          "rationale": "b"},
         {"model": "lightgbm", "feature_set": "no_size+agent", "imbalance": "none", "params": {}, "rationale": "c"}]},
-    "critic_verdict": {"chosen_run": 1, "stop": True, "concerns": ["none"], "next_experiments": []},
+    "critic_verdict": {"chosen_run": 1, "confidence": 0.9, "stop": True, "concerns": ["none"], "next_experiments": []},
 }
 
 
@@ -80,7 +80,7 @@ def fake_page(ev):
             "cautions": ["Rehearsal: a high rank is not proof.", f"Rehearsal: data covers {ev['claims_period']}."]}
 
 
-def fake_raw(self, system, messages, schema):
+def fake_raw(self, system, messages, schema, effort=None):
     tool_name = TITLES[schema["title"]]
     if tool_name in ("dashboard_overview", "provider_page"):
         import json
@@ -113,6 +113,16 @@ for cfg in batch.proposals:
     print(f"executed {cfg.model}/{cfg.feature_set}: PR-AUC {res.pr_auc.mean():.3f}")
 specs, truth = leak_bench.benchmark()
 assert len(specs) == 15 and sum(truth.values()) == 5
+
+# ------------------------------------------------------------------ tool tests
+from fraudrank.agents.tools import get_fold_detail
+
+fold_details = {1: [0.72, 0.73, 0.71, 0.74, 0.72], 2: [0.68, 0.75, 0.66, 0.78, 0.69]}
+detail = get_fold_detail({"run_id": 1}, {"fold_details": fold_details})
+assert detail["n_folds"] == 5 and "error" not in detail and len(detail["pr_auc_per_fold"]) == 5
+detail_missing = get_fold_detail({"run_id": 99}, {"fold_details": fold_details})
+assert "error" in detail_missing
+print("fold detail tool: ok")
 
 cache = ROOT / "results" / "cache"
 if (cache / "shap_test_lightgbm.pkl").exists():

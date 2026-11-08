@@ -28,6 +28,7 @@ from fraudrank.agents import agents as A  # noqa: E402
 from fraudrank.agents import executor as X  # noqa: E402
 from fraudrank.agents import leak_bench  # noqa: E402
 from fraudrank.agents.case_file import build_evidence, check_brief  # noqa: E402
+from fraudrank.agents.context import critic_context, experiment_context  # noqa: E402
 from fraudrank.agents.llm import LLMClient, LLMError  # noqa: E402
 from fraudrank.agents.rag import HybridRetriever, evaluate_retrieval  # noqa: E402
 from fraudrank.config import CACHE_DIR, RAW_DIR, TABLES_DIR, TRAIN_FILES  # noqa: E402
@@ -145,7 +146,7 @@ def agent_loop(run: int, allow_agent_features: bool = True, tag: str = "") -> di
         base = df.join(feats)
         feat_log = {"proposal": prop.model_dump(), "review": review.model_dump(),
                     "accepted": agent_cols, "rejected": sorted(rejected), "all_proposed": list(feats.columns)}
-    history, runs = [], {}
+    history, runs, fold_details = [], {}, {}
 
     def execute(cfgs):
         for cfg in cfgs:
@@ -154,27 +155,69 @@ def agent_loop(run: int, allow_agent_features: bool = True, tag: str = "") -> di
             rid = len(runs) + 1
             res = _cv(cfg, X.feature_set(cfg, FAM, agent_cols), base, REPEAT0)
             runs[rid] = cfg
+            fold_details[rid] = list(res.pr_auc)
             history.append({"run_id": rid, **cfg.model_dump(exclude={"rationale"}),
                             "pr_auc_mean": round(res.pr_auc.mean(), 4), "pr_auc_sd": round(res.pr_auc.std(), 4),
                             "prec_k50_mean": round(res.prec_k50.mean(), 4), "roc_auc_mean": round(res.roc_auc.mean(), 4)})
 
-    ctx = {"feature_sets": {"all": len(sum(FAM.values(), [])), "no_size": len(sum(FAM.values(), [])) - len(FAM["size"]),
-                            "agent_features": agent_cols if allow_agent_features else "not available"},
-           "families": {k: len(v) for k, v in FAM.items()}, "history": history}
-    execute(A.experiment_agent(llm, ctx, run_tag).proposals)
+    PREVIEW_FOLDS = SPLITS["folds"][:3]
+    preview_log = []
+
+    def preview_gate(proposals):
+        previews = []
+        for cfg in proposals:
+            c = cfg
+            if not allow_agent_features and c.feature_set.endswith("+agent"):
+                c = c.model_copy(update={"feature_set": c.feature_set.replace("+agent", "")})
+            cols = X.feature_set(c, FAM, agent_cols)
+            res = _cv(c, cols, base, PREVIEW_FOLDS)
+            previews.append({"cfg": cfg, "mean": float(res.pr_auc.mean()), "sd": float(res.pr_auc.std())})
+        if history:
+            floor = max(h["pr_auc_mean"] for h in history)
+        else:
+            floor = max(p["mean"] for p in previews)
+        survived = [p for p in previews if p["mean"] + p["sd"] >= floor]
+        dropped = [p for p in previews if p["mean"] + p["sd"] < floor]
+        if not survived:
+            survived = [max(previews, key=lambda p: p["mean"])]
+            dropped = [p for p in previews if p not in survived]
+        for p in dropped:
+            print(f"    preview gate dropped {p['cfg'].model}/{p['cfg'].feature_set}/{p['cfg'].imbalance}: "
+                  f"PR-AUC {p['mean']:.3f} ± {p['sd']:.3f} (floor {floor:.3f})")
+        for p in survived:
+            print(f"    preview gate kept {p['cfg'].model}/{p['cfg'].feature_set}/{p['cfg'].imbalance}: "
+                  f"PR-AUC {p['mean']:.3f} ± {p['sd']:.3f}")
+        preview_log.append({"floor": round(floor, 4),
+                            "previews": [{"model": p["cfg"].model, "feature_set": p["cfg"].feature_set,
+                                          "imbalance": p["cfg"].imbalance, "mean": round(p["mean"], 4),
+                                          "sd": round(p["sd"], 4), "kept": p in survived} for p in previews]})
+        return [p["cfg"] for p in survived]
+
+    ctx = experiment_context(FAM, agent_cols if allow_agent_features else [], history)
+    execute(preview_gate(A.experiment_agent(llm, ctx, run_tag).proposals))
     first_round_best = max(history, key=lambda h: h["pr_auc_mean"])["run_id"]
+    CONFIDENCE_THRESHOLD = 0.7
     verdicts = []
     for rnd in range(args.max_rounds):
-        v = A.critic_agent(llm, {**ctx, "history": history}, args.max_rounds - rnd - 1, run_tag)
+        critic_tool_ctx = {"fold_details": fold_details}
+        v = A.critic_agent(llm, critic_context(history, args.max_rounds - rnd - 1),
+                           args.max_rounds - rnd - 1, run_tag, tool_ctx=critic_tool_ctx)
         verdicts.append(v.model_dump())
         if v.stop or not v.next_experiments or rnd == args.max_rounds - 1:
             break
-        execute(v.next_experiments)
+        execute(preview_gate(v.next_experiments))
     chosen = verdicts[-1]["chosen_run"]
-    if chosen not in runs:                      # an invalid id is recorded, then the best CV run is used
-        chosen = max(history, key=lambda h: h["pr_auc_mean"])["run_id"]
+    confidence = verdicts[-1].get("confidence", 1.0)
+    best_cv = max(history, key=lambda h: h["pr_auc_mean"])["run_id"]
+    if chosen not in runs:
+        chosen = best_cv
+    elif confidence < CONFIDENCE_THRESHOLD:
+        print(f"  critic confidence {confidence:.2f} < {CONFIDENCE_THRESHOLD}: "
+              f"overriding run {chosen} → {best_cv}")
+        chosen = best_cv
     return {"runs": runs, "history": history, "verdicts": verdicts, "chosen": chosen,
-            "first_round_best": first_round_best, "features": feat_log, "agent_cols": agent_cols, "base": base}
+            "first_round_best": first_round_best, "features": feat_log, "agent_cols": agent_cols,
+            "base": base, "preview_log": preview_log}
 
 
 def E4():
@@ -188,13 +231,23 @@ def E4():
         res = _cv(cfg, cols, out["base"], None)
         d = res.pr_auc.to_numpy() - fixed.pr_auc.to_numpy()
         rows.append(res.assign(pipeline=label, run=run))
+        n_folds = len(res)
+        ci = lambda col: 1.96 * col.std() / np.sqrt(n_folds)
         summary.append({"pipeline": label, "run": run, "config": cfg.model_dump(exclude={"rationale"}),
-                        "n_features": len(cols), "pr_auc_mean": res.pr_auc.mean(), "pr_auc_sd": res.pr_auc.std(),
-                        "prec_k100_mean": res.prec_k100.mean(), "diff_vs_fixed_mean": d.mean(),
+                        "n_features": len(cols),
+                        "pr_auc_mean": res.pr_auc.mean(), "pr_auc_sd": res.pr_auc.std(),
+                        "pr_auc_ci_lo": res.pr_auc.mean() - ci(res.pr_auc),
+                        "pr_auc_ci_hi": res.pr_auc.mean() + ci(res.pr_auc),
+                        "prec_k100_mean": res.prec_k100.mean(), "prec_k100_sd": res.prec_k100.std(),
+                        "rec_k100_mean": res.rec_k100.mean(), "rec_k100_sd": res.rec_k100.std(),
+                        "prec_k50_mean": res.prec_k50.mean(), "rec_k50_mean": res.rec_k50.mean(),
+                        "diff_vs_fixed_mean": d.mean(),
                         "diff_vs_fixed_sd": d.std(), "folds_better": int((d > 0).sum()),
                         "loop_rounds": len(out["verdicts"]), "configs_tried": len(out["runs"])})
-        print(f"  {label:32s} run {run}: PR-AUC {res.pr_auc.mean():.3f} ± {res.pr_auc.std():.3f}  "
-              f"diff vs fixed {d.mean():+.3f} ({int((d > 0).sum())}/25 folds better)")
+        print(f"  {label:32s} run {run}: PR-AUC {res.pr_auc.mean():.3f} "
+              f"[{res.pr_auc.mean() - ci(res.pr_auc):.3f}, {res.pr_auc.mean() + ci(res.pr_auc):.3f}]  "
+              f"Prec@100 {res.prec_k100.mean():.3f}  Rec@100 {res.rec_k100.mean():.3f}  "
+              f"diff {d.mean():+.3f} ({int((d > 0).sum())}/25 folds)")
 
     failures = []
     for r in range(1, args.runs + 1):
@@ -219,8 +272,16 @@ def E4():
     except LLMError as err:
         failures.append({"run": "ablation: no feature agent", "error": str(err)[:300]})
     save("e4_failures.json", failures)
-    fixed_row = {"pipeline": "fixed pipeline (E1 LightGBM)", "run": 0, "pr_auc_mean": fixed.pr_auc.mean(),
-                 "pr_auc_sd": fixed.pr_auc.std(), "prec_k100_mean": fixed.prec_k100.mean(), "diff_vs_fixed_mean": 0}
+    n_folds = len(fixed)
+    ci = lambda col: 1.96 * col.std() / np.sqrt(n_folds)
+    fixed_row = {"pipeline": "fixed pipeline (E1 LightGBM)", "run": 0,
+                 "pr_auc_mean": fixed.pr_auc.mean(), "pr_auc_sd": fixed.pr_auc.std(),
+                 "pr_auc_ci_lo": fixed.pr_auc.mean() - ci(fixed.pr_auc),
+                 "pr_auc_ci_hi": fixed.pr_auc.mean() + ci(fixed.pr_auc),
+                 "prec_k100_mean": fixed.prec_k100.mean(), "prec_k100_sd": fixed.prec_k100.std(),
+                 "rec_k100_mean": fixed.rec_k100.mean(), "rec_k100_sd": fixed.rec_k100.std(),
+                 "prec_k50_mean": fixed.prec_k50.mean(), "rec_k50_mean": fixed.rec_k50.mean(),
+                 "diff_vs_fixed_mean": 0}
     save("e4_summary.csv", pd.DataFrame([fixed_row] + summary))
     save("e4_folds.csv", pd.concat(rows))
 
@@ -231,13 +292,15 @@ def E8():
     shap = pd.read_pickle(CACHE_DIR / "shap_test_lightgbm.pkl")
     Xte = pd.read_pickle(CACHE_DIR / "X_test_lightgbm.pkl")
     retr = HybridRetriever()
+    tool_ctx = {"df": df, "dev": SPLITS["dev"], "retriever": retr, "shap": shap}
     rows, briefs = [], []
     for cond, use_rag in [("with retrieval", True), ("without retrieval", False)]:
         for rank, (prov, sc) in enumerate(scores.head(args.top_k).items(), start=1):
             ev = build_evidence(prov, rank, sc, Xte, shap, df, SPLITS["dev"], retr if use_rag else None)
             t0 = (llm.input_tokens, llm.output_tokens)
             try:
-                brief = A.case_file_agent(llm, ev, use_rag)
+                brief = A.case_file_agent(llm, ev, use_rag,
+                                          tool_ctx=tool_ctx if use_rag else None)
                 chk = check_brief(brief, ev)
                 chk.update(schema_valid=True)
                 briefs.append({"condition": cond, "evidence": ev, "brief": brief.model_dump()})

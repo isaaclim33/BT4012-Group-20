@@ -2,29 +2,9 @@
   "history": [
     {
       "run_id": 1,
-      "model": "logistic",
-      "feature_set": "no_size",
-      "imbalance": "class_weight",
-      "params": {
-        "C": 0.1,
-        "min_samples_leaf": null,
-        "max_features": null,
-        "num_leaves": null,
-        "learning_rate": null,
-        "n_estimators": null,
-        "min_child_samples": null,
-        "colsample_bytree": null
-      },
-      "pr_auc_mean": 0.6809,
-      "pr_auc_sd": 0.0595,
-      "prec_k50_mean": 0.74,
-      "roc_auc_mean": 0.9407
-    },
-    {
-      "run_id": 2,
       "model": "random_forest",
       "feature_set": "all",
-      "imbalance": "none",
+      "imbalance": "class_weight",
       "params": {
         "C": null,
         "min_samples_leaf": 5,
@@ -35,13 +15,13 @@
         "min_child_samples": null,
         "colsample_bytree": null
       },
-      "pr_auc_mean": 0.7351,
-      "pr_auc_sd": 0.0596,
-      "prec_k50_mean": 0.776,
-      "roc_auc_mean": 0.942
+      "pr_auc_mean": 0.7047,
+      "pr_auc_sd": 0.065,
+      "prec_k50_mean": 0.748,
+      "roc_auc_mean": 0.9407
     },
     {
-      "run_id": 3,
+      "run_id": 2,
       "model": "lightgbm",
       "feature_set": "all+agent",
       "imbalance": "none",
@@ -51,17 +31,17 @@
         "max_features": null,
         "num_leaves": 15,
         "learning_rate": 0.03,
-        "n_estimators": 400,
+        "n_estimators": 500,
         "min_child_samples": 30,
         "colsample_bytree": 0.6
       },
-      "pr_auc_mean": 0.7362,
-      "pr_auc_sd": 0.0573,
+      "pr_auc_mean": 0.7328,
+      "pr_auc_sd": 0.056,
       "prec_k50_mean": 0.776,
-      "roc_auc_mean": 0.9456
+      "roc_auc_mean": 0.9454
     },
     {
-      "run_id": 4,
+      "run_id": 3,
       "model": "lightgbm",
       "feature_set": "no_size+agent",
       "imbalance": "class_weight",
@@ -70,36 +50,174 @@
         "min_samples_leaf": null,
         "max_features": null,
         "num_leaves": 8,
-        "learning_rate": 0.02,
-        "n_estimators": 600,
+        "learning_rate": 0.05,
+        "n_estimators": 300,
         "min_child_samples": 40,
         "colsample_bytree": 0.5
       },
-      "pr_auc_mean": 0.7116,
-      "pr_auc_sd": 0.0719,
+      "pr_auc_mean": 0.7009,
+      "pr_auc_sd": 0.0791,
+      "prec_k50_mean": 0.76,
+      "roc_auc_mean": 0.9445
+    },
+    {
+      "run_id": 4,
+      "model": "lightgbm",
+      "feature_set": "all",
+      "imbalance": "none",
+      "params": {
+        "C": null,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": 15,
+        "learning_rate": 0.03,
+        "n_estimators": 500,
+        "min_child_samples": 30,
+        "colsample_bytree": 0.6
+      },
+      "pr_auc_mean": 0.7342,
+      "pr_auc_sd": 0.0571,
       "prec_k50_mean": 0.788,
-      "roc_auc_mean": 0.9446
+      "roc_auc_mean": 0.9434
+    },
+    {
+      "run_id": 5,
+      "model": "lightgbm",
+      "feature_set": "no_size",
+      "imbalance": "none",
+      "params": {
+        "C": null,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": 15,
+        "learning_rate": 0.03,
+        "n_estimators": 500,
+        "min_child_samples": 30,
+        "colsample_bytree": 0.6
+      },
+      "pr_auc_mean": 0.713,
+      "pr_auc_sd": 0.0691,
+      "prec_k50_mean": 0.784,
+      "roc_auc_mean": 0.9416
     }
   ],
   "verdicts": [
     {
       "chosen_run": 2,
+      "confidence": 0.8,
+      "stop": false,
+      "concerns": [
+        "Run 2 wins 4 of 5 folds against run 1 and 4 of 5 against run 3. Run 3 beats it only on fold 4 (0.79 vs 0.7765), and the margin is small.",
+        "The mean gain over the random forest is about 0.028 PR-AUC, which is only about half of the fold SD (0.056-0.065). The folds are correlated, so the lead is consistent but modest.",
+        "Only 3 configs have been tried, and no simple baseline such as logistic regression has been run. It is unclear whether the gap comes from the model or the feature set.",
+        "The PotentialFraud labels have an undocumented origin. They may be rule-based or derived from the same claim features, so high PR-AUC (about 0.73) and ROC-AUC (about 0.945) may reflect label leakage or circularity rather than real fraud detection.",
+        "The 'agent' feature set is only partly explained, and it could encode label-related artifacts. Run 2 uses all+agent while run 1 uses all, so model and features are confounded.",
+        "Fold 3 is weak for every config (about 0.60-0.65), which suggests a temporal or distribution shift across the 2009 claim window. Check whether the folds are time-aware.",
+        "Precision@50 of about 0.78 is the closest proxy for the roughly 100-provider audit queue. It was measured at k=50, not k=100, so queue-level performance is unverified.",
+        "Run 3 used class_weight with a smaller model and did worse on average. Imbalance handling does not appear to help here, but the confound with feature_set remains."
+      ],
+      "next_experiments": [
+        {
+          "model": "lightgbm",
+          "feature_set": "all",
+          "imbalance": "none",
+          "params": {
+            "C": null,
+            "min_samples_leaf": null,
+            "max_features": null,
+            "num_leaves": 15,
+            "learning_rate": 0.03,
+            "n_estimators": 500,
+            "min_child_samples": 30,
+            "colsample_bytree": 0.6
+          },
+          "rationale": "Ablate the agent features while keeping run 2's hyperparameters, to see whether the gain comes from the agent features or from the model. This also checks for leakage."
+        },
+        {
+          "model": "logistic",
+          "feature_set": "all",
+          "imbalance": "class_weight",
+          "params": {
+            "C": 1.0,
+            "min_samples_leaf": null,
+            "max_features": null,
+            "num_leaves": null,
+            "learning_rate": null,
+            "n_estimators": null,
+            "min_child_samples": null,
+            "colsample_bytree": null
+          },
+          "rationale": "Add a simple, interpretable baseline. If it comes close to LightGBM on fold-level PR-AUC, the simpler model should be preferred."
+        }
+      ]
+    },
+    {
+      "chosen_run": 4,
+      "confidence": 0.6,
+      "stop": false,
+      "concerns": [
+        "Runs 4 and 2 are near-identical (mean PR-AUC 0.7342 vs 0.7328). Run 4 wins 3 of 5 folds (2, 3, 4) and run 2 wins 2 (1, 5), mostly by margins under 0.01. This is within noise, so the win is weak. I picked run 4 because it has the same hyperparameters with a simpler feature set (no agent features) and the higher prec@50.",
+        "Run 4 beats run 1 (random forest) and run 3 (lightgbm, no_size+agent, class_weight) in all 5 folds. The lightgbm-with-no-imbalance-handling family looks genuinely better than those two.",
+        "ROC-AUC of about 0.94 and PR-AUC of about 0.73 against a 9.35% base rate are strong. The PotentialFraud label has an undocumented origin and may be partly derived from the same claim volume or size signals used as features, which would be leakage or label circularity. The result may reflect reproducing an existing flagging rule rather than finding fraud.",
+        "The feature_set 'all' includes size features. If they proxy for the label process, performance would be inflated. The no_size variant has only been tested with class_weight and agent features, so size dependence is not isolated cleanly.",
+        "Fold 3 is consistently the weakest (about 0.60-0.65 for every config), which suggests a distribution or time-window shift between folds. The claims window is under 13 months, so temporal generalisation is unverified.",
+        "Prec@50 is about 0.79, but the audit queue holds about 100 providers. Precision at k=100 has not been reported, so queue performance is uncertain.",
+        "Only 4 configs were tried, with no logistic baseline, so there is no evidence on whether the gain from boosting is substantial or the signal is mostly simple."
+      ],
+      "next_experiments": [
+        {
+          "model": "lightgbm",
+          "feature_set": "no_size",
+          "imbalance": "none",
+          "params": {
+            "C": null,
+            "min_samples_leaf": null,
+            "max_features": null,
+            "num_leaves": 15,
+            "learning_rate": 0.03,
+            "n_estimators": 500,
+            "min_child_samples": 30,
+            "colsample_bytree": 0.6
+          },
+          "rationale": "Same params as run 4 with size features removed, to test whether performance depends on size or volume features that may proxy for how the label was created. A small drop would increase trust in the ranking."
+        },
+        {
+          "model": "logistic",
+          "feature_set": "all",
+          "imbalance": "class_weight",
+          "params": {
+            "C": 0.1,
+            "min_samples_leaf": null,
+            "max_features": null,
+            "num_leaves": null,
+            "learning_rate": null,
+            "n_estimators": null,
+            "min_child_samples": null,
+            "colsample_bytree": null
+          },
+          "rationale": "A simple regularised linear baseline. If it comes close to lightgbm, the simpler model should be preferred and the signal is likely simple."
+        }
+      ]
+    },
+    {
+      "chosen_run": 4,
+      "confidence": 0.72,
       "stop": true,
       "concerns": [
-        "Run 3 (LightGBM, all+agent) beats run 2 (random forest, all) by only 0.0011 PR-AUC, far below one fold SD (~0.06), so the simpler model is preferred. Run 2 vs run 1 (logistic) is +0.054, just under one SD (0.0596), so strictly the logistic model is the simplest choice that is not clearly beaten. Random forest is carried forward as a pragmatic compromise, but the margin is not significant.",
-        "All differences between runs are within fold noise. With only about 506 positives and SD around 0.06, the ranking of configurations is unreliable and more search is unlikely to help.",
-        "ROC-AUC of about 0.94 and PR-AUC of 0.68-0.74 are high for a label of undocumented origin. The label may be derived from, or correlated with, the same claim-level features (leakage or circularity), so the model may be reproducing a rule rather than detecting fraud.",
-        "Feature set 'all' includes 13 size features. Provider size can proxy for claim volume and may inflate performance. The no_size logistic result is similar, which suggests size is not the sole driver, but size dependence should be checked.",
-        "Agent features add nothing (run 3 is about equal to run 2, run 4 is lower), so they add complexity without clear value.",
-        "Precision@50 of 0.74-0.79 is on a queue of 50, while the audit queue is about 100. Precision@100 was not reported, and the fold-level variation is unknown.",
-        "The claim window is under a year, so no temporal holdout is possible. Cross-validation may be optimistic if providers share patterns or agents across folds.",
-        "The positive label is suspicion, not confirmed fraud, so the metrics measure agreement with the label, not audit yield."
+        "Run 4 (LightGBM, all features, no imbalance handling) beats runs 1, 3 and 5 on all 5 folds. Against run 2 it wins 3 of 5 folds (2, 3, 4), and the mean gap of 0.0014 PR-AUC is far inside the fold SD of about 0.057. Runs 2 and 4 are effectively tied on performance.",
+        "Run 4 is slightly simpler than run 2, because it does not use the agent features. That, plus the 3/5 fold wins, justifies picking it, but the choice is not clear-cut.",
+        "Fold-to-fold variance is large. PR-AUC ranges from about 0.65 to 0.79 across folds in every config, and fold 3 is consistently the weakest. The ranking is more stable than the absolute level.",
+        "ROC-AUC around 0.94 and PR-AUC around 0.73 at a 9.35% base rate is strong. This may reflect leakage, or labels that are partly a deterministic function of the features, such as provider size or volume. Dropping size features (run 5) costs about 0.02 PR-AUC, so size-related signal is carrying real weight. A provider's size could mean it is simply more likely to be flagged, not that it is actually fraudulent.",
+        "The PotentialFraud label has an undocumented origin. High scores may reproduce whatever flagging process generated the labels, not confirmed fraud, so the audit queue should be treated as a suspicion ranking.",
+        "The claims window runs from late Nov 2008 to Dec 2009, and no temporal holdout is evidenced. If the CV folds are random, any time-based drift or leakage across providers is not tested.",
+        "Precision@50 is only 0.75-0.79, and the audit queue holds about 100 providers. Precision at k=100 was not reported, so performance at the actual operating point is unverified.",
+        "Only 5 configs were tried, with no tuning of hyperparameters or comparison with logistic regression. No further rounds are available, so the conclusion is limited to what was tested."
       ],
       "next_experiments": []
     }
   ],
-  "chosen": 2,
-  "first_round_best": 3,
+  "chosen": 4,
+  "first_round_best": 2,
   "features": {
     "proposal": {
       "claim_aggregates": [
@@ -413,27 +531,92 @@
     "agent_admitdx_per_ip",
     "agent_states_per_bene"
   ],
+  "preview_log": [
+    {
+      "floor": 0.7169,
+      "previews": [
+        {
+          "model": "logistic",
+          "feature_set": "no_size",
+          "imbalance": "class_weight",
+          "mean": 0.6477,
+          "sd": 0.0528,
+          "kept": false
+        },
+        {
+          "model": "random_forest",
+          "feature_set": "all",
+          "imbalance": "class_weight",
+          "mean": 0.6818,
+          "sd": 0.0763,
+          "kept": true
+        },
+        {
+          "model": "lightgbm",
+          "feature_set": "all+agent",
+          "imbalance": "none",
+          "mean": 0.7169,
+          "sd": 0.0703,
+          "kept": true
+        },
+        {
+          "model": "lightgbm",
+          "feature_set": "no_size+agent",
+          "imbalance": "class_weight",
+          "mean": 0.6799,
+          "sd": 0.0869,
+          "kept": true
+        }
+      ]
+    },
+    {
+      "floor": 0.7328,
+      "previews": [
+        {
+          "model": "lightgbm",
+          "feature_set": "all",
+          "imbalance": "none",
+          "mean": 0.7168,
+          "sd": 0.0669,
+          "kept": true
+        },
+        {
+          "model": "logistic",
+          "feature_set": "all",
+          "imbalance": "class_weight",
+          "mean": 0.6601,
+          "sd": 0.0296,
+          "kept": false
+        }
+      ]
+    },
+    {
+      "floor": 0.7342,
+      "previews": [
+        {
+          "model": "lightgbm",
+          "feature_set": "no_size",
+          "imbalance": "none",
+          "mean": 0.6956,
+          "sd": 0.0831,
+          "kept": true
+        },
+        {
+          "model": "logistic",
+          "feature_set": "all",
+          "imbalance": "class_weight",
+          "mean": 0.6586,
+          "sd": 0.0451,
+          "kept": false
+        }
+      ]
+    }
+  ],
   "runs": {
     "1": {
-      "model": "logistic",
-      "feature_set": "no_size",
-      "imbalance": "class_weight",
-      "params": {
-        "C": 0.1,
-        "min_samples_leaf": null,
-        "max_features": null,
-        "num_leaves": null,
-        "learning_rate": null,
-        "n_estimators": null,
-        "min_child_samples": null,
-        "colsample_bytree": null
-      },
-      "rationale": "Regularized linear baseline without size features to check whether signal is more than provider volume. Class weighting suits the 9% positive rate and gives a stable reference for PR-AUC."
-    },
-    "2": {
       "model": "random_forest",
       "feature_set": "all",
-      "imbalance": "none",
+      "imbalance": "class_weight",
       "params": {
         "C": null,
         "min_samples_leaf": 5,
@@ -444,9 +627,9 @@
         "min_child_samples": null,
         "colsample_bytree": null
       },
-      "rationale": "Bagged trees capture nonlinearity with little tuning. Leaf size 5 keeps probabilities smooth for ranking at the top of the queue. No resampling keeps the score calibrated."
+      "rationale": "Robust nonlinear ensemble using all 63 features with class weighting and moderate leaf size to limit overfitting on the 9% positive rate. Tests the benefit of size features and interactions."
     },
-    "3": {
+    "2": {
       "model": "lightgbm",
       "feature_set": "all+agent",
       "imbalance": "none",
@@ -456,13 +639,13 @@
         "max_features": null,
         "num_leaves": 15,
         "learning_rate": 0.03,
-        "n_estimators": 400,
+        "n_estimators": 500,
         "min_child_samples": 30,
         "colsample_bytree": 0.6
       },
-      "rationale": "Moderate-capacity boosting with the agent features added to test whether they add signal. Low learning rate, large child samples and column subsampling limit overfitting on about 500 positives."
+      "rationale": "Gradient boosting with modest capacity and strong regularization, no resampling so probabilities stay calibrated for PR-AUC ranking. Adds agent features to test whether they add signal."
     },
-    "4": {
+    "3": {
       "model": "lightgbm",
       "feature_set": "no_size+agent",
       "imbalance": "class_weight",
@@ -471,12 +654,44 @@
         "min_samples_leaf": null,
         "max_features": null,
         "num_leaves": 8,
-        "learning_rate": 0.02,
-        "n_estimators": 600,
+        "learning_rate": 0.05,
+        "n_estimators": 300,
         "min_child_samples": 40,
         "colsample_bytree": 0.5
       },
-      "rationale": "A smaller, more regularized boosted model without size features but with agent features, plus class weighting. It tests robustness when volume is not available as a shortcut for the label."
+      "rationale": "Lower-capacity boosting that excludes size features and uses agent features plus class weighting. Probes whether behavioral signal alone gives a robust ranking, less tied to provider volume."
+    },
+    "4": {
+      "model": "lightgbm",
+      "feature_set": "all",
+      "imbalance": "none",
+      "params": {
+        "C": null,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": 15,
+        "learning_rate": 0.03,
+        "n_estimators": 500,
+        "min_child_samples": 30,
+        "colsample_bytree": 0.6
+      },
+      "rationale": "Ablate the agent features while keeping run 2's hyperparameters, to see whether the gain comes from the agent features or from the model. This also checks for leakage."
+    },
+    "5": {
+      "model": "lightgbm",
+      "feature_set": "no_size",
+      "imbalance": "none",
+      "params": {
+        "C": null,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": 15,
+        "learning_rate": 0.03,
+        "n_estimators": 500,
+        "min_child_samples": 30,
+        "colsample_bytree": 0.6
+      },
+      "rationale": "Same params as run 4 with size features removed, to test whether performance depends on size or volume features that may proxy for how the label was created. A small drop would increase trust in the ranking."
     }
   }
 }
