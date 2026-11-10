@@ -1,0 +1,620 @@
+{
+  "history": [
+    {
+      "run_id": 1,
+      "model": "random_forest",
+      "feature_set": "no_size",
+      "imbalance": "smote",
+      "params": {
+        "C": null,
+        "min_samples_leaf": 10,
+        "max_features": 0.5,
+        "num_leaves": null,
+        "learning_rate": null,
+        "n_estimators": 200,
+        "min_child_samples": null,
+        "colsample_bytree": null
+      },
+      "n_features": 50,
+      "pr_auc_mean": 0.6541,
+      "pr_auc_sd": 0.084,
+      "prec_k50_mean": 0.704,
+      "roc_auc_mean": 0.9384
+    },
+    {
+      "run_id": 2,
+      "model": "lightgbm",
+      "feature_set": "all+agent",
+      "imbalance": "class_weight",
+      "params": {
+        "C": null,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": 31,
+        "learning_rate": 0.05,
+        "n_estimators": 500,
+        "min_child_samples": 20,
+        "colsample_bytree": 0.8
+      },
+      "n_features": 83,
+      "pr_auc_mean": 0.7287,
+      "pr_auc_sd": 0.0594,
+      "prec_k50_mean": 0.784,
+      "roc_auc_mean": 0.9414
+    },
+    {
+      "run_id": 3,
+      "model": "lightgbm",
+      "feature_set": "all",
+      "imbalance": "class_weight",
+      "params": {
+        "C": null,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": 31,
+        "learning_rate": 0.05,
+        "n_estimators": 500,
+        "min_child_samples": 20,
+        "colsample_bytree": 0.8
+      },
+      "n_features": 63,
+      "pr_auc_mean": 0.7344,
+      "pr_auc_sd": 0.0611,
+      "prec_k50_mean": 0.784,
+      "roc_auc_mean": 0.9411
+    },
+    {
+      "run_id": 4,
+      "model": "lightgbm",
+      "feature_set": "no_size",
+      "imbalance": "class_weight",
+      "params": {
+        "C": null,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": 31,
+        "learning_rate": 0.05,
+        "n_estimators": 500,
+        "min_child_samples": 20,
+        "colsample_bytree": 0.8
+      },
+      "n_features": 50,
+      "pr_auc_mean": 0.7135,
+      "pr_auc_sd": 0.0732,
+      "prec_k50_mean": 0.76,
+      "roc_auc_mean": 0.9403
+    }
+  ],
+  "verdicts": [
+    {
+      "stop": false,
+      "concerns": [
+        "The inclusion of agent features in the all+agent feature set raises potential data leakage concerns regarding provider-agent associations.",
+        "The high PR-AUC of 0.7287 on an imbalanced dataset with a 9.35% positive rate requires verification to ensure generalizability without artifact reliance."
+      ],
+      "next_experiments": [
+        {
+          "model": "lightgbm",
+          "feature_set": "all",
+          "imbalance": "class_weight",
+          "params": {
+            "C": null,
+            "min_samples_leaf": null,
+            "max_features": null,
+            "num_leaves": 31,
+            "learning_rate": 0.05,
+            "n_estimators": 500,
+            "min_child_samples": 20,
+            "colsample_bytree": 0.8
+          },
+          "rationale": "Test LightGBM using the all feature set without agent features to determine if the performance gain in Run 2 is driven by agent-related data leakage."
+        }
+      ]
+    },
+    {
+      "stop": false,
+      "concerns": [
+        "High PR-AUC (~0.734) and ROC-AUC (~0.941) warrant careful validation to ensure no subtle data leakage from provider size or target characteristics.",
+        "Removing agent features improved performance, suggesting that auxiliary metadata may introduce noise or overfitting."
+      ],
+      "next_experiments": [
+        {
+          "model": "lightgbm",
+          "feature_set": "no_size",
+          "imbalance": "class_weight",
+          "params": {
+            "C": null,
+            "min_samples_leaf": null,
+            "max_features": null,
+            "num_leaves": 31,
+            "learning_rate": 0.05,
+            "n_estimators": 500,
+            "min_child_samples": 20,
+            "colsample_bytree": 0.8
+          },
+          "rationale": "Testing if removing provider size features in addition to agent features (no_size) further enhances LightGBM performance, following the positive trend observed when dropping agent features."
+        }
+      ]
+    },
+    {
+      "stop": true,
+      "concerns": [
+        "The high PR-AUC (0.7344) and ROC-AUC (0.9411) achieved by the LightGBM model raise concerns regarding potential data leakage or overly dominant proxy features in the feature set.",
+        "The origin of the PotentialFraud label is undocumented, creating a risk that the model is learning administrative or billing volume artifacts rather than genuine fraudulent behavior."
+      ],
+      "next_experiments": []
+    }
+  ],
+  "chosen": 3,
+  "selection": {
+    "chosen": 3,
+    "best_mean_run": 3,
+    "kept_simpler": false,
+    "comparisons": [
+      {
+        "best_run": 3,
+        "vs_run": 1,
+        "mean_gain": 0.0803,
+        "paired_se": 0.0119,
+        "wins": 5,
+        "n_folds": 5,
+        "reliably_better": true
+      },
+      {
+        "best_run": 3,
+        "vs_run": 2,
+        "mean_gain": 0.0057,
+        "paired_se": 0.0051,
+        "wins": 3,
+        "n_folds": 5,
+        "reliably_better": true
+      },
+      {
+        "best_run": 3,
+        "vs_run": 4,
+        "mean_gain": 0.0209,
+        "paired_se": 0.0074,
+        "wins": 4,
+        "n_folds": 5,
+        "reliably_better": true
+      }
+    ]
+  },
+  "first_round_best": 2,
+  "features": {
+    "proposal": {
+      "claim_aggregates": [
+        {
+          "name": "agent_los_std_ip",
+          "column": "los",
+          "agg": "std",
+          "scope": "ip",
+          "rationale": "Captures variance in length of stay for inpatient claims which may indicate irregular discharge practices."
+        },
+        {
+          "name": "agent_claim_days_max_all",
+          "column": "claim_days",
+          "agg": "max",
+          "scope": "all",
+          "rationale": "Identifies extreme claim duration spans across all claims."
+        },
+        {
+          "name": "agent_n_diag_max_ip",
+          "column": "n_diag",
+          "agg": "max",
+          "scope": "ip",
+          "rationale": "Finds maximum diagnosis codes used on inpatient claims, pointing to potential upcoding."
+        },
+        {
+          "name": "agent_n_proc_mean_ip",
+          "column": "n_proc",
+          "agg": "mean",
+          "scope": "ip",
+          "rationale": "Measures average procedure intensity per inpatient claim."
+        },
+        {
+          "name": "agent_op_deductible_std_op",
+          "column": "OPDeductible",
+          "agg": "std",
+          "scope": "op",
+          "rationale": "Measures variability in outpatient deductibles charged."
+        },
+        {
+          "name": "agent_age_median_all",
+          "column": "age",
+          "agg": "median",
+          "scope": "all",
+          "rationale": "Robust central tendency of beneficiary ages served by the provider."
+        },
+        {
+          "name": "agent_n_chronic_mean_all",
+          "column": "n_chronic",
+          "agg": "mean",
+          "scope": "all",
+          "rationale": "Average chronic condition count per claim to normalize patient sickness."
+        },
+        {
+          "name": "agent_renaldisease_share_all",
+          "column": "RenalDiseaseIndicator",
+          "agg": "share_positive",
+          "scope": "all",
+          "rationale": "Proportion of claims involving renal disease indicators."
+        },
+        {
+          "name": "agent_bene_dead_share_all",
+          "column": "bene_dead",
+          "agg": "share_positive",
+          "scope": "all",
+          "rationale": "Mortality rate among claims processed by the provider."
+        },
+        {
+          "name": "agent_dup_any_share_all",
+          "column": "dup_any_provider",
+          "agg": "share_positive",
+          "scope": "all",
+          "rationale": "Share of claims showing any duplication flag."
+        },
+        {
+          "name": "agent_dup_same_share_all",
+          "column": "dup_same_provider",
+          "agg": "share_positive",
+          "scope": "all",
+          "rationale": "Share of claims showing duplication with the same provider."
+        },
+        {
+          "name": "agent_att_is_op_share_all",
+          "column": "att_is_op",
+          "agg": "share_positive",
+          "scope": "all",
+          "rationale": "Proportion of claims where attending physician is also operating."
+        }
+      ],
+      "ratios": [
+        {
+          "name": "agent_ratio_claims_bene",
+          "numerator": "n_claims",
+          "denominator": "n_bene",
+          "rationale": "Measures claim frequency per distinct beneficiary."
+        },
+        {
+          "name": "agent_ratio_ip_op_claims",
+          "numerator": "n_ip_claims",
+          "denominator": "n_op_claims",
+          "rationale": "Ratio of inpatient to outpatient claim volume."
+        },
+        {
+          "name": "agent_ratio_ip_op_reimb",
+          "numerator": "ip_total_reimb",
+          "denominator": "op_total_reimb",
+          "rationale": "Ratio of total inpatient reimbursement to outpatient reimbursement."
+        },
+        {
+          "name": "agent_ratio_claims_attending",
+          "numerator": "n_claims",
+          "denominator": "n_attending",
+          "rationale": "Average claims handled per attending physician."
+        },
+        {
+          "name": "agent_ratio_claims_operating",
+          "numerator": "n_claims",
+          "denominator": "n_operating",
+          "rationale": "Average claims handled per operating physician."
+        },
+        {
+          "name": "agent_ratio_states_bene",
+          "numerator": "n_states",
+          "denominator": "n_bene",
+          "rationale": "Geographic dispersion of beneficiaries relative to count."
+        },
+        {
+          "name": "agent_ratio_dgc_claims",
+          "numerator": "n_dgc",
+          "denominator": "n_claims",
+          "rationale": "Diagnosis group count relative to total claims."
+        },
+        {
+          "name": "agent_ratio_admit_claims",
+          "numerator": "n_admit_diag",
+          "denominator": "n_claims",
+          "rationale": "Admitting diagnosis diversity relative to total claims."
+        }
+      ]
+    },
+    "review": {
+      "verdicts": [
+        {
+          "feature": "agent_los_std_ip",
+          "verdict": "ok",
+          "reason": "Computed solely from claim length of stay for inpatient claims per provider."
+        },
+        {
+          "feature": "agent_claim_days_max_all",
+          "verdict": "ok",
+          "reason": "Computed solely from claim days across all claims per provider."
+        },
+        {
+          "feature": "agent_n_diag_max_ip",
+          "verdict": "ok",
+          "reason": "Computed solely from diagnosis counts for inpatient claims per provider."
+        },
+        {
+          "feature": "agent_n_proc_mean_ip",
+          "verdict": "ok",
+          "reason": "Computed solely from procedure counts for inpatient claims per provider."
+        },
+        {
+          "feature": "agent_op_deductible_std_op",
+          "verdict": "ok",
+          "reason": "Computed solely from outpatient deductible values per provider."
+        },
+        {
+          "feature": "agent_age_median_all",
+          "verdict": "ok",
+          "reason": "Computed solely from beneficiary age across all claims per provider."
+        },
+        {
+          "feature": "agent_n_chronic_mean_all",
+          "verdict": "ok",
+          "reason": "Computed solely from chronic condition counts across all claims per provider."
+        },
+        {
+          "feature": "agent_renaldisease_share_all",
+          "verdict": "ok",
+          "reason": "Computed solely from renal disease indicator shares across all claims per provider."
+        },
+        {
+          "feature": "agent_bene_dead_share_all",
+          "verdict": "ok",
+          "reason": "Computed solely from beneficiary mortality indicator shares across all claims per provider."
+        },
+        {
+          "feature": "agent_dup_any_share_all",
+          "verdict": "ok",
+          "reason": "Computed solely from duplication flags across all claims per provider."
+        },
+        {
+          "feature": "agent_dup_same_share_all",
+          "verdict": "ok",
+          "reason": "Computed solely from duplication flags across all claims per provider."
+        },
+        {
+          "feature": "agent_att_is_op_share_all",
+          "verdict": "ok",
+          "reason": "Computed solely from claim attributes across all claims per provider."
+        },
+        {
+          "feature": "agent_ratio_claims_bene",
+          "verdict": "ok",
+          "reason": "Ratio of claim counts to unique beneficiaries per provider, derived from claims."
+        },
+        {
+          "feature": "agent_ratio_ip_op_claims",
+          "verdict": "ok",
+          "reason": "Ratio of inpatient to outpatient claims per provider, derived from claims."
+        },
+        {
+          "feature": "agent_ratio_ip_op_reimb",
+          "verdict": "ok",
+          "reason": "Ratio of inpatient to outpatient reimbursement totals per provider, derived from claims."
+        },
+        {
+          "feature": "agent_ratio_claims_attending",
+          "verdict": "ok",
+          "reason": "Ratio of claims to attending physicians per provider, derived from claims."
+        },
+        {
+          "feature": "agent_ratio_claims_operating",
+          "verdict": "ok",
+          "reason": "Ratio of claims to operating physicians per provider, derived from claims."
+        },
+        {
+          "feature": "agent_ratio_states_bene",
+          "verdict": "ok",
+          "reason": "Ratio of states to beneficiaries per provider, derived from claims."
+        },
+        {
+          "feature": "agent_ratio_dgc_claims",
+          "verdict": "ok",
+          "reason": "Ratio of diagnostic codes to claims per provider, derived from claims."
+        },
+        {
+          "feature": "agent_ratio_admit_claims",
+          "verdict": "ok",
+          "reason": "Ratio of admitting diagnoses to claims per provider, derived from claims."
+        }
+      ],
+      "split_ok": true,
+      "split_comment": "Stratified provider-level split with 5-fold cross-validation properly isolates providers to prevent leakage across folds."
+    },
+    "accepted": [
+      "agent_los_std_ip",
+      "agent_claim_days_max_all",
+      "agent_n_diag_max_ip",
+      "agent_n_proc_mean_ip",
+      "agent_op_deductible_std_op",
+      "agent_age_median_all",
+      "agent_n_chronic_mean_all",
+      "agent_renaldisease_share_all",
+      "agent_bene_dead_share_all",
+      "agent_dup_any_share_all",
+      "agent_dup_same_share_all",
+      "agent_att_is_op_share_all",
+      "agent_ratio_claims_bene",
+      "agent_ratio_ip_op_claims",
+      "agent_ratio_ip_op_reimb",
+      "agent_ratio_claims_attending",
+      "agent_ratio_claims_operating",
+      "agent_ratio_states_bene",
+      "agent_ratio_dgc_claims",
+      "agent_ratio_admit_claims"
+    ],
+    "rejected": [],
+    "all_proposed": [
+      "agent_los_std_ip",
+      "agent_claim_days_max_all",
+      "agent_n_diag_max_ip",
+      "agent_n_proc_mean_ip",
+      "agent_op_deductible_std_op",
+      "agent_age_median_all",
+      "agent_n_chronic_mean_all",
+      "agent_renaldisease_share_all",
+      "agent_bene_dead_share_all",
+      "agent_dup_any_share_all",
+      "agent_dup_same_share_all",
+      "agent_att_is_op_share_all",
+      "agent_ratio_claims_bene",
+      "agent_ratio_ip_op_claims",
+      "agent_ratio_ip_op_reimb",
+      "agent_ratio_claims_attending",
+      "agent_ratio_claims_operating",
+      "agent_ratio_states_bene",
+      "agent_ratio_dgc_claims",
+      "agent_ratio_admit_claims"
+    ]
+  },
+  "agent_cols": [
+    "agent_los_std_ip",
+    "agent_claim_days_max_all",
+    "agent_n_diag_max_ip",
+    "agent_n_proc_mean_ip",
+    "agent_op_deductible_std_op",
+    "agent_age_median_all",
+    "agent_n_chronic_mean_all",
+    "agent_renaldisease_share_all",
+    "agent_bene_dead_share_all",
+    "agent_dup_any_share_all",
+    "agent_dup_same_share_all",
+    "agent_att_is_op_share_all",
+    "agent_ratio_claims_bene",
+    "agent_ratio_ip_op_claims",
+    "agent_ratio_ip_op_reimb",
+    "agent_ratio_claims_attending",
+    "agent_ratio_claims_operating",
+    "agent_ratio_states_bene",
+    "agent_ratio_dgc_claims",
+    "agent_ratio_admit_claims"
+  ],
+  "preview_log": [
+    {
+      "floor": 0.7118,
+      "previews": [
+        {
+          "model": "logistic",
+          "feature_set": "all",
+          "imbalance": "class_weight",
+          "mean": 0.6586,
+          "sd": 0.0451,
+          "kept": false
+        },
+        {
+          "model": "random_forest",
+          "feature_set": "no_size",
+          "imbalance": "smote",
+          "mean": 0.6248,
+          "sd": 0.0897,
+          "kept": true
+        },
+        {
+          "model": "lightgbm",
+          "feature_set": "all+agent",
+          "imbalance": "class_weight",
+          "mean": 0.7118,
+          "sd": 0.0716,
+          "kept": true
+        }
+      ]
+    },
+    {
+      "floor": 0.7133,
+      "previews": [
+        {
+          "model": "lightgbm",
+          "feature_set": "all",
+          "imbalance": "class_weight",
+          "mean": 0.7133,
+          "sd": 0.0722,
+          "kept": true
+        }
+      ]
+    },
+    {
+      "floor": 0.7133,
+      "previews": [
+        {
+          "model": "lightgbm",
+          "feature_set": "no_size",
+          "imbalance": "class_weight",
+          "mean": 0.6911,
+          "sd": 0.0882,
+          "kept": true
+        }
+      ]
+    }
+  ],
+  "runs": {
+    "1": {
+      "model": "random_forest",
+      "feature_set": "no_size",
+      "imbalance": "smote",
+      "params": {
+        "C": null,
+        "min_samples_leaf": 10,
+        "max_features": 0.5,
+        "num_leaves": null,
+        "learning_rate": null,
+        "n_estimators": 200,
+        "min_child_samples": null,
+        "colsample_bytree": null
+      },
+      "rationale": "Tree ensemble excluding raw size features to prevent provider scale bias, using SMOTE for minority class representation."
+    },
+    "2": {
+      "model": "lightgbm",
+      "feature_set": "all+agent",
+      "imbalance": "class_weight",
+      "params": {
+        "C": null,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": 31,
+        "learning_rate": 0.05,
+        "n_estimators": 500,
+        "min_child_samples": 20,
+        "colsample_bytree": 0.8
+      },
+      "rationale": "Gradient boosting with engineered agent features and class balancing to optimize PR-AUC for the audit queue."
+    },
+    "3": {
+      "model": "lightgbm",
+      "feature_set": "all",
+      "imbalance": "class_weight",
+      "params": {
+        "C": null,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": 31,
+        "learning_rate": 0.05,
+        "n_estimators": 500,
+        "min_child_samples": 20,
+        "colsample_bytree": 0.8
+      },
+      "rationale": "Test LightGBM using the all feature set without agent features to determine if the performance gain in Run 2 is driven by agent-related data leakage."
+    },
+    "4": {
+      "model": "lightgbm",
+      "feature_set": "no_size",
+      "imbalance": "class_weight",
+      "params": {
+        "C": null,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": 31,
+        "learning_rate": 0.05,
+        "n_estimators": 500,
+        "min_child_samples": 20,
+        "colsample_bytree": 0.8
+      },
+      "rationale": "Testing if removing provider size features in addition to agent features (no_size) further enhances LightGBM performance, following the positive trend observed when dropping agent features."
+    }
+  }
+}

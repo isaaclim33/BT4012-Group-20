@@ -18,6 +18,11 @@ JARGON = ["shap", "pr-auc", "roc", "auc", "log-odds", "lightgbm", "gradient boos
           "percentile", "classifier", "embedding", "bm25", "pagerank", "z-score", "model score"]
 
 NUM = re.compile(r"(?<![\w.])\d[\d,]*(?:\.\d+)?")
+# Numbers written out in words escape the digit check above. Small ones ("two stays") read naturally and are
+# checked against the 0-10 allowance; anything from eleven up is flagged, because the prompt asks for numbers
+# written the same way as the evidence.
+SPELLED = re.compile(r"\b(eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|"
+                     r"fifty|sixty|seventy|eighty|ninety|hundred|thousand|million|billion)\b", re.I)
 
 
 def numbers_in(obj) -> list[float]:
@@ -86,5 +91,6 @@ def check_text(out: dict, source) -> dict:
     jargon = sorted({j for j in JARGON if re.search(rf"(?<![\w-]){re.escape(j)}(?![\w-])", joined.lower())})
     return {"numbers_stated": len(stated), "numbers_unsupported": len(unsupported),
             "unsupported_values": unsupported[:10], "jargon_terms": jargon,
+            "spelled_numbers": sorted({m.lower() for t in texts for m in SPELLED.findall(t)}),
             "says_proven_fraud": any(asserts_fraud(t) for t in texts),
             "reading_ease": round(reading_ease(joined), 1), "words": len(joined.split())}

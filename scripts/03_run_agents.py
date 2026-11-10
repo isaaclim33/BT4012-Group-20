@@ -1,14 +1,17 @@
 """Step 3: agent experiments.
 
   RETRIEVAL  retrieval quality of the playbook search (no LLM needed)
-  CLEAN      Cleaning agent's plan scored against a reference checklist
-  E10        Leakage agent on a benchmark of planted leaks
-  E4         agent-assisted pipeline vs fixed pipeline on identical folds (3 runs + ablations)
-  E8         Case-file briefs for the top test providers, with and without retrieval
-  E11        Dashboard agent -> interactive provider review dashboard (needs E8 first)
+  CLEAN      Cleaning agent's plan (one call per raw file, every column covered, 3 runs) scored against
+             the analyst's own cleaning decisions in data.py; the pipeline itself uses data.py
+  LEAK_AGENT        Leakage agent on a benchmark of planted leaks
+  AGENT_MODEL         agent-assisted pipeline vs fixed pipeline on CV repeats 2-5 and the test set
+             (3 runs; every ablation repeated per run)
+  QUEUE      two-gate audit selection: the review queue and each action, decided by code (no LLM)
+  BRIEFS         Case-file briefs for every queued provider, with and without retrieval (needs QUEUE)
+  DASHBOARD        Dashboard agent -> interactive provider review dashboard (needs QUEUE and BRIEFS)
 
 Usage:
-  python scripts/03_run_agents.py [STEPS...]            # live: needs ANTHROPIC_API_KEY
+  python scripts/03_run_agents.py [STEPS...]            # live: needs GEMINI_API_KEY
   python scripts/03_run_agents.py --replay [STEPS...]   # reproduce from results/cache/llm
 Requires steps 01 and 02 (TEST) to have run first.
 """
@@ -31,7 +34,9 @@ from fraudrank.agents.case_file import build_evidence, check_brief  # noqa: E402
 from fraudrank.agents.context import critic_context, experiment_context  # noqa: E402
 from fraudrank.agents.llm import LLMClient, LLMError  # noqa: E402
 from fraudrank.agents.rag import HybridRetriever, evaluate_retrieval  # noqa: E402
+from fraudrank.agents.selection import choose_config  # noqa: E402
 from fraudrank.config import CACHE_DIR, RAW_DIR, TABLES_DIR, TRAIN_FILES  # noqa: E402
+from fraudrank.metrics import bootstrap_ci, evaluate, paired_bootstrap_diff  # noqa: E402
 
 ap = argparse.ArgumentParser()
 ap.add_argument("steps", nargs="*")
@@ -39,7 +44,6 @@ ap.add_argument("--replay", action="store_true")
 ap.add_argument("--model", default=None)
 ap.add_argument("--runs", type=int, default=3)
 ap.add_argument("--max-rounds", type=int, default=3)
-ap.add_argument("--top-k", type=int, default=20)
 args = ap.parse_args()
 
 llm = LLMClient(**({"model": args.model} if args.model else {}), mode="replay" if args.replay else "live")
@@ -65,17 +69,19 @@ def RETRIEVAL():
 
 
 # ------------------------------------------------------------------ cleaning
-def raw_profile() -> str:
-    lines = []
+def raw_profiles() -> dict[str, tuple[str, dict[str, str]]]:
+    """Per raw file: a header line and one profile line per column."""
+    out = {}
     for key, fname in TRAIN_FILES.items():
         d = pd.read_csv(RAW_DIR / fname, nrows=200000)
-        lines.append(f"FILE {key} ({fname}), {len(d)} rows sampled")
+        lines = {}
         for col in d.columns:
             s = d[col]
             top = s.value_counts(dropna=True).head(4).to_dict()
-            lines.append(f"  {col}: dtype={s.dtype}, missing={s.isna().mean():.1%}, distinct={s.nunique()}, "
-                         f"top={top}")
-    return "\n".join(lines)
+            lines[col] = (f"  {col}: dtype={s.dtype}, missing={s.isna().mean():.1%}, distinct={s.nunique()}, "
+                          f"top={top}")
+        out[key] = (f"FILE {key} ({fname}), {len(d)} rows sampled", lines)
+    return out
 
 
 REFERENCE = {
@@ -93,19 +99,54 @@ REFERENCE = {
 STRUCTURAL = ("Physician", "Procedure", "Diagnosis", "DOD", "Admission", "Discharge")
 
 
+def clean_file(header: str, lines: dict[str, str], run_tag: str) -> tuple[list, list[str], int]:
+    """One file's plan. Coverage is enforced by code: columns left out get one more call."""
+    plan = A.cleaning_agent(llm, header + "\n" + "\n".join(lines.values()), list(lines), run_tag)
+    steps = [s for s in plan.steps if s.column in lines]
+    off_profile = len(plan.steps) - len(steps)
+    missing = [c for c in lines if c not in {s.column for s in steps}]
+    if missing:
+        print(f"    {header.split()[1]}: {len(missing)} column(s) left out, asking again: {missing[:6]}")
+        plan = A.cleaning_agent(llm, header + "\n" + "\n".join(lines[c] for c in missing), missing, run_tag)
+        steps += [s for s in plan.steps if s.column in missing]
+        missing = [c for c in lines if c not in {s.column for s in steps}]
+    return steps, missing, off_profile
+
+
 def CLEAN():
-    plan = A.cleaning_agent(llm, raw_profile())
-    hits = {k: bool(f(plan.steps)) for k, f in REFERENCE.items()}
-    errors = [s.model_dump() for s in plan.steps if s.action == "impute" and any(t in s.column for t in STRUCTURAL)]
-    result = {"reference_items": len(hits), "caught": sum(hits.values()), "items": hits,
-              "structural_imputations_proposed": len(errors), "errors": errors, "steps": len(plan.steps)}
-    save("clean_plan.json", plan.model_dump())
-    save("clean_score.json", result)
-    print(json.dumps({k: v for k, v in result.items() if k != "errors"}, indent=1))
+    profiles = raw_profiles()
+    n_cols = sum(len(lines) for _, lines in profiles.values())
+    rows = []
+    for r in range(1, args.runs + 1):
+        run_tag = f"(Independent run {r} of {args.runs}.)"
+        steps, uncovered, off_profile = [], {}, 0
+        for key, (header, lines) in profiles.items():
+            got, missing, off = clean_file(header, lines, run_tag)
+            steps += [(key, s) for s in got]
+            uncovered[key], off_profile = missing, off_profile + off
+        plan = [s for _, s in steps]
+        hits = {k: bool(f(plan)) for k, f in REFERENCE.items()}
+        errors = [s.model_dump() for s in plan if s.action == "impute" and any(t in s.column for t in STRUCTURAL)]
+        rows.append({"run": r, "caught": sum(hits.values()), "reference_items": len(hits), **hits,
+                     "structural_imputations_proposed": len(errors), "steps": len(plan),
+                     "columns": n_cols, "columns_covered": n_cols - sum(map(len, uncovered.values())),
+                     "steps_off_profile": off_profile})
+        save(f"clean_plan_run{r}.json", {"steps": [{"file": k, **s.model_dump()} for k, s in steps],
+                                         "uncovered": uncovered, "structural_imputations": errors})
+        print(f"  run {r}: caught {sum(hits.values())}/{len(hits)}, "
+              f"{n_cols - sum(map(len, uncovered.values()))}/{n_cols} columns covered, "
+              f"missed {[k for k, v in hits.items() if not v]}")
+    runs = pd.DataFrame(rows)
+    save("clean_runs.csv", runs)
+    save("clean_score.json", {"runs": len(runs), "caught_per_run": runs.caught.tolist(),
+                              "caught_mean": runs.caught.mean(), "reference_items": len(REFERENCE),
+                              "items_caught_share": {k: runs[k].mean() for k in REFERENCE},
+                              "structural_imputations_proposed": int(runs.structural_imputations_proposed.sum()),
+                              "columns": n_cols, "columns_covered_min": int(runs.columns_covered.min())})
 
 
-# ------------------------------------------------------------------ E10
-def E10():
+# ------------------------------------------------------------------ LEAK_AGENT
+def LEAK_AGENT():
     rows = []
     specs, truth = leak_bench.benchmark()
     for r in range(args.runs):
@@ -114,12 +155,19 @@ def E10():
                                  run_tag=f"(Independent review {r + 1} of {args.runs}.)")
         sc = leak_bench.score(review, truth)
         rows.append({"run": r + 1, **sc, "split_ok": review.split_ok})
-        save(f"e10_review_run{r + 1}.json", review.model_dump())
-    save("e10_leak_bench.csv", pd.DataFrame(rows))
+        save(f"leak_agent_review_run{r + 1}.json", review.model_dump())
+    save("leak_agent_bench.csv", pd.DataFrame(rows))
     print(pd.DataFrame(rows).to_string(index=False))
 
 
-# ------------------------------------------------------------------ E4
+# ------------------------------------------------------------------ AGENT_MODEL
+# The loop chooses configurations on the first CV repeat (folds 1-5, previews on folds
+# 1-3), and tuning also used that repeat. Both pipelines are therefore compared on
+# repeats 2-5 only, which no choice has seen.
+EVAL_FOLDS = SPLITS["folds"][5:]
+PREVIEW_FOLDS = REPEAT0[:3]
+
+
 def _cv(cfg, cols, base, folds):
     res, _ = runner.cv_evaluate(X.make_model(cfg), cols, base, SPLITS, folds=folds)
     return res
@@ -148,45 +196,41 @@ def agent_loop(run: int, allow_agent_features: bool = True, tag: str = "") -> di
                     "accepted": agent_cols, "rejected": sorted(rejected), "all_proposed": list(feats.columns)}
     history, runs, fold_details = [], {}, {}
 
+    def strip_agent(cfg):
+        if not allow_agent_features and cfg.feature_set.endswith("+agent"):
+            return cfg.model_copy(update={"feature_set": cfg.feature_set.replace("+agent", "")})
+        return cfg
+
     def execute(cfgs):
-        for cfg in cfgs:
-            if not allow_agent_features and cfg.feature_set.endswith("+agent"):
-                cfg = cfg.model_copy(update={"feature_set": cfg.feature_set.replace("+agent", "")})
+        for cfg in map(strip_agent, cfgs):
             rid = len(runs) + 1
-            res = _cv(cfg, X.feature_set(cfg, FAM, agent_cols), base, REPEAT0)
+            cols = X.feature_set(cfg, FAM, agent_cols)
+            res = _cv(cfg, cols, base, REPEAT0)
             runs[rid] = cfg
             fold_details[rid] = list(res.pr_auc)
-            history.append({"run_id": rid, **cfg.model_dump(exclude={"rationale"}),
+            history.append({"run_id": rid, **cfg.model_dump(exclude={"rationale"}), "n_features": len(cols),
                             "pr_auc_mean": round(res.pr_auc.mean(), 4), "pr_auc_sd": round(res.pr_auc.std(), 4),
                             "prec_k50_mean": round(res.prec_k50.mean(), 4), "roc_auc_mean": round(res.roc_auc.mean(), 4)})
 
-    PREVIEW_FOLDS = SPLITS["folds"][:3]
     preview_log = []
 
     def preview_gate(proposals):
+        # Every number compared here is a mean over the same 3 preview folds: completed runs
+        # were scored on REPEAT0, whose first 3 folds are the preview folds.
         previews = []
         for cfg in proposals:
-            c = cfg
-            if not allow_agent_features and c.feature_set.endswith("+agent"):
-                c = c.model_copy(update={"feature_set": c.feature_set.replace("+agent", "")})
-            cols = X.feature_set(c, FAM, agent_cols)
-            res = _cv(c, cols, base, PREVIEW_FOLDS)
+            c = strip_agent(cfg)
+            res = _cv(c, X.feature_set(c, FAM, agent_cols), base, PREVIEW_FOLDS)
             previews.append({"cfg": cfg, "mean": float(res.pr_auc.mean()), "sd": float(res.pr_auc.std())})
-        if history:
-            floor = max(h["pr_auc_mean"] for h in history)
-        else:
-            floor = max(p["mean"] for p in previews)
+        done = [float(np.mean(f[:len(PREVIEW_FOLDS)])) for f in fold_details.values()]
+        floor = max([p["mean"] for p in previews] + done)
         survived = [p for p in previews if p["mean"] + p["sd"] >= floor]
-        dropped = [p for p in previews if p["mean"] + p["sd"] < floor]
         if not survived:
             survived = [max(previews, key=lambda p: p["mean"])]
-            dropped = [p for p in previews if p not in survived]
-        for p in dropped:
-            print(f"    preview gate dropped {p['cfg'].model}/{p['cfg'].feature_set}/{p['cfg'].imbalance}: "
+        for p in previews:
+            print(f"    preview gate {'kept' if p in survived else 'dropped'} "
+                  f"{p['cfg'].model}/{p['cfg'].feature_set}/{p['cfg'].imbalance}: "
                   f"PR-AUC {p['mean']:.3f} ± {p['sd']:.3f} (floor {floor:.3f})")
-        for p in survived:
-            print(f"    preview gate kept {p['cfg'].model}/{p['cfg'].feature_set}/{p['cfg'].imbalance}: "
-                  f"PR-AUC {p['mean']:.3f} ± {p['sd']:.3f}")
         preview_log.append({"floor": round(floor, 4),
                             "previews": [{"model": p["cfg"].model, "feature_set": p["cfg"].feature_set,
                                           "imbalance": p["cfg"].imbalance, "mean": round(p["mean"], 4),
@@ -195,59 +239,73 @@ def agent_loop(run: int, allow_agent_features: bool = True, tag: str = "") -> di
 
     ctx = experiment_context(FAM, agent_cols if allow_agent_features else [], history)
     execute(preview_gate(A.experiment_agent(llm, ctx, run_tag).proposals))
-    first_round_best = max(history, key=lambda h: h["pr_auc_mean"])["run_id"]
-    CONFIDENCE_THRESHOLD = 0.7
-    verdicts = []
+    first_round = choose_config(history, fold_details)
+    selection, verdicts = first_round, []
     for rnd in range(args.max_rounds):
-        critic_tool_ctx = {"fold_details": fold_details}
-        v = A.critic_agent(llm, critic_context(history, args.max_rounds - rnd - 1),
-                           args.max_rounds - rnd - 1, run_tag, tool_ctx=critic_tool_ctx)
+        rounds_left = args.max_rounds - rnd - 1
+        v = A.critic_agent(llm, critic_context(history, rounds_left, selection), rounds_left, run_tag,
+                           tool_ctx={"fold_details": fold_details})
         verdicts.append(v.model_dump())
         if v.stop or not v.next_experiments or rnd == args.max_rounds - 1:
             break
         execute(preview_gate(v.next_experiments))
-    chosen = verdicts[-1]["chosen_run"]
-    confidence = verdicts[-1].get("confidence", 1.0)
-    best_cv = max(history, key=lambda h: h["pr_auc_mean"])["run_id"]
-    if chosen not in runs:
-        chosen = best_cv
-    elif confidence < CONFIDENCE_THRESHOLD:
-        print(f"  critic confidence {confidence:.2f} < {CONFIDENCE_THRESHOLD}: "
-              f"overriding run {chosen} → {best_cv}")
-        chosen = best_cv
-    return {"runs": runs, "history": history, "verdicts": verdicts, "chosen": chosen,
-            "first_round_best": first_round_best, "features": feat_log, "agent_cols": agent_cols,
-            "base": base, "preview_log": preview_log}
+        selection = choose_config(history, fold_details)
+    print(f"  chosen run {selection['chosen']} (best mean: run {selection['best_mean_run']})")
+    return {"runs": runs, "history": history, "verdicts": verdicts, "chosen": selection["chosen"],
+            "selection": selection, "first_round_best": first_round["chosen"], "features": feat_log,
+            "agent_cols": agent_cols, "base": base, "preview_log": preview_log}
 
 
-def E4():
-    fixed = pd.read_csv(TABLES_DIR / "cv_folds.csv").query("experiment == 'E1' and model == 'lightgbm'") \
-        .sort_values("fold").reset_index(drop=True)
-    rows, summary = [], []
+def _ci(col):
+    return 1.96 * col.std() / np.sqrt(len(col))
+
+
+def AGENT_MODEL():
+    fixed = pd.read_csv(TABLES_DIR / "cv_folds.csv").query("experiment == 'MODELS' and model == 'lightgbm'") \
+        .sort_values("fold").iloc[len(REPEAT0):].reset_index(drop=True)
+    test_scores = pd.read_pickle(CACHE_DIR / "test_scores.pkl")
+    y_test = test_scores["y"].to_numpy()
+    rows, summary, test_rows = [], [], []
 
     def full_eval(label, run, out, cfg_id, cols_override=None):
         cfg = out["runs"][cfg_id]
         cols = cols_override or X.feature_set(cfg, FAM, out["agent_cols"])
-        res = _cv(cfg, cols, out["base"], None)
-        d = res.pr_auc.to_numpy() - fixed.pr_auc.to_numpy()
+        res = _cv(cfg, cols, out["base"], EVAL_FOLDS)
+        res["fold"] += len(REPEAT0)                                 # same fold numbering as cv_folds.csv
+        d = pd.Series(res.pr_auc.to_numpy() - fixed.pr_auc.to_numpy())
         rows.append(res.assign(pipeline=label, run=run))
-        n_folds = len(res)
-        ci = lambda col: 1.96 * col.std() / np.sqrt(n_folds)
         summary.append({"pipeline": label, "run": run, "config": cfg.model_dump(exclude={"rationale"}),
-                        "n_features": len(cols),
+                        "n_features": len(cols), "eval_folds": len(res),
                         "pr_auc_mean": res.pr_auc.mean(), "pr_auc_sd": res.pr_auc.std(),
-                        "pr_auc_ci_lo": res.pr_auc.mean() - ci(res.pr_auc),
-                        "pr_auc_ci_hi": res.pr_auc.mean() + ci(res.pr_auc),
+                        "pr_auc_ci_lo": res.pr_auc.mean() - _ci(res.pr_auc),
+                        "pr_auc_ci_hi": res.pr_auc.mean() + _ci(res.pr_auc),
                         "prec_k100_mean": res.prec_k100.mean(), "prec_k100_sd": res.prec_k100.std(),
                         "rec_k100_mean": res.rec_k100.mean(), "rec_k100_sd": res.rec_k100.std(),
                         "prec_k50_mean": res.prec_k50.mean(), "rec_k50_mean": res.rec_k50.mean(),
-                        "diff_vs_fixed_mean": d.mean(),
-                        "diff_vs_fixed_sd": d.std(), "folds_better": int((d > 0).sum()),
+                        "diff_vs_fixed_mean": d.mean(), "diff_vs_fixed_sd": d.std(),
+                        "diff_vs_fixed_ci_lo": d.mean() - _ci(d), "diff_vs_fixed_ci_hi": d.mean() + _ci(d),
+                        "folds_better": int((d > 0).sum()),
                         "loop_rounds": len(out["verdicts"]), "configs_tried": len(out["runs"])})
         print(f"  {label:32s} run {run}: PR-AUC {res.pr_auc.mean():.3f} "
-              f"[{res.pr_auc.mean() - ci(res.pr_auc):.3f}, {res.pr_auc.mean() + ci(res.pr_auc):.3f}]  "
+              f"[{res.pr_auc.mean() - _ci(res.pr_auc):.3f}, {res.pr_auc.mean() + _ci(res.pr_auc):.3f}]  "
               f"Prec@100 {res.prec_k100.mean():.3f}  Rec@100 {res.rec_k100.mean():.3f}  "
-              f"diff {d.mean():+.3f} ({int((d > 0).sum())}/25 folds)")
+              f"diff {d.mean():+.3f} ({int((d > 0).sum())}/{len(d)} folds)")
+
+    def test_eval(run, out):
+        """Score the chosen configuration on the held-out test set once."""
+        cfg = out["runs"][out["chosen"]]
+        _, s, _, _ = runner.test_evaluate(X.make_model(cfg), X.feature_set(cfg, FAM, out["agent_cols"]),
+                                          out["base"], SPLITS)
+        s = s.reindex(test_scores.index).to_numpy()
+        m = evaluate(y_test, s)
+        ci = {f"{k}_{b}": v for k in ("pr_auc", "prec_k100", "rec_k100")
+              for b, v in zip(("lo", "hi"), bootstrap_ci(y_test, s, k))}
+        d, lo, hi = paired_bootstrap_diff(y_test, s, test_scores["lightgbm"].to_numpy(), "pr_auc")
+        test_rows.append({"pipeline": "agent pipeline", "run": run, "config": cfg.model_dump(exclude={"rationale"}),
+                          **{k: m[k] for k in ("pr_auc", "prec_k50", "rec_k50", "prec_k100", "rec_k100")}, **ci,
+                          "pr_auc_diff_vs_fixed": d, "pr_auc_diff_lo": lo, "pr_auc_diff_hi": hi})
+        print(f"  TEST agent run {run}: PR-AUC {m['pr_auc']:.3f} [{ci['pr_auc_lo']:.3f}, {ci['pr_auc_hi']:.3f}]  "
+              f"Rec@100 {m['rec_k100']:.3f}  diff vs fixed {d:+.3f} [{lo:+.3f}, {hi:+.3f}]")
 
     failures = []
     for r in range(1, args.runs + 1):
@@ -257,85 +315,150 @@ def E4():
             print(f"  run {r} failed: {err}")
             failures.append({"run": r, "error": str(err)[:300]})
             continue
-        save(f"e4_run{r}_log.json", {k: v for k, v in out.items() if k not in ("base", "runs")} |
+        save(f"agent_model_run{r}_log.json", {k: v for k, v in out.items() if k not in ("base", "runs")} |
              {"runs": {k: v.model_dump() for k, v in out["runs"].items()}})
         full_eval("agent pipeline", r, out, out["chosen"])
-        if r == 1:
-            full_eval("ablation: no critic (best of round 1)", r, out, out["first_round_best"])
-            cfg = out["runs"][out["chosen"]]
-            if cfg.feature_set.endswith("+agent"):
-                cols = X.feature_set(cfg, FAM, out["features"]["all_proposed"])
-                full_eval("ablation: no leakage review", r, out, out["chosen"], cols)
-    try:
-        out = agent_loop(1, allow_agent_features=False, tag=", no feature agent")
-        full_eval("ablation: no feature agent", 1, out, out["chosen"])
-    except LLMError as err:
-        failures.append({"run": "ablation: no feature agent", "error": str(err)[:300]})
-    save("e4_failures.json", failures)
-    n_folds = len(fixed)
-    ci = lambda col: 1.96 * col.std() / np.sqrt(n_folds)
-    fixed_row = {"pipeline": "fixed pipeline (E1 LightGBM)", "run": 0,
+        test_eval(r, out)
+        full_eval("ablation: no critic (round 1 only)", r, out, out["first_round_best"])
+        cfg = out["runs"][out["chosen"]]
+        if cfg.feature_set.endswith("+agent"):
+            cols = X.feature_set(cfg, FAM, out["features"]["all_proposed"])
+            full_eval("ablation: no leakage review", r, out, out["chosen"], cols)
+    for r in range(1, args.runs + 1):
+        try:
+            out = agent_loop(r, allow_agent_features=False, tag=", no feature agent")
+            full_eval("ablation: no feature agent", r, out, out["chosen"])
+        except LLMError as err:
+            failures.append({"run": f"ablation: no feature agent, run {r}", "error": str(err)[:300]})
+    save("agent_model_failures.json", failures)
+    fixed_row = {"pipeline": "fixed pipeline (LightGBM)", "run": 0, "eval_folds": len(fixed),
                  "pr_auc_mean": fixed.pr_auc.mean(), "pr_auc_sd": fixed.pr_auc.std(),
-                 "pr_auc_ci_lo": fixed.pr_auc.mean() - ci(fixed.pr_auc),
-                 "pr_auc_ci_hi": fixed.pr_auc.mean() + ci(fixed.pr_auc),
+                 "pr_auc_ci_lo": fixed.pr_auc.mean() - _ci(fixed.pr_auc),
+                 "pr_auc_ci_hi": fixed.pr_auc.mean() + _ci(fixed.pr_auc),
                  "prec_k100_mean": fixed.prec_k100.mean(), "prec_k100_sd": fixed.prec_k100.std(),
                  "rec_k100_mean": fixed.rec_k100.mean(), "rec_k100_sd": fixed.rec_k100.std(),
                  "prec_k50_mean": fixed.prec_k50.mean(), "rec_k50_mean": fixed.rec_k50.mean(),
                  "diff_vs_fixed_mean": 0}
-    save("e4_summary.csv", pd.DataFrame([fixed_row] + summary))
-    save("e4_folds.csv", pd.concat(rows))
+    summary_df = pd.DataFrame([fixed_row] + summary)
+    save("agent_model_summary.csv", summary_df)
+    save("agent_model_folds.csv", pd.concat(rows))
+    # headline: every condition averaged over its runs, never the best run
+    by_pipeline = summary_df.groupby("pipeline", sort=False).agg(
+        runs=("run", "count"), pr_auc_mean=("pr_auc_mean", "mean"), pr_auc_min=("pr_auc_mean", "min"),
+        pr_auc_max=("pr_auc_mean", "max"), diff_vs_fixed_mean=("diff_vs_fixed_mean", "mean"),
+        folds_better_mean=("folds_better", "mean"), rec_k100_mean=("rec_k100_mean", "mean")).reset_index()
+    save("agent_model_by_pipeline.csv", by_pipeline)
+    print(by_pipeline.round(4).to_string(index=False))
+
+    if not test_rows:
+        return
+    fixed_test = pd.read_csv(TABLES_DIR / "test_results.csv").query("model == 'lightgbm'").iloc[0]
+    test_df = pd.DataFrame(test_rows)
+    mean_row = {"pipeline": "agent pipeline, mean of runs", "run": len(test_df),
+                **test_df.drop(columns=["pipeline", "run", "config"]).mean().to_dict()}
+    fixed_test_row = {"pipeline": "fixed pipeline (LightGBM)", "run": 0,
+                      **{k: fixed_test[k] for k in ("pr_auc", "prec_k50", "rec_k50", "prec_k100", "rec_k100",
+                                                    "pr_auc_lo", "pr_auc_hi", "prec_k100_lo", "prec_k100_hi")}}
+    save("agent_model_test.csv", pd.DataFrame([fixed_test_row, mean_row] + test_rows))
+    print(pd.DataFrame([fixed_test_row, mean_row]).round(3).to_string(index=False))
 
 
-# ------------------------------------------------------------------ E8
-def E8():
-    scores = pd.read_pickle(CACHE_DIR / "test_scores.pkl")["lightgbm"].sort_values(ascending=False)
+# ------------------------------------------------------------------ QUEUE (code only, no LLM)
+def QUEUE():
+    """Two-gate audit selection on the test set (audit_selection.py). Rule thresholds were set on
+    development providers; BRIEFS and DASHBOARD read the queue this writes."""
+    from fraudrank import audit_selection as AS
+    from fraudrank import models as M
+    from fraudrank.config import SEED, VOTE_SEEDS
+    checks = AS.billing_checks(df.index)
+    save("rule_check_dev.csv", AS.rule_check_dev(checks.loc[SPLITS["dev"]], df.loc[SPLITS["dev"], "y"]))
+    scores = pd.read_pickle(CACHE_DIR / "test_scores.pkl")
+    params = json.loads((TABLES_DIR / "tuned_params.json").read_text())["lightgbm"]["params"]
+    no_size = [c for f, cols in FAM.items() if f != "size" for c in cols]
+    size_free = {}
+    for seed in VOTE_SEEDS:     # same tuned settings as lgbm:no_size; only the seed changes
+        _, s, _, _ = runner.test_evaluate(lambda: M.lightgbm(params, seed=seed), no_size, df, SPLITS)
+        size_free[seed] = s
+    assert np.allclose(size_free[SEED].reindex(scores.index), scores["lgbm:no_size"]), "seed 42 must match TEST"
+    pd.DataFrame(size_free).to_pickle(CACHE_DIR / "size_free_seed_scores.pkl")
+    queue = AS.two_gate_selection(scores["lightgbm"], checks, AS.seed_votes(size_free))
+    save("audit_queue.csv", queue)
+    gate1 = AS.rule_check(checks) != ""
+    save("queue_evaluation.csv", AS.queue_evaluation(scores["lightgbm"], scores["y"], gate1, queue))
+    print(queue.drop(columns=["risk_score", "of_models"]).to_string(index=False))
+    print(queue.groupby(["gate", "action", "reason"]).size().to_string())
+
+
+def _queue() -> pd.DataFrame:
+    path = AGENT_DIR / "audit_queue.csv"
+    if not path.exists():
+        sys.exit("No review queue yet: run the QUEUE step first (python scripts/03_run_agents.py QUEUE).")
+    return pd.read_csv(path).fillna({"reason": ""})
+
+
+# ------------------------------------------------------------------ BRIEFS
+def BRIEFS():
+    """Case briefs for every provider in the review queue (two-gate audit selection, script 02 QUEUE).
+    The queue and each action are decided by code; the brief's own recommended action is recorded
+    next to it as the agent's suggestion, so agreement can be measured."""
+    scores = pd.read_pickle(CACHE_DIR / "test_scores.pkl")["lightgbm"]
+    queue = _queue()
     shap = pd.read_pickle(CACHE_DIR / "shap_test_lightgbm.pkl")
     Xte = pd.read_pickle(CACHE_DIR / "X_test_lightgbm.pkl")
     retr = HybridRetriever()
     tool_ctx = {"df": df, "dev": SPLITS["dev"], "retriever": retr, "shap": shap}
     rows, briefs = [], []
     for cond, use_rag in [("with retrieval", True), ("without retrieval", False)]:
-        for rank, (prov, sc) in enumerate(scores.head(args.top_k).items(), start=1):
-            ev = build_evidence(prov, rank, sc, Xte, shap, df, SPLITS["dev"], retr if use_rag else None)
+        for q in queue.itertuples():
+            prov = q.provider
+            ev = build_evidence(prov, q.risk_rank, scores[prov], Xte, shap, df, SPLITS["dev"], retr if use_rag else None)
+            ev["billing_checks"] = {"duplicate_claims": q.duplicate_claims, "overlapping_hospital_stays": q.overlapping_stays}
             t0 = (llm.input_tokens, llm.output_tokens)
             try:
                 brief = A.case_file_agent(llm, ev, use_rag,
                                           tool_ctx=tool_ctx if use_rag else None)
                 chk = check_brief(brief, ev)
-                chk.update(schema_valid=True)
+                chk.update(schema_valid=True, agrees_with_code=brief.recommended_action == q.action)
                 briefs.append({"condition": cond, "evidence": ev, "brief": brief.model_dump()})
             except LLMError as e:
                 chk = {"provider": prov, "schema_valid": False, "error": str(e)[:200]}
-            chk.update(condition=cond, rank=rank, label=int(df.loc[prov, "y"]),
+            chk.update(condition=cond, position=q.position, gate=q.gate, code_action=q.action, rank=q.risk_rank,
+                       label=int(df.loc[prov, "y"]),
                        input_tokens=llm.input_tokens - t0[0], output_tokens=llm.output_tokens - t0[1])
             rows.append(chk)
     res = pd.DataFrame(rows)
-    save("e8_checks.csv", res)
-    save("e8_briefs.json", briefs)
+    save("briefs_checks.csv", res)
+    save("briefs.json", briefs)
     agg = res.groupby("condition").agg(
         briefs=("provider", "count"), schema_valid=("schema_valid", "mean"),
         drivers=("drivers", "sum"), drivers_faithful=("drivers_faithful", "sum"),
         citations=("citations", "sum"), citations_exist=("citations_exist", "sum"),
         citations_supported=("citations_supported", "sum"), says_confirmed=("says_fraud_confirmed", "sum"),
+        agrees_with_code=("agrees_with_code", "mean"),
         input_tokens=("input_tokens", "sum"), output_tokens=("output_tokens", "sum")).reset_index()
-    save("e8_summary.csv", agg)
+    save("briefs_summary.csv", agg)
+    save("briefs_action_agreement.csv", res.groupby(["condition", "code_action", "action"]).size()
+         .rename("briefs").reset_index().rename(columns={"action": "agent_suggested_action"}))
     print(agg.to_string(index=False))
 
 
-# ------------------------------------------------------------------ E11
-def E11():
+# ------------------------------------------------------------------ DASHBOARD
+def DASHBOARD():
     """Dashboard agent: overview + one page per queued provider -> checks -> interactive HTML dashboard."""
     from fraudrank.agents import dashboard_agent as G
     from fraudrank.agents import dashboard_data as DD
     from fraudrank.agents.dashboard import render
+    from fraudrank.agents.grounding import ground
     from fraudrank.agents.text_checks import reading_ease
     from fraudrank.config import RESULTS_DIR
     out_dir = RESULTS_DIR / "dashboard"
     out_dir.mkdir(exist_ok=True)
+    _queue()
     data = DD.build(df, SPLITS)
     facts = G.overview_facts(data)
     queue = [p for p in data["providers"] if p["in_queue"]]
-    evidence = {p["id"]: G.provider_evidence(p, data) for p in queue}
+    # desk reviews get a lighter page in standard code wording; AI text only for full audits and borderline
+    evidence = {p["id"]: G.provider_evidence(p, data) for p in queue if p["lane"] != "desk"}
     notes = " ".join(p.get("case_summary", "") for p in queue)
     rows = [{"part": "case-file summaries (input)", "run": 0, "reading_ease": round(reading_ease(notes), 1),
              "words": len(notes.split())}]
@@ -358,25 +481,22 @@ def E11():
                 checks[pid] = {"passed": False, "error": str(err)[:300]}
             rows.append({"part": "provider page", "run": r, "provider": pid, **checks[pid]})
         ai, failed = G.assemble(ov, ov_chk, pages, checks)
+        ai, grounding_rows = ground(data, ai)       # final gate: everything shown traces to case evidence
         cost = {"input_tokens": llm.input_tokens - t0[0], "output_tokens": llm.output_tokens - t0[1]}
         records.append({"run": r, "overview": ov, "overview_check": ov_chk, "pages": pages, "checks": checks,
                         "failed": failed, **cost})
         print(f"  run {r}: overview passed={ov_chk.get('passed')}  pages passed "
               f"{sum(c.get('passed', False) for c in checks.values())}/{len(evidence)}  tokens {cost}")
         if r == 1:
-            n_long = len(ov_chk.get("too_long", [])) + sum(len(c.get("too_long", [])) for c in checks.values())
-            meta = {"generated": "2026-10-18", "cycle": "claims Nov 2008 to Dec 2009", "checks_failed": failed,
-                    "ai_note": f"Plain-language text written by AI agents ({llm.model}) and checked automatically; "
-                               f"{len(evidence) - sum(1 for f in failed if f != 'home page')} of {len(evidence)} "
-                               f"provider pages and {'the' if 'home page' not in failed else 'no'} home page passed"
-                               + (f"; {n_long} passage(s) too long for their space show standard wording." if n_long
-                                  else ".")}
+            # check results go to dashboard_checks.csv and dashboard_grounding.csv, not onto the page
+            meta = {"generated": "2026-10-18", "cycle": "claims Nov 2008 to Dec 2009"}
+            save("dashboard_grounding.csv", pd.DataFrame(grounding_rows))
             (out_dir / "provider_review_dashboard.html").write_text(render(data, ai, meta), encoding="utf-8")
-    save("e11_checks.csv", pd.DataFrame(rows))
-    save("e11_outputs.json", records)
+    save("dashboard_checks.csv", pd.DataFrame(rows))
+    save("dashboard_outputs.json", records)
 
 
-STEPS = {"RETRIEVAL": RETRIEVAL, "CLEAN": CLEAN, "E10": E10, "E4": E4, "E8": E8, "E11": E11}
+STEPS = {"RETRIEVAL": RETRIEVAL, "CLEAN": CLEAN, "LEAK_AGENT": LEAK_AGENT, "AGENT_MODEL": AGENT_MODEL, "QUEUE": QUEUE, "BRIEFS": BRIEFS, "DASHBOARD": DASHBOARD}
 if __name__ == "__main__":
     for step in args.steps or list(STEPS):
         print(f"== {step}")

@@ -17,7 +17,7 @@ from .config import SEED
 
 
 class SingleSignal:
-    """E0 baseline: rank by one column (e.g. total reimbursement). Nothing is fitted."""
+    """SIZE baseline: rank by one column (e.g. total reimbursement). Nothing is fitted."""
 
     def __init__(self, column: str):
         self.column = column
@@ -30,7 +30,7 @@ class SingleSignal:
 
 
 class ExpertRules:
-    """Rule-based screen of the kind a payer runs without ML (lecture 01).
+    """Rule-based screen of the kind a payer runs without ML.
 
     Each rule fires when a provider is above the training-fold 90th percentile of a
     red-flag measure; the score is the number of rules fired, with total
@@ -88,9 +88,9 @@ LGBM_DEFAULT = dict(n_estimators=400, learning_rate=0.03, num_leaves=15, min_chi
                     subsample=0.8, subsample_freq=1, colsample_bytree=0.7, reg_lambda=1.0)
 
 
-def lightgbm(params: dict | None = None, balanced: bool = True, sampler=None):
+def lightgbm(params: dict | None = None, balanced: bool = True, sampler=None, seed: int = SEED):
     p = {**LGBM_DEFAULT, **(params or {})}
-    est = LGBMClassifier(**p, objective="binary", random_state=SEED, n_jobs=2, verbose=-1,
+    est = LGBMClassifier(**p, objective="binary", random_state=seed, n_jobs=2, verbose=-1,
                          class_weight="balanced" if balanced else None)
     return SklearnScorer(est, sampler)
 

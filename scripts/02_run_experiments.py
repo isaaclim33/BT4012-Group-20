@@ -1,8 +1,8 @@
 """Step 2: run every non-LLM experiment and save tables to results/.
 
-Usage:  python scripts/02_run_experiments.py [E0 E1 ...]   (default: all)
+Usage:  python scripts/02_run_experiments.py [SIZE MODELS ...]   (default: all)
 
-Order matters: TUNE writes the chosen hyperparameters that E1-E7 use, and TEST
+Order matters: TUNE writes the chosen hyperparameters that the model experiments use, and TEST
 opens the held-out test set once, after all choices are frozen.
 """
 import itertools
@@ -101,33 +101,33 @@ def make_models():
 
 
 # ---------------------------------------------------------------- experiments
-def E0():
+def SIZE():
     """How much does size alone explain? No model is fitted."""
     for col in ["total_reimb", "n_claims", "n_ip_claims", "n_bene"]:
-        run_cv(f"size_only:{col}", lambda col=col: M.SingleSignal(col), ALL, "E0")
+        run_cv(f"size_only:{col}", lambda col=col: M.SingleSignal(col), ALL, "SIZE")
 
 
-def E1():
+def MODELS():
     """Model comparison on all features."""
     for name, make in make_models().items():
-        run_cv(name, make, ALL, "E1")
+        run_cv(name, make, ALL, "MODELS")
 
 
-def E2():
+def FAMILIES():
     """Feature-family ablation with LightGBM; plus size-free and size-only models."""
     make = make_models()["lightgbm"]
-    run_cv("lgbm:all", make, ALL, "E2")
-    run_cv("lgbm:no_size", make, NO_SIZE, "E2")
-    run_cv("lgbm:size_only", make, FAM["size"], "E2")
-    run_cv("logistic:no_size", make_models()["logistic"], NO_SIZE, "E2")
+    run_cv("lgbm:all", make, ALL, "FAMILIES")
+    run_cv("lgbm:no_size", make, NO_SIZE, "FAMILIES")
+    run_cv("lgbm:size_only", make, FAM["size"], "FAMILIES")
+    run_cv("logistic:no_size", make_models()["logistic"], NO_SIZE, "FAMILIES")
     for fam in FAM:
         if fam == "size":
             continue
         cols = [c for c in NO_SIZE if c not in FAM[fam]]
-        run_cv(f"lgbm:no_size-minus-{fam}", make, cols, "E2")
+        run_cv(f"lgbm:no_size-minus-{fam}", make, cols, "FAMILIES")
 
 
-def E3():
+def NETWORK():
     """Network: homophily test on the development set, then models with/without network features."""
     g = runner.graph(df)
     dev = SPLITS["dev"]
@@ -135,11 +135,11 @@ def E3():
     (TABLES_DIR / "homophily.json").write_text(json.dumps(h, indent=2))
     print("  homophily:", {k: round(v, 3) if isinstance(v, float) else v for k, v in h.items()})
     make = make_models()["lightgbm"]
-    run_cv("lgbm:all+network", make, ALL, "E3", use_network=True)
-    run_cv("lgbm:no_size+network", make, NO_SIZE, "E3", use_network=True)
+    run_cv("lgbm:all+network", make, ALL, "NETWORK", use_network=True)
+    run_cv("lgbm:no_size+network", make, NO_SIZE, "NETWORK", use_network=True)
 
 
-def E5():
+def IMBALANCE():
     """Imbalance handling, inside the training fold only."""
     p = params()
     for name, make in {
@@ -152,19 +152,19 @@ def E5():
         "logistic:smote": lambda: M.logistic(p["logistic"]["C"], balanced=False,
                                              sampler=SMOTE(random_state=SEED)),
     }.items():
-        res, oof = run_cv(name, make, ALL, "E5")
+        res, oof = run_cv(name, make, ALL, "IMBALANCE")
     # calibration: Brier score of the out-of-fold probabilities (lower = better)
     rows = []
     for name in ["lgbm:none", "lgbm:class_weight", "lgbm:smote", "logistic:none",
                  "logistic:class_weight", "logistic:smote"]:
-        oof = pd.read_pickle(CACHE_DIR / f"oof_E5_{name}.pkl")
+        oof = pd.read_pickle(CACHE_DIR / f"oof_IMBALANCE_{name}.pkl")
         y = df.loc[oof.index, "y"]
         rows.append({"model": name, "brier": brier_score_loss(y, oof), "mean_pred": oof.mean(),
                      "base_rate": y.mean()})
-    pd.DataFrame(rows).to_csv(TABLES_DIR / "e5_calibration.csv", index=False)
+    pd.DataFrame(rows).to_csv(TABLES_DIR / "imbalance_calibration.csv", index=False)
 
 
-def E7():
+def NOISE():
     """Label noise: hide a share of flagged providers in training (they become 0)."""
     make = make_models()["lightgbm"]
     for rate in [0.0, 0.1, 0.2, 0.3, 0.5]:
@@ -174,8 +174,8 @@ def E7():
             pos = np.where(y == 1)[0]
             y[rng.choice(pos, int(round(rate * len(pos))), replace=False)] = 0
             return y
-        run_cv(f"lgbm:all|noise={rate}", make, ALL, "E7", label_transform=flip)
-        run_cv(f"lgbm:no_size|noise={rate}", make, NO_SIZE, "E7", label_transform=flip)
+        run_cv(f"lgbm:all|noise={rate}", make, ALL, "NOISE", label_transform=flip)
+        run_cv(f"lgbm:no_size|noise={rate}", make, NO_SIZE, "NOISE", label_transform=flip)
 
 
 def TEST():
@@ -221,8 +221,8 @@ def TEST():
             diffs.append({"a": a, "b": b, "metric": metric, "diff": d, "lo": lo, "hi": hi})
     pd.DataFrame(diffs).to_csv(TABLES_DIR / "test_paired_diffs.csv", index=False)
 
-    # E6 operating points: queue size chosen on development out-of-fold scores
-    oof = pd.read_pickle(CACHE_DIR / "oof_E1_lightgbm.pkl")
+    # QUEUE_COST: queue size chosen on development out-of-fold scores, applied to the test set
+    oof = pd.read_pickle(CACHE_DIR / "oof_MODELS_lightgbm.pkl")
     y_dev = df.loc[oof.index, "y"].to_numpy()
     s_dev = oof.to_numpy()
     ops = []
@@ -244,11 +244,11 @@ def TEST():
                     "cost_model": tm["fp"] + ratio * tm["fn"],
                     "cost_flag_none": ratio * int(y_test.sum()),
                     "cost_flag_all": int(len(y_test) - y_test.sum())})
-    pd.DataFrame(ops).to_csv(TABLES_DIR / "e6_operating_points.csv", index=False)
+    pd.DataFrame(ops).to_csv(TABLES_DIR / "queue_cost_operating_points.csv", index=False)
     print(pd.DataFrame(ops)[["fn_to_fp_cost", "queue_size_test", "tp", "fp", "fn", "precision", "recall"]])
 
 
-def E9():
+def LEAKY_SPLIT():
     """Claim-level model: random claim split vs provider-grouped split."""
     from lightgbm import LGBMClassifier
     from fraudrank import data
@@ -287,10 +287,10 @@ def E9():
                          "claim_roc_auc": claim_m["roc_auc"], "provider_pr_auc": prov_m["pr_auc"],
                          "provider_roc_auc": prov_m["roc_auc"], "test_claims": int(te.sum()),
                          "test_providers": len(prov)})
-            print("  E9", rows[-1])
-    pd.DataFrame(rows).to_csv(TABLES_DIR / "e9_leakage.csv", index=False)
+            print("  LEAKY_SPLIT", rows[-1])
+    pd.DataFrame(rows).to_csv(TABLES_DIR / "leaky_split.csv", index=False)
     ph = c.groupby("AttendingPhysician")["Provider"].nunique()
-    (TABLES_DIR / "e9_physicians.json").write_text(json.dumps(
+    (TABLES_DIR / "leaky_split_physicians.json").write_text(json.dumps(
         {"attending_physicians": int(len(ph)), "share_billing_for_one_provider": float((ph == 1).mean())}, indent=2))
 
 
@@ -315,8 +315,8 @@ def SUMMARY():
     print(pd.DataFrame(rows).round(4).to_string())
 
 
-STEPS = {"TUNE": TUNE, "E0": E0, "E1": E1, "E2": E2, "E3": E3, "E5": E5, "E7": E7, "TEST": TEST,
-         "E9": E9, "SUMMARY": SUMMARY}
+STEPS = {"TUNE": TUNE, "SIZE": SIZE, "MODELS": MODELS, "FAMILIES": FAMILIES, "NETWORK": NETWORK, "IMBALANCE": IMBALANCE, "NOISE": NOISE, "TEST": TEST,
+         "LEAKY_SPLIT": LEAKY_SPLIT, "SUMMARY": SUMMARY}
 
 if __name__ == "__main__":
     todo = sys.argv[1:] or list(STEPS)

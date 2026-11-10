@@ -1,0 +1,34 @@
+{
+  "steps": [
+    {
+      "column": "PotentialFraud",
+      "action": "recode_binary",
+      "detail": "Yes->1, No->0",
+      "reason": "Target variable needs to be numeric binary for modeling"
+    },
+    {
+      "column": "DOD",
+      "action": "missing_indicator",
+      "detail": "missing->1, present->0",
+      "reason": "Missing by design for living beneficiaries, prefer missing indicator"
+    },
+    {
+      "column": "DOB",
+      "action": "parse_date",
+      "detail": "convert to datetime",
+      "reason": "Need date format for age calculation"
+    },
+    {
+      "column": "ClmProcedureCode_5",
+      "action": "drop_column",
+      "detail": "100% missing",
+      "reason": "Column is entirely missing and carries no information"
+    },
+    {
+      "column": "ClmProcedureCode_6",
+      "action": "drop_column",
+      "detail": "100% missing",
+      "reason": "Column is entirely missing and carries no information"
+    }
+  ]
+}

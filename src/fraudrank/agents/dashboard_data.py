@@ -2,6 +2,9 @@
 
 The dashboard covers all 1,082 held-out providers. Every number on it comes from
 here; the Dashboard agent only adds plain-language text for the top of the queue.
+The queue and each provider's action come from the two-gate audit selection
+(audit_selection.py, saved to audit_queue.csv); the Case-file agent's own suggested
+action is kept for comparison but never decides anything.
 
 Peer group = development-set providers with the same type of care (inpatient and
 outpatient / inpatient only / outpatient only), so a hospital is compared with
@@ -15,10 +18,9 @@ import json
 import numpy as np
 import pandas as pd
 
-from ..config import CACHE_DIR, TABLES_DIR
+from ..config import BATCH_SIZE, CACHE_DIR, RISK_QUEUE_SIZE, TABLES_DIR, VOTE_AUDIT
 from .rag import HybridRetriever
 
-QUEUE_SIZE = 20
 CARE = {(1, 1): "Hospital and outpatient", (1, 0): "Hospital only", (0, 1): "Outpatient only"}
 
 # Metrics shown to reviewers: (column, label, unit, log scale for charts, what it means)
@@ -132,6 +134,7 @@ def build(df: pd.DataFrame, splits: dict) -> dict:
     rank = scores["lightgbm"].rank(ascending=False, method="first").astype(int)
     size_free_rank = scores["lgbm:no_size"].rank(ascending=False, method="first").astype(int)
     order = rank.sort_values().index
+    aq = pd.read_csv(TABLES_DIR / "agents" / "audit_queue.csv").fillna({"reason": ""}).set_index("provider")
 
     # peer distributions and quantiles per care type
     peers = {}
@@ -144,7 +147,7 @@ def build(df: pd.DataFrame, splits: dict) -> dict:
                 "hist": _hist(v, log)}
 
     briefs = {}
-    bpath = TABLES_DIR / "agents" / "e8_briefs.json"
+    bpath = TABLES_DIR / "agents" / "briefs.json"
     if bpath.exists():
         for b in json.loads(bpath.read_text()):
             if b["condition"] == "with retrieval":
@@ -169,25 +172,46 @@ def build(df: pd.DataFrame, splits: dict) -> dict:
         sn = shap_ns.loc[p]
         beyond = [[f, round(float(row[f]), 4), round(float((g[f] < row[f]).mean() * 100), 1)]
                   for f, v in sn.sort_values(ascending=False).items() if v > 0][:3]
-        in_queue = int(rank[p]) <= QUEUE_SIZE
+        in_queue = p in aq.index
         entry = {"id": p, "rank": int(rank[p]), "size_free_rank": int(size_free_rank[p]),
-                 "care": care, "in_queue": in_queue,
-                 "unusual_without_size": bool(int(size_free_rank[p]) <= QUEUE_SIZE) if in_queue else None,
+                 "care": care, "in_queue": in_queue, "unusual_without_size": None,
                  "v": vals, "pct": pcts, "drivers": drivers, "beyond": beyond}
+        if in_queue:
+            q = aq.loc[p]
+            entry.update(action=q.action, gate=int(q.gate[0]), position=int(q.position), votes=int(q.votes),
+                         of_models=int(q.of_models), unusual_without_size=bool(q.votes >= VOTE_AUDIT),
+                         rule_reason=q.reason if q.gate.startswith("1") else "",
+                         recommendation_check="borderline" if q.reason == "borderline" else None,
+                         duplicate_claims=int(q.duplicate_claims), overlapping_stays=int(q.overlapping_stays),
+                         lane=("borderline" if q.reason == "borderline" else
+                               "audit" if q.action == "priority_audit" else "desk"),
+                         batch=(int(q.position) - 1) // BATCH_SIZE + 1,
+                         group=(" and ".join((["Duplicate claims"] if q.duplicate_claims and q.gate.startswith("1") else [])
+                                             + (["Overlapping stays"] if q.overlapping_stays >= 2 and q.gate.startswith("1")
+                                                else [])) if q.gate.startswith("1") else
+                                "Possibly unusual billing" if q.reason == "borderline" else
+                                "Unusual billing" if q.votes >= VOTE_AUDIT else "Mainly provider size"))
+            # why the case is here, in the investigator's words: the rule finding, or what drives the rank
+            entry["reason_label"] = entry["rule_reason"] if entry["gate"] == 1 else entry["group"]
         if p in briefs:
             br = briefs[p]["brief"]
-            entry["action"] = br["recommended_action"]
+            entry["agent_suggested_action"] = br["recommended_action"]
             entry["patterns"] = [{"id": t["chunk_id"], "title": retr.by_id(t["chunk_id"])["title"],
                                   "text": _pattern_text(retr.by_id(t["chunk_id"]))}
                                  for t in br["typologies"] if retr.by_id(t["chunk_id"])]
+            entry["pattern_group"] = entry["patterns"][0]["title"] if entry["patterns"] else "No pattern matched"
             entry["case_summary"] = br["summary"]
             entry["case_uncertainty"] = br["uncertainty"]
         providers.append(entry)
 
     test_res = pd.read_csv(TABLES_DIR / "test_results.csv").set_index("model")
-    queue = [p for p in providers if p["in_queue"]]
+    queue = sorted((p for p in providers if p["in_queue"]), key=lambda p: p["position"])
     overview = {
-        "providers_scored": len(test), "queue_size": QUEUE_SIZE,
+        "providers_scored": len(test), "queue_size": len(queue), "risk_queue_size": RISK_QUEUE_SIZE,
+        "gate1_rule_check": sum(p["gate"] == 1 for p in queue), "gate2_risk_ranking": sum(p["gate"] == 2 for p in queue),
+        "gate1_reasons": {"duplicate claims": sum(p["gate"] == 1 and p["duplicate_claims"] > 0 for p in queue),
+                          "overlapping hospital stays": sum(p["gate"] == 1 and p["overlapping_stays"] >= 2 for p in queue)},
+        "vote_models": int(aq.of_models.iloc[0]), "vote_audit": VOTE_AUDIT, "batch_size": BATCH_SIZE,
         "actions": {a: sum(p.get("action") == a for p in queue) for a in ("priority_audit", "desk_review", "monitor")},
         "queue_unusual_without_size": sum(bool(p["unusual_without_size"]) for p in queue),
         "queue_care": pd.Series([p["care"] for p in queue]).value_counts().to_dict(),
@@ -205,12 +229,10 @@ def build(df: pd.DataFrame, splits: dict) -> dict:
         peers[care]["driver_q"] = {f: [round(float(x), 4) for x in np.quantile(g[f].to_numpy(dtype=float),
                                                                               [0.1, 0.25, 0.5, 0.75, 0.9])]
                                    for f in used if f not in metric_keys}
-    for p in queue:
-        a = p.get("action")
-        p["recommendation_check"] = (
-            "unusual_but_desk" if a in ("desk_review", "monitor") and p["unusual_without_size"] else
-            "size_but_audit" if a == "priority_audit" and not p["unusual_without_size"] else None)
     overview["recommendations_to_check"] = sum(bool(p.get("recommendation_check")) for p in queue)
+    overview["lanes"] = {k: sum(p["lane"] == k for p in queue) for k in ("audit", "borderline", "desk")}
+    overview["batches"] = max(p["batch"] for p in queue)
+    overview["agent_agrees"] = sum(p.get("agent_suggested_action") == p["action"] for p in queue)
     overview["actions_unusual_beyond_size"] = {
         a: sum(p.get("action") == a and bool(p["unusual_without_size"]) for p in queue)
         for a in ("priority_audit", "desk_review", "monitor")}

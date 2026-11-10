@@ -1,4 +1,4 @@
-"""Provider network features (lecture 08) built without label leakage.
+"""Provider network features built without label leakage.
 
 Graph: providers are linked when they bill the same beneficiary; the edge weight
 is the number of shared beneficiaries. Edges use claims only, which are known for
@@ -89,7 +89,7 @@ class ProviderGraph:
 
 
 def homophily_test(graph: ProviderGraph, provs, y) -> dict:
-    """Lecture 08 test: observed share of cross-label edges vs the expected 2*l*f."""
+    """Homophily test: observed share of cross-label edges vs the expected 2*l*f."""
     idx = graph.index_of(provs)
     y = np.asarray(y)
     sub = sp.triu(graph.A[idx][:, idx], k=1).tocoo()

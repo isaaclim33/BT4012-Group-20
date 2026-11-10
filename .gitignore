@@ -23,3 +23,6 @@ agent_outputs_*.zip
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Word lock files, written while a document is open
+~$*

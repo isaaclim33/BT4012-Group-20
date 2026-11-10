@@ -1,0 +1,4 @@
+run,caught,reference_items,recode chronic conditions 1/2,recode gender 1/2,recode renal 0/Y,drop constant inpatient deductible,parse dates,physician/procedure missing kept as indicator,DOD missing means alive,structural_imputations_proposed,steps,columns,columns_covered,steps_off_profile
+1,6,7,True,False,True,True,True,True,True,0,84,84,84,0
+2,6,7,True,False,True,True,True,True,True,0,84,84,84,0
+3,7,7,True,True,True,True,True,True,True,0,84,84,84,0

@@ -1,0 +1,599 @@
+{
+  "steps": [
+    {
+      "file": "labels",
+      "column": "Provider",
+      "action": "keep",
+      "detail": "Provider identifier",
+      "reason": "Identifiers and medical codes should be kept"
+    },
+    {
+      "file": "labels",
+      "column": "PotentialFraud",
+      "action": "recode_binary",
+      "detail": "No->0, Yes->1",
+      "reason": "Binary flag coded as text values rather than 0/1"
+    },
+    {
+      "file": "beneficiary",
+      "column": "BeneID",
+      "action": "keep",
+      "detail": "identifier",
+      "reason": "BeneID is a unique identifier and must be kept as-is."
+    },
+    {
+      "file": "beneficiary",
+      "column": "DOB",
+      "action": "parse_date",
+      "detail": "parse string to date format",
+      "reason": "DOB is stored as text and needs to be parsed into a date format."
+    },
+    {
+      "file": "beneficiary",
+      "column": "DOD",
+      "action": "missing_indicator",
+      "detail": "create missing indicator",
+      "reason": "DOD is missing because the beneficiary is alive (field does not apply), so a missing indicator should be used without imputation."
+    },
+    {
+      "file": "beneficiary",
+      "column": "Gender",
+      "action": "recode_binary",
+      "detail": "1->0, 2->1",
+      "reason": "Gender is coded as 1/2 and needs to be recoded to standard binary 0/1."
+    },
+    {
+      "file": "beneficiary",
+      "column": "Race",
+      "action": "keep",
+      "detail": "categorical race code",
+      "reason": "Race is a categorical code representing race categories and should be kept as-is."
+    },
+    {
+      "file": "beneficiary",
+      "column": "RenalDiseaseIndicator",
+      "action": "recode_binary",
+      "detail": "'0'->0, 'Y'->1",
+      "reason": "RenalDiseaseIndicator is coded as '0'/'Y' and needs to be recoded to standard binary 0/1."
+    },
+    {
+      "file": "beneficiary",
+      "column": "State",
+      "action": "keep",
+      "detail": "geographic code",
+      "reason": "State is a geographic identifier code and should be kept as-is."
+    },
+    {
+      "file": "beneficiary",
+      "column": "County",
+      "action": "keep",
+      "detail": "geographic code",
+      "reason": "County is a geographic identifier code and should be kept as-is."
+    },
+    {
+      "file": "beneficiary",
+      "column": "NoOfMonths_PartACov",
+      "action": "keep",
+      "detail": "numeric count",
+      "reason": "NoOfMonths_PartACov represents coverage duration and should be kept as-is."
+    },
+    {
+      "file": "beneficiary",
+      "column": "NoOfMonths_PartBCov",
+      "action": "keep",
+      "detail": "numeric count",
+      "reason": "NoOfMonths_PartBCov represents coverage duration and should be kept as-is."
+    },
+    {
+      "file": "beneficiary",
+      "column": "ChronicCond_Alzheimer",
+      "action": "recode_binary",
+      "detail": "1->1, 2->0",
+      "reason": "ChronicCond_Alzheimer is coded as 1/2 and needs to be recoded to standard binary 0/1."
+    },
+    {
+      "file": "beneficiary",
+      "column": "ChronicCond_Heartfailure",
+      "action": "recode_binary",
+      "detail": "1->1, 2->0",
+      "reason": "ChronicCond_Heartfailure is coded as 1/2 and needs to be recoded to standard binary 0/1."
+    },
+    {
+      "file": "beneficiary",
+      "column": "ChronicCond_KidneyDisease",
+      "action": "recode_binary",
+      "detail": "1->1, 2->0",
+      "reason": "ChronicCond_KidneyDisease is coded as 1/2 and needs to be recoded to standard binary 0/1."
+    },
+    {
+      "file": "beneficiary",
+      "column": "ChronicCond_Cancer",
+      "action": "recode_binary",
+      "detail": "1->1, 2->0",
+      "reason": "ChronicCond_Cancer is coded as 1/2 and needs to be recoded to standard binary 0/1."
+    },
+    {
+      "file": "beneficiary",
+      "column": "ChronicCond_ObstrPulmonary",
+      "action": "recode_binary",
+      "detail": "1->1, 2->0",
+      "reason": "ChronicCond_ObstrPulmonary is coded as 1/2 and needs to be recoded to standard binary 0/1."
+    },
+    {
+      "file": "beneficiary",
+      "column": "ChronicCond_Depression",
+      "action": "recode_binary",
+      "detail": "1->1, 2->0",
+      "reason": "ChronicCond_Depression is coded as 1/2 and needs to be recoded to standard binary 0/1."
+    },
+    {
+      "file": "beneficiary",
+      "column": "ChronicCond_Diabetes",
+      "action": "recode_binary",
+      "detail": "1->1, 2->0",
+      "reason": "ChronicCond_Diabetes is coded as 1/2 and needs to be recoded to standard binary 0/1."
+    },
+    {
+      "file": "beneficiary",
+      "column": "ChronicCond_IschemicHeart",
+      "action": "recode_binary",
+      "detail": "1->1, 2->0",
+      "reason": "ChronicCond_IschemicHeart is coded as 1/2 and needs to be recoded to standard binary 0/1."
+    },
+    {
+      "file": "beneficiary",
+      "column": "ChronicCond_Osteoporasis",
+      "action": "recode_binary",
+      "detail": "1->1, 2->0",
+      "reason": "ChronicCond_Osteoporasis is coded as 1/2 and needs to be recoded to standard binary 0/1."
+    },
+    {
+      "file": "beneficiary",
+      "column": "ChronicCond_rheumatoidarthritis",
+      "action": "recode_binary",
+      "detail": "1->1, 2->0",
+      "reason": "ChronicCond_rheumatoidarthritis is coded as 1/2 and needs to be recoded to standard binary 0/1."
+    },
+    {
+      "file": "beneficiary",
+      "column": "ChronicCond_stroke",
+      "action": "recode_binary",
+      "detail": "1->1, 2->0",
+      "reason": "ChronicCond_stroke is coded as 1/2 and needs to be recoded to standard binary 0/1."
+    },
+    {
+      "file": "beneficiary",
+      "column": "IPAnnualReimbursementAmt",
+      "action": "keep",
+      "detail": "continuous monetary amount",
+      "reason": "IPAnnualReimbursementAmt is a valid numeric reimbursement amount and should be kept as-is."
+    },
+    {
+      "file": "beneficiary",
+      "column": "IPAnnualDeductibleAmt",
+      "action": "keep",
+      "detail": "continuous monetary amount",
+      "reason": "IPAnnualDeductibleAmt is a valid numeric deductible amount and should be kept as-is."
+    },
+    {
+      "file": "beneficiary",
+      "column": "OPAnnualReimbursementAmt",
+      "action": "keep",
+      "detail": "continuous monetary amount",
+      "reason": "OPAnnualReimbursementAmt is a valid numeric reimbursement amount and should be kept as-is."
+    },
+    {
+      "file": "beneficiary",
+      "column": "OPAnnualDeductibleAmt",
+      "action": "keep",
+      "detail": "continuous monetary amount",
+      "reason": "OPAnnualDeductibleAmt is a valid numeric deductible amount and should be kept as-is."
+    },
+    {
+      "file": "inpatient",
+      "column": "BeneID",
+      "action": "keep",
+      "detail": "none",
+      "reason": "Patient identifier; keep per policy for identifiers and medical codes."
+    },
+    {
+      "file": "inpatient",
+      "column": "ClaimID",
+      "action": "keep",
+      "detail": "none",
+      "reason": "Claim identifier; keep per policy for identifiers and medical codes."
+    },
+    {
+      "file": "inpatient",
+      "column": "ClaimStartDt",
+      "action": "parse_date",
+      "detail": "parse text as datetime",
+      "reason": "Dates stored as text require parsing."
+    },
+    {
+      "file": "inpatient",
+      "column": "ClaimEndDt",
+      "action": "parse_date",
+      "detail": "parse text as datetime",
+      "reason": "Dates stored as text require parsing."
+    },
+    {
+      "file": "inpatient",
+      "column": "Provider",
+      "action": "keep",
+      "detail": "none",
+      "reason": "Provider identifier; keep per policy for identifiers and medical codes."
+    },
+    {
+      "file": "inpatient",
+      "column": "InscClaimAmtReimbursed",
+      "action": "keep",
+      "detail": "none",
+      "reason": "Numeric reimbursement amount with variance; no action needed."
+    },
+    {
+      "file": "inpatient",
+      "column": "AttendingPhysician",
+      "action": "keep",
+      "detail": "none",
+      "reason": "Physician identifier; keep per policy for identifiers and medical codes."
+    },
+    {
+      "file": "inpatient",
+      "column": "OperatingPhysician",
+      "action": "missing_indicator",
+      "detail": "add binary indicator for missingness",
+      "reason": "Values missing because the operating physician does not apply to all claims."
+    },
+    {
+      "file": "inpatient",
+      "column": "OtherPhysician",
+      "action": "missing_indicator",
+      "detail": "add binary indicator for missingness",
+      "reason": "Values missing because other physicians do not apply to most claims."
+    },
+    {
+      "file": "inpatient",
+      "column": "AdmissionDt",
+      "action": "parse_date",
+      "detail": "parse text as datetime",
+      "reason": "Dates stored as text require parsing."
+    },
+    {
+      "file": "inpatient",
+      "column": "ClmAdmitDiagnosisCode",
+      "action": "keep",
+      "detail": "none",
+      "reason": "Medical code; keep per policy."
+    },
+    {
+      "file": "inpatient",
+      "column": "DeductibleAmtPaid",
+      "action": "drop_column",
+      "detail": "single distinct value (1068.0)",
+      "reason": "Has a single distinct value among non-missing rows, providing no variance."
+    },
+    {
+      "file": "inpatient",
+      "column": "DischargeDt",
+      "action": "parse_date",
+      "detail": "parse text as datetime",
+      "reason": "Dates stored as text require parsing."
+    },
+    {
+      "file": "inpatient",
+      "column": "DiagnosisGroupCode",
+      "action": "keep",
+      "detail": "none",
+      "reason": "Medical code; keep per policy."
+    },
+    {
+      "file": "inpatient",
+      "column": "ClmDiagnosisCode_1",
+      "action": "keep",
+      "detail": "none",
+      "reason": "Medical code; keep per policy."
+    },
+    {
+      "file": "inpatient",
+      "column": "ClmDiagnosisCode_2",
+      "action": "keep",
+      "detail": "none",
+      "reason": "Medical code; keep per policy."
+    },
+    {
+      "file": "inpatient",
+      "column": "ClmDiagnosisCode_3",
+      "action": "keep",
+      "detail": "none",
+      "reason": "Medical code; keep per policy."
+    },
+    {
+      "file": "inpatient",
+      "column": "ClmDiagnosisCode_4",
+      "action": "keep",
+      "detail": "none",
+      "reason": "Medical code; keep per policy."
+    },
+    {
+      "file": "inpatient",
+      "column": "ClmDiagnosisCode_5",
+      "action": "keep",
+      "detail": "none",
+      "reason": "Medical code; keep per policy."
+    },
+    {
+      "file": "inpatient",
+      "column": "ClmDiagnosisCode_6",
+      "action": "keep",
+      "detail": "none",
+      "reason": "Medical code; keep per policy."
+    },
+    {
+      "file": "inpatient",
+      "column": "ClmDiagnosisCode_7",
+      "action": "keep",
+      "detail": "none",
+      "reason": "Medical code; keep per policy."
+    },
+    {
+      "file": "inpatient",
+      "column": "ClmDiagnosisCode_8",
+      "action": "keep",
+      "detail": "none",
+      "reason": "Medical code; keep per policy."
+    },
+    {
+      "file": "inpatient",
+      "column": "ClmDiagnosisCode_9",
+      "action": "keep",
+      "detail": "none",
+      "reason": "Medical code; keep per policy."
+    },
+    {
+      "file": "inpatient",
+      "column": "ClmDiagnosisCode_10",
+      "action": "keep",
+      "detail": "none",
+      "reason": "Medical code; keep per policy."
+    },
+    {
+      "file": "inpatient",
+      "column": "ClmProcedureCode_1",
+      "action": "keep",
+      "detail": "none",
+      "reason": "Medical code; keep per policy."
+    },
+    {
+      "file": "inpatient",
+      "column": "ClmProcedureCode_2",
+      "action": "keep",
+      "detail": "none",
+      "reason": "Medical code; keep per policy."
+    },
+    {
+      "file": "inpatient",
+      "column": "ClmProcedureCode_3",
+      "action": "keep",
+      "detail": "none",
+      "reason": "Medical code; keep per policy."
+    },
+    {
+      "file": "inpatient",
+      "column": "ClmProcedureCode_4",
+      "action": "keep",
+      "detail": "none",
+      "reason": "Medical code; keep per policy."
+    },
+    {
+      "file": "inpatient",
+      "column": "ClmProcedureCode_5",
+      "action": "keep",
+      "detail": "none",
+      "reason": "Medical code; keep per policy."
+    },
+    {
+      "file": "inpatient",
+      "column": "ClmProcedureCode_6",
+      "action": "drop_column",
+      "detail": "zero distinct values / constant missing",
+      "reason": "Has no variance or single distinct value among non-missing rows."
+    },
+    {
+      "file": "outpatient",
+      "column": "BeneID",
+      "action": "keep",
+      "detail": "Beneficiary identifier",
+      "reason": "Beneficiary ID is an identifier; keep per guideline."
+    },
+    {
+      "file": "outpatient",
+      "column": "ClaimID",
+      "action": "keep",
+      "detail": "Claim identifier",
+      "reason": "Claim ID is an identifier; keep per guideline."
+    },
+    {
+      "file": "outpatient",
+      "column": "ClaimStartDt",
+      "action": "parse_date",
+      "detail": "Parse string date to datetime",
+      "reason": "Dates stored as text must be parsed into datetime format."
+    },
+    {
+      "file": "outpatient",
+      "column": "ClaimEndDt",
+      "action": "parse_date",
+      "detail": "Parse string date to datetime",
+      "reason": "Dates stored as text must be parsed into datetime format."
+    },
+    {
+      "file": "outpatient",
+      "column": "Provider",
+      "action": "keep",
+      "detail": "Provider identifier",
+      "reason": "Provider ID is an identifier; keep per guideline."
+    },
+    {
+      "file": "outpatient",
+      "column": "InscClaimAmtReimbursed",
+      "action": "keep",
+      "detail": "Numeric claim amount",
+      "reason": "Insurance claim reimbursement amount is a key financial feature."
+    },
+    {
+      "file": "outpatient",
+      "column": "AttendingPhysician",
+      "action": "keep",
+      "detail": "Physician identifier",
+      "reason": "Physician ID is an identifier; keep per guideline."
+    },
+    {
+      "file": "outpatient",
+      "column": "OperatingPhysician",
+      "action": "keep",
+      "detail": "Physician identifier",
+      "reason": "Physician ID is an identifier; keep per guideline."
+    },
+    {
+      "file": "outpatient",
+      "column": "OtherPhysician",
+      "action": "keep",
+      "detail": "Physician identifier",
+      "reason": "Physician ID is an identifier; keep per guideline."
+    },
+    {
+      "file": "outpatient",
+      "column": "ClmDiagnosisCode_1",
+      "action": "keep",
+      "detail": "Medical diagnosis code",
+      "reason": "Medical diagnosis code; keep per guideline."
+    },
+    {
+      "file": "outpatient",
+      "column": "ClmDiagnosisCode_2",
+      "action": "keep",
+      "detail": "Medical diagnosis code",
+      "reason": "Medical diagnosis code; keep per guideline."
+    },
+    {
+      "file": "outpatient",
+      "column": "ClmDiagnosisCode_3",
+      "action": "keep",
+      "detail": "Medical diagnosis code",
+      "reason": "Medical diagnosis code; keep per guideline."
+    },
+    {
+      "file": "outpatient",
+      "column": "ClmDiagnosisCode_4",
+      "action": "keep",
+      "detail": "Medical diagnosis code",
+      "reason": "Medical diagnosis code; keep per guideline."
+    },
+    {
+      "file": "outpatient",
+      "column": "ClmDiagnosisCode_5",
+      "action": "keep",
+      "detail": "Medical diagnosis code",
+      "reason": "Medical diagnosis code; keep per guideline."
+    },
+    {
+      "file": "outpatient",
+      "column": "ClmDiagnosisCode_6",
+      "action": "keep",
+      "detail": "Medical diagnosis code",
+      "reason": "Medical diagnosis code; keep per guideline."
+    },
+    {
+      "file": "outpatient",
+      "column": "ClmDiagnosisCode_7",
+      "action": "keep",
+      "detail": "Medical diagnosis code",
+      "reason": "Medical diagnosis code; keep per guideline."
+    },
+    {
+      "file": "outpatient",
+      "column": "ClmDiagnosisCode_8",
+      "action": "keep",
+      "detail": "Medical diagnosis code",
+      "reason": "Medical diagnosis code; keep per guideline."
+    },
+    {
+      "file": "outpatient",
+      "column": "ClmDiagnosisCode_9",
+      "action": "keep",
+      "detail": "Medical diagnosis code",
+      "reason": "Medical diagnosis code; keep per guideline."
+    },
+    {
+      "file": "outpatient",
+      "column": "ClmDiagnosisCode_10",
+      "action": "keep",
+      "detail": "Medical diagnosis code",
+      "reason": "Medical diagnosis code; keep per guideline."
+    },
+    {
+      "file": "outpatient",
+      "column": "ClmProcedureCode_1",
+      "action": "keep",
+      "detail": "Medical procedure code",
+      "reason": "Medical procedure code; keep per guideline."
+    },
+    {
+      "file": "outpatient",
+      "column": "ClmProcedureCode_2",
+      "action": "keep",
+      "detail": "Medical procedure code",
+      "reason": "Medical procedure code; keep per guideline."
+    },
+    {
+      "file": "outpatient",
+      "column": "ClmProcedureCode_3",
+      "action": "keep",
+      "detail": "Medical procedure code",
+      "reason": "Medical procedure code; keep per guideline."
+    },
+    {
+      "file": "outpatient",
+      "column": "ClmProcedureCode_4",
+      "action": "keep",
+      "detail": "Medical procedure code",
+      "reason": "Medical procedure code; keep per guideline."
+    },
+    {
+      "file": "outpatient",
+      "column": "ClmProcedureCode_5",
+      "action": "keep",
+      "detail": "Medical procedure code",
+      "reason": "Medical procedure code; keep per guideline."
+    },
+    {
+      "file": "outpatient",
+      "column": "ClmProcedureCode_6",
+      "action": "keep",
+      "detail": "Medical procedure code",
+      "reason": "Medical procedure code; keep per guideline."
+    },
+    {
+      "file": "outpatient",
+      "column": "DeductibleAmtPaid",
+      "action": "keep",
+      "detail": "Numeric deductible amount",
+      "reason": "Deductible amount paid is a key financial feature."
+    },
+    {
+      "file": "outpatient",
+      "column": "ClmAdmitDiagnosisCode",
+      "action": "keep",
+      "detail": "Medical admission diagnosis code",
+      "reason": "Medical diagnosis code; keep per guideline."
+    }
+  ],
+  "uncovered": {
+    "labels": [],
+    "beneficiary": [],
+    "inpatient": [],
+    "outpatient": []
+  },
+  "structural_imputations": []
+}

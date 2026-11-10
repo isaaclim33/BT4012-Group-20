@@ -1,7 +1,7 @@
 """Aggregate claims to one row per provider, grouped into named feature families.
 
 The label is assigned per provider, so the model works per provider too. Features
-are split into families so that experiments can drop a family (E2) or keep only
+are split into families so that experiments can drop a family (FAMILIES) or keep only
 size-free features. The SIZE family holds raw counts and totals that grow with a
 provider's volume; every other family is a ratio, mean or share, so it describes
 *how* a provider bills rather than *how much*.

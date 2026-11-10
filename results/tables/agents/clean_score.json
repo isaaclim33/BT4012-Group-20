@@ -1,16 +1,22 @@
 {
+  "runs": 3,
+  "caught_per_run": [
+    6,
+    6,
+    7
+  ],
+  "caught_mean": 6.333333333333333,
   "reference_items": 7,
-  "caught": 6,
-  "items": {
-    "recode chronic conditions 1/2": true,
-    "recode gender 1/2": true,
-    "recode renal 0/Y": true,
-    "drop constant inpatient deductible": false,
-    "parse dates": true,
-    "physician/procedure missing kept as indicator": true,
-    "DOD missing means alive": true
+  "items_caught_share": {
+    "recode chronic conditions 1/2": 1.0,
+    "recode gender 1/2": 0.3333333333333333,
+    "recode renal 0/Y": 1.0,
+    "drop constant inpatient deductible": 1.0,
+    "parse dates": 1.0,
+    "physician/procedure missing kept as indicator": 1.0,
+    "DOD missing means alive": 1.0
   },
   "structural_imputations_proposed": 0,
-  "errors": [],
-  "steps": 42
+  "columns": 84,
+  "columns_covered_min": 84
 }

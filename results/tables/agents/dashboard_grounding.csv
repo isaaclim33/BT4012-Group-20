@@ -1,0 +1,1173 @@
+provider,part,field,kind,text,matches_evidence,numbers_unsupported,passed,numbers_stated,unsupported_values,spelled_numbers,jargon_terms,says_proven_fraud
+PRV56560,evidence line,duplicate_claims,duplicate_claims,1 duplicate claim,True,0,True,,,,,
+PRV56560,evidence line,overlapping_stays,overlapping_stays,2 overlapping hospital stays,True,0,True,,,,,
+PRV56560,evidence line,total_paid,total_paid,$3.21M paid,True,0,True,,,,,
+PRV56560,evidence line,beyond_size,beyond_size,Variety of main diagnoses 58%,True,0,True,,,,,
+PRV56560,ai text,summary,,,,0,True,2.0,[],[],[],False
+PRV56560,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV56560,ai text,beyond[distinct_diag1_per_claim],,,,0,True,0.0,[],[],[],False
+PRV56560,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV56560,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV56560,ai text,reasons[total_reimb],,,,0,True,1.0,[],[],[],False
+PRV56560,ai text,reasons[los_max],,,,0,True,2.0,[],[],[],False
+PRV56560,ai text,reasons[n_claims],,,,0,True,1.0,[],[],[],False
+PRV56560,ai text,reasons[ip_total_reimb],,,,0,True,1.0,[],[],[],False
+PRV56560,ai text,reasons[n_admit_diag],,,,0,True,1.0,[],[],[],False
+PRV56560,ai text,what_to_check[0],,,,0,True,0.0,[],[],[],False
+PRV56560,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV56560,ai text,what_to_check[2],,,,0,True,1.0,[],[],[],False
+PRV56560,ai text,what_to_check[3],,,,0,True,0.0,[],[],[],False
+PRV56560,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV56560,ai text,patterns[T7],,,,0,True,0.0,[],[],[],False
+PRV56560,ai text,patterns[T4],,,,0,True,0.0,[],[],[],False
+PRV56560,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV56560,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV54742,evidence line,overlapping_stays,overlapping_stays,2 overlapping hospital stays,True,0,True,,,,,
+PRV54742,evidence line,total_paid,total_paid,$2.97M paid,True,0,True,,,,,
+PRV54742,evidence line,beyond_size,beyond_size,Variety of main diagnoses 61%,True,0,True,,,,,
+PRV54742,ai text,summary,,,,0,True,1.0,[],[],[],False
+PRV54742,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV54742,ai text,beyond[distinct_diag1_per_claim],,,,0,True,0.0,[],[],[],False
+PRV54742,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV54742,ai text,beyond[ip_reimb_max],,,,0,True,1.0,[],[],[],False
+PRV54742,ai text,reasons[total_reimb],,,,0,True,1.0,[],[],[],False
+PRV54742,ai text,reasons[los_max],,,,0,True,2.0,[],[],[],False
+PRV54742,ai text,reasons[n_claims],,,,0,True,1.0,[],[],[],False
+PRV54742,ai text,reasons[ip_total_reimb],,,,0,True,1.0,[],[],[],False
+PRV54742,ai text,reasons[n_admit_diag],,,,0,True,1.0,[],[],[],False
+PRV54742,ai text,what_to_check[0],,,,0,True,0.0,[],[],[],False
+PRV54742,ai text,what_to_check[1],,,,0,True,1.0,[],[],[],False
+PRV54742,ai text,what_to_check[2],,,,0,True,1.0,[],[],[],False
+PRV54742,ai text,what_to_check[3],,,,0,True,1.0,[],[],[],False
+PRV54742,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV54742,ai text,patterns[T4],,,,0,True,0.0,[],[],[],False
+PRV54742,ai text,patterns[T7],,,,0,True,0.0,[],[],[],False
+PRV54742,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV54742,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV54772,evidence line,overlapping_stays,overlapping_stays,1 overlapping hospital stay,True,0,True,,,,,
+PRV54772,evidence line,total_paid,total_paid,$1.75M paid,True,0,True,,,,,
+PRV54772,evidence line,beyond_size,beyond_size,Variety of main diagnoses 61%,True,0,True,,,,,
+PRV54772,ai text,summary,,,,0,True,0.0,[],[],[],False
+PRV54772,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV54772,ai text,beyond[distinct_diag1_per_claim],,,,0,True,0.0,[],[],[],False
+PRV54772,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV54772,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV54772,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV54772,ai text,reasons[los_max],,,,0,True,2.0,[],[],[],False
+PRV54772,ai text,reasons[n_claims],,,,0,True,1.0,[],[],[],False
+PRV54772,ai text,reasons[ip_total_reimb],,,,0,True,2.0,[],[],[],False
+PRV54772,ai text,reasons[n_admit_diag],,,,0,True,1.0,[],[],[],False
+PRV54772,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV54772,ai text,what_to_check[1],,,,0,True,1.0,[],[],[],False
+PRV54772,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV54772,ai text,what_to_check[3],,,,0,True,0.0,[],[],[],False
+PRV54772,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV54772,ai text,patterns[T4],,,,0,True,0.0,[],[],[],False
+PRV54772,ai text,patterns[T7],,,,0,True,0.0,[],[],[],False
+PRV54772,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV54772,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV52985,evidence line,overlapping_stays,overlapping_stays,2 overlapping hospital stays,True,0,True,,,,,
+PRV52985,evidence line,total_paid,total_paid,$1.72M paid,True,0,True,,,,,
+PRV52985,evidence line,beyond_size,beyond_size,Longest hospital stay 35 days,True,0,True,,,,,
+PRV52985,ai text,summary,,,,0,True,3.0,[],[],[],False
+PRV52985,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV52985,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV52985,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV52985,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV52985,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV52985,ai text,reasons[los_max],,,,0,True,2.0,[],[],[],False
+PRV52985,ai text,reasons[n_claims],,,,0,True,2.0,[],[],[],False
+PRV52985,ai text,reasons[ip_total_reimb],,,,0,True,2.0,[],[],[],False
+PRV52985,ai text,reasons[n_admit_diag],,,,0,True,2.0,[],[],[],False
+PRV52985,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV52985,ai text,what_to_check[1],,,,0,True,1.0,[],[],[],False
+PRV52985,ai text,what_to_check[2],,,,0,True,1.0,[],[],[],False
+PRV52985,ai text,patterns[T6],,,,0,True,1.0,[],[],[],False
+PRV52985,ai text,patterns[T7],,,,0,True,1.0,[],[],[],False
+PRV52985,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV52985,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV52340,evidence line,overlapping_stays,overlapping_stays,1 overlapping hospital stay,True,0,True,,,,,
+PRV52340,evidence line,total_paid,total_paid,$2.54M paid,True,0,True,,,,,
+PRV52340,evidence line,beyond_size,beyond_size,Longest hospital stay 35 days,True,0,True,,,,,
+PRV52340,ai text,summary,,,,0,True,2.0,[],[],[],False
+PRV52340,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV52340,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV52340,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV52340,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV52340,ai text,reasons[total_reimb],,,,0,True,1.0,[],[],[],False
+PRV52340,ai text,reasons[los_max],,,,0,True,1.0,[],[],[],False
+PRV52340,ai text,reasons[n_claims],,,,0,True,1.0,[],[],[],False
+PRV52340,ai text,reasons[ip_total_reimb],,,,0,True,2.0,[],[],[],False
+PRV52340,ai text,reasons[n_admit_diag],,,,0,True,1.0,[],[],[],False
+PRV52340,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV52340,ai text,what_to_check[1],,,,0,True,1.0,[],[],[],False
+PRV52340,ai text,what_to_check[2],,,,0,True,1.0,[],[],[],False
+PRV52340,ai text,what_to_check[3],,,,0,True,1.0,[],[],[],False
+PRV52340,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV52340,ai text,patterns[T7],,,,0,True,1.0,[],[],[],False
+PRV52340,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV52340,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV55435,evidence line,overlapping_stays,overlapping_stays,2 overlapping hospital stays,True,0,True,,,,,
+PRV55435,evidence line,total_paid,total_paid,$1.25M paid,True,0,True,,,,,
+PRV55435,evidence line,beyond_size,beyond_size,Longest hospital stay 34 days,True,0,True,,,,,
+PRV55435,ai text,summary,,,,0,True,1.0,[],[],[],False
+PRV55435,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV55435,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV55435,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV55435,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV55435,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV55435,ai text,reasons[los_max],,,,0,True,2.0,[],[],[],False
+PRV55435,ai text,reasons[ip_total_reimb],,,,0,True,2.0,[],[],[],False
+PRV55435,ai text,reasons[n_ip_claims],,,,0,True,2.0,[],[],[],False
+PRV55435,ai text,reasons[n_dgc],,,,0,True,2.0,[],[],[],False
+PRV55435,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV55435,ai text,what_to_check[1],,,,0,True,1.0,[],[],[],False
+PRV55435,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV55435,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV55435,ai text,patterns[T7],,,,0,True,0.0,[],[],[],False
+PRV55435,ai text,patterns[T4],,,,0,True,0.0,[],[],[],False
+PRV55435,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV51390,evidence line,overlapping_stays,overlapping_stays,2 overlapping hospital stays,True,0,True,,,,,
+PRV51390,evidence line,total_paid,total_paid,$1.61M paid,True,0,True,,,,,
+PRV51390,evidence line,beyond_size,beyond_size,Longest hospital stay 35 days,True,0,True,,,,,
+PRV51390,ai text,summary,,,,0,True,1.0,[],[],[],False
+PRV51390,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV51390,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV51390,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV51390,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV51390,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV51390,ai text,reasons[los_max],,,,0,True,2.0,[],[],[],False
+PRV51390,ai text,reasons[ip_total_reimb],,,,0,True,2.0,[],[],[],False
+PRV51390,ai text,reasons[n_ip_claims],,,,0,True,2.0,[],[],[],False
+PRV51390,ai text,reasons[n_admit_diag],,,,0,True,2.0,[],[],[],False
+PRV51390,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV51390,ai text,what_to_check[1],,,,0,True,1.0,[],[],[],False
+PRV51390,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV51390,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV51390,ai text,patterns[T7],,,,0,True,0.0,[],[],[],False
+PRV51390,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV51390,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV53797,evidence line,total_paid,total_paid,$1.30M paid,True,0,True,,,,,
+PRV53797,evidence line,beyond_size,beyond_size,Variety of main diagnoses 48%,True,0,True,,,,,
+PRV53797,ai text,summary,,,,0,True,0.0,[],[],[],False
+PRV53797,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV53797,ai text,beyond[distinct_diag1_per_claim],,,,0,True,0.0,[],[],[],False
+PRV53797,ai text,beyond[claims_per_bene],,,,0,True,1.0,[],[],[],False
+PRV53797,ai text,beyond[claims_per_attending],,,,0,True,0.0,[],[],[],False
+PRV53797,ai text,reasons[total_reimb],,,,0,True,0.0,[],[],[],False
+PRV53797,ai text,reasons[n_claims],,,,0,True,0.0,[],[],[],False
+PRV53797,ai text,reasons[n_admit_diag],,,,0,True,0.0,[],[],[],False
+PRV53797,ai text,reasons[claims_per_bene],,,,0,True,1.0,[],[],[],False
+PRV53797,ai text,reasons[n_op_claims],,,,0,True,0.0,[],[],[],False
+PRV53797,ai text,what_to_check[0],,,,0,True,0.0,[],[],[],False
+PRV53797,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV53797,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV53797,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV53797,ai text,patterns[T1],,,,0,True,0.0,[],[],[],False
+PRV53797,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV53797,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV52120,evidence line,overlapping_stays,overlapping_stays,4 overlapping hospital stays,True,0,True,,,,,
+PRV52120,evidence line,total_paid,total_paid,$1.95M paid,True,0,True,,,,,
+PRV52120,evidence line,beyond_size,beyond_size,Longest hospital stay 35 days,True,0,True,,,,,
+PRV52120,ai text,summary,,,,0,True,1.0,[],[],[],False
+PRV52120,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV52120,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV52120,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV52120,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV52120,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV52120,ai text,reasons[los_max],,,,0,True,1.0,[],[],[],False
+PRV52120,ai text,reasons[ip_total_reimb],,,,0,True,2.0,[],[],[],False
+PRV52120,ai text,reasons[n_admit_diag],,,,0,True,2.0,[],[],[],False
+PRV52120,ai text,reasons[n_ip_claims],,,,0,True,2.0,[],[],[],False
+PRV52120,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV52120,ai text,what_to_check[1],,,,0,True,1.0,[],[],[],False
+PRV52120,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV52120,ai text,what_to_check[3],,,,0,True,0.0,[],[],[],False
+PRV52120,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV52120,ai text,patterns[T7],,,,0,True,0.0,[],[],[],False
+PRV52120,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV52120,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV52590,evidence line,total_paid,total_paid,$1.23M paid,True,0,True,,,,,
+PRV52590,evidence line,beyond_size,beyond_size,Longest hospital stay 26 days,True,0,True,,,,,
+PRV52590,ai text,summary,,,,0,True,0.0,[],[],[],False
+PRV52590,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV52590,ai text,beyond[los_max],,,,0,False,0.0,[],"['seventy', 'twenty']",[],False
+PRV52590,ai text,beyond[ip_reimb_max],,,,0,False,0.0,[],"['eighty', 'ninety', 'thousand']",[],False
+PRV52590,ai text,beyond[los_long_share],,,,0,False,0.0,[],"['eleven', 'fifty']",[],False
+PRV52590,ai text,reasons[total_reimb],,,,0,False,1.0,[],"['hundred', 'million', 'ninety', 'thirty', 'thousand']",[],False
+PRV52590,ai text,reasons[los_max],,,,0,False,0.0,[],"['seventy', 'twenty']",[],False
+PRV52590,ai text,reasons[ip_total_reimb],,,,0,False,0.0,[],"['hundred', 'million', 'ninety', 'thousand']",[],False
+PRV52590,ai text,reasons[n_ip_claims],,,,0,False,0.0,[],"['fifteen', 'hundred', 'ninety']",[],False
+PRV52590,ai text,reasons[n_admit_diag],,,,0,False,0.0,[],"['hundred', 'ninety']",[],False
+PRV52590,ai text,what_to_check[0],,,,0,False,0.0,[],['twenty'],[],False
+PRV52590,ai text,what_to_check[1],,,,0,False,0.0,[],"['eighty', 'thousand']",[],False
+PRV52590,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV52590,ai text,what_to_check[3],,,,0,False,0.0,[],['hundred'],[],False
+PRV52590,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV52590,ai text,patterns[T7],,,,0,True,0.0,[],[],[],False
+PRV52590,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV52590,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV51578,evidence line,total_paid,total_paid,$1.66M paid,True,0,True,,,,,
+PRV51578,evidence line,beyond_size,beyond_size,Variety of main diagnoses 66%,True,0,True,,,,,
+PRV51578,ai text,summary,,,,0,True,2.0,[],[],[],False
+PRV51578,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV51578,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV51578,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV51578,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV51578,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV51578,ai text,reasons[los_max],,,,0,True,2.0,[],[],[],False
+PRV51578,ai text,reasons[n_claims],,,,0,True,2.0,[],[],[],False
+PRV51578,ai text,reasons[ip_total_reimb],,,,0,True,2.0,[],[],[],False
+PRV51578,ai text,reasons[n_admit_diag],,,,0,True,2.0,[],[],[],False
+PRV51578,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV51578,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV51578,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV51578,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV51578,ai text,patterns[T7],,,,0,True,0.0,[],[],[],False
+PRV51578,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV51578,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV56416,evidence line,overlapping_stays,overlapping_stays,2 overlapping hospital stays,True,0,True,,,,,
+PRV56416,evidence line,total_paid,total_paid,$2.74M paid,True,0,True,,,,,
+PRV56416,evidence line,beyond_size,beyond_size,Variety of main diagnoses 66%,True,0,True,,,,,
+PRV56416,ai text,summary,,,,0,True,2.0,[],[],[],False
+PRV56416,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV56416,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV56416,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV56416,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV56416,ai text,reasons[total_reimb],,,,0,True,1.0,[],[],[],False
+PRV56416,ai text,reasons[los_max],,,,0,True,2.0,[],[],[],False
+PRV56416,ai text,reasons[n_claims],,,,0,True,2.0,[],[],[],False
+PRV56416,ai text,reasons[ip_total_reimb],,,,0,True,1.0,[],[],[],False
+PRV56416,ai text,reasons[n_admit_diag],,,,0,True,1.0,[],[],[],False
+PRV56416,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV56416,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV56416,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV56416,ai text,what_to_check[3],,,,0,True,0.0,[],[],[],False
+PRV56416,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV56416,ai text,patterns[T4],,,,0,True,0.0,[],[],[],False
+PRV56416,ai text,patterns[T7],,,,0,True,0.0,[],[],[],False
+PRV56416,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV56416,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV53808,evidence line,total_paid,total_paid,$1.93M paid,True,0,True,,,,,
+PRV53808,evidence line,beyond_size,beyond_size,Longest hospital stay 35 days,True,0,True,,,,,
+PRV53808,ai text,summary,,,,0,True,0.0,[],[],[],False
+PRV53808,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV53808,ai text,beyond[los_max],,,,0,False,0.0,[],"['eighty', 'thirty']",[],False
+PRV53808,ai text,beyond[distinct_diag1_per_claim],,,,0,False,0.0,[],['ninety'],[],False
+PRV53808,ai text,beyond[ip_reimb_max],,,,0,False,0.0,[],"['eighty', 'fifty', 'thousand']",[],False
+PRV53808,ai text,reasons[total_reimb],,,,0,False,0.0,[],"['hundred', 'million', 'ninety', 'thirty', 'thousand']",[],False
+PRV53808,ai text,reasons[los_max],,,,0,False,0.0,[],"['eighty', 'thirty']",[],False
+PRV53808,ai text,reasons[ip_total_reimb],,,,0,False,0.0,[],"['fifty', 'hundred', 'million', 'ninety', 'thousand']",[],False
+PRV53808,ai text,reasons[n_ip_claims],,,,0,False,0.0,[],"['hundred', 'ninety']",[],False
+PRV53808,ai text,reasons[n_admit_diag],,,,0,False,0.0,[],"['hundred', 'ninety', 'sixty']",[],False
+PRV53808,ai text,what_to_check[0],,,,0,False,0.0,[],['thirty'],[],False
+PRV53808,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV53808,ai text,what_to_check[2],,,,0,False,0.0,[],"['fifty', 'thousand']",[],False
+PRV53808,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV53808,ai text,patterns[T7],,,,0,False,0.0,[],['thirty'],[],False
+PRV53808,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV55215,evidence line,total_paid,total_paid,$2.28M paid,True,0,True,,,,,
+PRV55215,evidence line,beyond_size,beyond_size,Variety of main diagnoses 53%,True,0,True,,,,,
+PRV55215,ai text,summary,,,,0,True,3.0,[],[],[],False
+PRV55215,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV55215,ai text,beyond[distinct_diag1_per_claim],,,,0,True,0.0,[],[],[],False
+PRV55215,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV55215,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV55215,ai text,reasons[total_reimb],,,,0,True,1.0,[],[],[],False
+PRV55215,ai text,reasons[los_max],,,,0,True,2.0,[],[],[],False
+PRV55215,ai text,reasons[n_claims],,,,0,True,1.0,[],[],[],False
+PRV55215,ai text,reasons[ip_total_reimb],,,,0,True,2.0,[],[],[],False
+PRV55215,ai text,reasons[n_admit_diag],,,,0,True,1.0,[],[],[],False
+PRV55215,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV55215,ai text,what_to_check[1],,,,0,True,1.0,[],[],[],False
+PRV55215,ai text,what_to_check[2],,,,0,True,1.0,[],[],[],False
+PRV55215,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV55215,ai text,patterns[T7],,,,0,True,0.0,[],[],[],False
+PRV55215,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV55215,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV57172,evidence line,overlapping_stays,overlapping_stays,1 overlapping hospital stay,True,0,True,,,,,
+PRV57172,evidence line,total_paid,total_paid,$1.39M paid,True,0,True,,,,,
+PRV57172,evidence line,beyond_size,beyond_size,Variety of main diagnoses 62%,True,0,True,,,,,
+PRV57172,ai text,summary,,,,0,True,0.0,[],[],[],False
+PRV57172,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV57172,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV57172,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV57172,ai text,beyond[claims_per_bene],,,,0,True,2.0,[],[],[],False
+PRV57172,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV57172,ai text,reasons[los_max],,,,0,True,2.0,[],[],[],False
+PRV57172,ai text,reasons[n_claims],,,,0,True,1.0,[],[],[],False
+PRV57172,ai text,reasons[claims_per_bene],,,,0,True,2.0,[],[],[],False
+PRV57172,ai text,reasons[n_admit_diag],,,,0,True,1.0,[],[],[],False
+PRV57172,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV57172,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV57172,ai text,what_to_check[2],,,,0,True,1.0,[],[],[],False
+PRV57172,ai text,what_to_check[3],,,,0,True,1.0,[],[],[],False
+PRV57172,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV57172,ai text,patterns[T7],,,,0,True,1.0,[],[],[],False
+PRV57172,ai text,patterns[T1],,,,0,True,0.0,[],[],[],False
+PRV57172,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV57172,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV54258,evidence line,overlapping_stays,overlapping_stays,2 overlapping hospital stays,True,0,True,,,,,
+PRV54258,evidence line,total_paid,total_paid,$1.22M paid,True,0,True,,,,,
+PRV54258,evidence line,beyond_size,beyond_size,Longest hospital stay 35 days,True,0,True,,,,,
+PRV54258,ai text,summary,,,,0,True,0.0,[],[],[],False
+PRV54258,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV54258,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV54258,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV54258,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV54258,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV54258,ai text,reasons[los_max],,,,0,True,2.0,[],[],[],False
+PRV54258,ai text,reasons[ip_total_reimb],,,,0,True,2.0,[],[],[],False
+PRV54258,ai text,reasons[n_ip_claims],,,,0,True,2.0,[],[],[],False
+PRV54258,ai text,reasons[n_admit_diag],,,,0,True,2.0,[],[],[],False
+PRV54258,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV54258,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV54258,ai text,what_to_check[2],,,,0,True,1.0,[],[],[],False
+PRV54258,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV54258,ai text,patterns[T4],,,,0,True,0.0,[],[],[],False
+PRV54258,ai text,patterns[T7],,,,0,True,0.0,[],[],[],False
+PRV54258,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV54258,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV55916,evidence line,total_paid,total_paid,$1.31M paid,True,0,True,,,,,
+PRV55916,evidence line,beyond_size,beyond_size,Longest hospital stay 35 days,True,0,True,,,,,
+PRV55916,ai text,summary,,,,0,True,0.0,[],[],[],False
+PRV55916,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV55916,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV55916,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV55916,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV55916,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV55916,ai text,reasons[los_max],,,,0,True,2.0,[],[],[],False
+PRV55916,ai text,reasons[ip_total_reimb],,,,0,True,2.0,[],[],[],False
+PRV55916,ai text,reasons[n_ip_claims],,,,0,True,2.0,[],[],[],False
+PRV55916,ai text,reasons[n_dgc],,,,0,True,2.0,[],[],[],False
+PRV55916,ai text,what_to_check[0],,,,0,True,0.0,[],[],[],False
+PRV55916,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV55916,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV55916,ai text,what_to_check[3],,,,0,True,0.0,[],[],[],False
+PRV55916,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV55916,ai text,patterns[T7],,,,0,True,0.0,[],[],[],False
+PRV55916,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV55916,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV53385,evidence line,overlapping_stays,overlapping_stays,1 overlapping hospital stay,True,0,True,,,,,
+PRV53385,evidence line,total_paid,total_paid,$1.36M paid,True,0,True,,,,,
+PRV53385,evidence line,beyond_size,beyond_size,Longest hospital stay 35 days,True,0,True,,,,,
+PRV53385,ai text,summary,,,,0,True,0.0,[],[],[],False
+PRV53385,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV53385,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV53385,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV53385,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV53385,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV53385,ai text,reasons[los_max],,,,0,True,2.0,[],[],[],False
+PRV53385,ai text,reasons[ip_total_reimb],,,,0,True,2.0,[],[],[],False
+PRV53385,ai text,reasons[n_admit_diag],,,,0,True,2.0,[],[],[],False
+PRV53385,ai text,reasons[n_ip_claims],,,,0,True,2.0,[],[],[],False
+PRV53385,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV53385,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV53385,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV53385,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV53385,ai text,patterns[T7],,,,0,True,0.0,[],[],[],False
+PRV53385,ai text,patterns[T4],,,,0,True,0.0,[],[],[],False
+PRV53385,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV53385,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV55194,evidence line,overlapping_stays,overlapping_stays,1 overlapping hospital stay,True,0,True,,,,,
+PRV55194,evidence line,total_paid,total_paid,$1.70M paid,True,0,True,,,,,
+PRV55194,evidence line,beyond_size,beyond_size,Longest hospital stay 27 days,True,0,True,,,,,
+PRV55194,ai text,summary,,,,0,True,0.0,[],[],[],False
+PRV55194,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV55194,ai text,beyond[los_max],,,,0,True,1.0,[],[],[],False
+PRV55194,ai text,beyond[ip_reimb_max],,,,0,True,1.0,[],[],[],False
+PRV55194,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV55194,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV55194,ai text,reasons[los_max],,,,0,True,1.0,[],[],[],False
+PRV55194,ai text,reasons[ip_total_reimb],,,,0,True,2.0,[],[],[],False
+PRV55194,ai text,reasons[n_ip_claims],,,,0,True,2.0,[],[],[],False
+PRV55194,ai text,reasons[n_admit_diag],,,,0,True,2.0,[],[],[],False
+PRV55194,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV55194,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV55194,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV55194,ai text,what_to_check[3],,,,0,True,0.0,[],[],[],False
+PRV55194,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV55194,ai text,patterns[T4],,,,0,True,0.0,[],[],[],False
+PRV55194,ai text,patterns[T7],,,,0,True,0.0,[],[],[],False
+PRV55194,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV55194,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV57548,evidence line,overlapping_stays,overlapping_stays,1 overlapping hospital stay,True,0,True,,,,,
+PRV57548,evidence line,total_paid,total_paid,$1.07M paid,True,0,True,,,,,
+PRV57548,evidence line,beyond_size,beyond_size,Longest hospital stay 35 days,True,0,True,,,,,
+PRV57548,ai text,summary,,,,0,True,0.0,[],[],[],False
+PRV57548,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV57548,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV57548,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV57548,ai text,beyond[los_long_share],,,,0,True,3.0,[],[],[],False
+PRV57548,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV57548,ai text,reasons[los_max],,,,0,True,2.0,[],[],[],False
+PRV57548,ai text,reasons[ip_total_reimb],,,,0,True,2.0,[],[],[],False
+PRV57548,ai text,reasons[n_ip_claims],,,,0,True,2.0,[],[],[],False
+PRV57548,ai text,reasons[n_dgc],,,,0,True,2.0,[],[],[],False
+PRV57548,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV57548,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV57548,ai text,what_to_check[2],,,,0,True,1.0,[],[],[],False
+PRV57548,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV57548,ai text,patterns[T4],,,,0,True,0.0,[],[],[],False
+PRV57548,ai text,patterns[T7],,,,0,True,1.0,[],[],[],False
+PRV57548,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV57548,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV53421,evidence line,total_paid,total_paid,$1000K paid,True,0,True,,,,,
+PRV53421,evidence line,beyond_size,beyond_size,Longest hospital stay 35 days,True,0,True,,,,,
+PRV53421,ai text,summary,,,,0,True,0.0,[],[],[],False
+PRV53421,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV53421,ai text,beyond[los_max],,,,0,False,0.0,[],"['eighty', 'thirty']",[],False
+PRV53421,ai text,beyond[ip_reimb_max],,,,0,False,0.0,[],"['eighty', 'fifty', 'thousand']",[],False
+PRV53421,ai text,beyond[distinct_diag1_per_claim],,,,0,False,0.0,[],['ninety'],[],False
+PRV53421,ai text,reasons[total_reimb],,,,0,False,0.0,[],"['million', 'ninety']",[],False
+PRV53421,ai text,reasons[los_max],,,,0,False,0.0,[],['thirty'],[],False
+PRV53421,ai text,reasons[n_ip_claims],,,,0,False,0.0,[],['ninety'],[],False
+PRV53421,ai text,reasons[ip_total_reimb],,,,0,False,0.0,[],"['eighty', 'hundred', 'ninety', 'thousand']",[],False
+PRV53421,ai text,reasons[n_admit_diag],,,,0,False,0.0,[],"['eighty', 'seventy']",[],False
+PRV53421,ai text,what_to_check[0],,,,0,False,0.0,[],['thirty'],[],False
+PRV53421,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV53421,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV53421,ai text,what_to_check[3],,,,0,True,0.0,[],[],[],False
+PRV53421,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV53421,ai text,patterns[T4],,,,0,True,0.0,[],[],[],False
+PRV53421,ai text,patterns[T7],,,,0,True,0.0,[],[],[],False
+PRV53421,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV53421,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV56647,evidence line,overlapping_stays,overlapping_stays,1 overlapping hospital stay,True,0,True,,,,,
+PRV56647,evidence line,total_paid,total_paid,$1.29M paid,True,0,True,,,,,
+PRV56647,evidence line,beyond_size,beyond_size,Longest hospital stay 35 days,True,0,True,,,,,
+PRV56647,ai text,summary,,,,0,True,0.0,[],[],[],False
+PRV56647,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV56647,ai text,beyond[los_max],,,,0,False,0.0,[],"['eighty', 'thirty']",[],False
+PRV56647,ai text,beyond[distinct_diag1_per_claim],,,,0,False,0.0,[],['ninety'],[],False
+PRV56647,ai text,beyond[los_long_share],,,,0,False,0.0,[],"['fifty', 'thirteen']",[],False
+PRV56647,ai text,reasons[total_reimb],,,,0,False,0.0,[],"['hundred', 'million', 'ninety', 'thousand']",[],False
+PRV56647,ai text,reasons[los_max],,,,0,False,0.0,[],"['eighty', 'thirty']",[],False
+PRV56647,ai text,reasons[ip_total_reimb],,,,0,False,0.0,[],"['hundred', 'million', 'ninety', 'seventy', 'thousand']",[],False
+PRV56647,ai text,reasons[n_ip_claims],,,,0,False,0.0,[],"['hundred', 'ninety', 'twenty']",[],False
+PRV56647,ai text,reasons[n_admit_diag],,,,0,False,0.0,[],['ninety'],[],False
+PRV56647,ai text,what_to_check[0],,,,0,True,0.0,[],[],[],False
+PRV56647,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV56647,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV56647,ai text,what_to_check[3],,,,0,True,0.0,[],[],[],False
+PRV56647,ai text,patterns[T6],,,,0,False,0.0,[],['ninety'],[],False
+PRV56647,ai text,patterns[T7],,,,0,False,0.0,[],"['eighty', 'thirty']",[],False
+PRV56647,ai text,patterns[T4],,,,0,False,0.0,[],"['forty', 'ninety', 'thousand']",[],False
+PRV56647,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV56647,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV56575,evidence line,overlapping_stays,overlapping_stays,1 overlapping hospital stay,True,0,True,,,,,
+PRV56575,evidence line,total_paid,total_paid,$1.15M paid,True,0,True,,,,,
+PRV56575,evidence line,beyond_size,beyond_size,Longest hospital stay 25 days,True,0,True,,,,,
+PRV56575,ai text,summary,,,,0,True,0.0,[],[],[],False
+PRV56575,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV56575,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV56575,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV56575,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV56575,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV56575,ai text,reasons[los_max],,,,0,True,1.0,[],[],[],False
+PRV56575,ai text,reasons[n_ip_claims],,,,0,True,2.0,[],[],[],False
+PRV56575,ai text,reasons[ip_total_reimb],,,,0,True,2.0,[],[],[],False
+PRV56575,ai text,reasons[n_admit_diag],,,,0,True,2.0,[],[],[],False
+PRV56575,ai text,what_to_check[0],,,,0,True,0.0,[],[],[],False
+PRV56575,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV56575,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV56575,ai text,what_to_check[3],,,,0,True,0.0,[],[],[],False
+PRV56575,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV56575,ai text,patterns[T7],,,,0,True,0.0,[],[],[],False
+PRV56575,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV56575,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV51456,evidence line,total_paid,total_paid,$1.04M paid,True,0,True,,,,,
+PRV51456,evidence line,beyond_size,beyond_size,Longest hospital stay 35 days,True,0,True,,,,,
+PRV51456,ai text,summary,,,,0,True,0.0,[],[],[],False
+PRV51456,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV51456,ai text,beyond[los_max],,,,0,False,1.0,[],['thirty'],[],False
+PRV51456,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV51456,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV51456,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV51456,ai text,reasons[los_max],,,,0,False,1.0,[],['thirty'],[],False
+PRV51456,ai text,reasons[ip_total_reimb],,,,0,True,2.0,[],[],[],False
+PRV51456,ai text,reasons[n_ip_claims],,,,0,True,2.0,[],[],[],False
+PRV51456,ai text,reasons[n_dgc],,,,0,True,2.0,[],[],[],False
+PRV51456,ai text,what_to_check[0],,,,0,True,0.0,[],[],[],False
+PRV51456,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV51456,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV51456,ai text,what_to_check[3],,,,0,True,0.0,[],[],[],False
+PRV51456,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV51456,ai text,patterns[T4],,,,0,True,0.0,[],[],[],False
+PRV51456,ai text,patterns[T7],,,,0,True,0.0,[],[],[],False
+PRV51456,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV51456,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV56689,evidence line,total_paid,total_paid,$506K paid,True,0,True,,,,,
+PRV56689,evidence line,beyond_size,beyond_size,Variety of main diagnoses 62%,True,0,True,,,,,
+PRV56689,ai text,summary,,,,0,True,2.0,[],[],[],False
+PRV56689,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV56689,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV56689,ai text,beyond[claims_per_bene],,,,0,True,1.0,[],[],[],False
+PRV56689,ai text,beyond[claims_per_attending],,,,0,True,1.0,[],[],[],False
+PRV56689,ai text,reasons[total_reimb],,,,0,True,0.0,[],[],[],False
+PRV56689,ai text,reasons[n_claims],,,,0,True,0.0,[],[],[],False
+PRV56689,ai text,reasons[n_admit_diag],,,,0,True,0.0,[],[],[],False
+PRV56689,ai text,reasons[claims_per_bene],,,,0,True,1.0,[],[],[],False
+PRV56689,ai text,reasons[n_op_claims],,,,0,True,0.0,[],[],[],False
+PRV56689,ai text,what_to_check[0],,,,0,True,0.0,[],[],[],False
+PRV56689,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV56689,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV56689,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV56689,ai text,patterns[T1],,,,0,True,0.0,[],[],[],False
+PRV56689,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV56689,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV52135,evidence line,total_paid,total_paid,$1.83M paid,True,0,True,,,,,
+PRV52135,evidence line,beyond_size,beyond_size,Longest hospital stay 35 days,True,0,True,,,,,
+PRV52135,ai text,summary,,,,0,True,2.0,[],[],[],False
+PRV52135,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV52135,ai text,beyond[los_max],,,,0,False,0.0,[],"['eighty', 'thirty']",[],False
+PRV52135,ai text,beyond[distinct_diag1_per_claim],,,,0,False,0.0,[],['ninety'],[],False
+PRV52135,ai text,beyond[ip_reimb_max],,,,0,False,0.0,[],"['eighty', 'fifty', 'thousand']",[],False
+PRV52135,ai text,reasons[total_reimb],,,,0,False,0.0,[],"['hundred', 'million', 'ninety', 'thirty', 'thousand']",[],False
+PRV52135,ai text,reasons[los_max],,,,0,False,0.0,[],['thirty'],[],False
+PRV52135,ai text,reasons[ip_total_reimb],,,,0,False,0.0,[],"['hundred', 'million', 'ninety', 'thousand', 'twenty']",[],False
+PRV52135,ai text,reasons[n_ip_claims],,,,0,False,0.0,[],['hundred'],[],False
+PRV52135,ai text,reasons[n_admit_diag],,,,0,False,0.0,[],"['hundred', 'ninety', 'twenty']",[],False
+PRV52135,ai text,what_to_check[0],,,,0,True,0.0,[],[],[],False
+PRV52135,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV52135,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV52135,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV52135,ai text,patterns[T7],,,,0,False,0.0,[],['thirty'],[],False
+PRV52135,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV52135,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV52041,evidence line,total_paid,total_paid,$605K paid,True,0,True,,,,,
+PRV52041,evidence line,beyond_size,beyond_size,Variety of main diagnoses 61%,True,0,True,,,,,
+PRV52041,ai text,summary,,,,0,True,2.0,[],[],[],False
+PRV52041,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV52041,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV52041,ai text,beyond[claims_per_bene],,,,0,True,1.0,[],[],[],False
+PRV52041,ai text,beyond[claims_per_attending],,,,0,True,1.0,[],[],[],False
+PRV52041,ai text,reasons[total_reimb],,,,0,True,1.0,[],[],[],False
+PRV52041,ai text,reasons[n_claims],,,,0,True,1.0,[],[],[],False
+PRV52041,ai text,reasons[n_admit_diag],,,,0,True,1.0,[],[],[],False
+PRV52041,ai text,reasons[claims_per_bene],,,,0,True,2.0,[],[],[],False
+PRV52041,ai text,reasons[n_op_claims],,,,0,True,1.0,[],[],[],False
+PRV52041,ai text,what_to_check[0],,,,0,True,0.0,[],[],[],False
+PRV52041,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV52041,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV52041,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV52041,ai text,patterns[T1],,,,0,True,0.0,[],[],[],False
+PRV52041,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV52041,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV52320,evidence line,total_paid,total_paid,$874K paid,True,0,True,,,,,
+PRV52320,evidence line,beyond_size,beyond_size,Longest hospital stay 35 days,True,0,True,,,,,
+PRV52320,ai text,summary,,,,0,True,0.0,[],[],[],False
+PRV52320,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV52320,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV52320,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV52320,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV52320,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV52320,ai text,reasons[los_max],,,,0,True,2.0,[],[],[],False
+PRV52320,ai text,reasons[ip_total_reimb],,,,0,True,2.0,[],[],[],False
+PRV52320,ai text,reasons[claims_per_bene],,,,0,True,2.0,[],[],[],False
+PRV52320,ai text,reasons[n_admit_diag],,,,0,True,2.0,[],[],[],False
+PRV52320,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV52320,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV52320,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV52320,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV52320,ai text,patterns[T4],,,,0,True,0.0,[],[],[],False
+PRV52320,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV52320,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV57103,evidence line,total_paid,total_paid,$893K paid,True,0,True,,,,,
+PRV57103,evidence line,beyond_size,beyond_size,Variety of main diagnoses 60%,True,0,True,,,,,
+PRV57103,ai text,summary,,,,0,True,0.0,[],[],[],False
+PRV57103,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV57103,ai text,beyond[distinct_diag1_per_claim],,,,0,True,0.0,[],[],[],False
+PRV57103,ai text,beyond[claims_per_bene],,,,0,True,2.0,[],[],[],False
+PRV57103,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV57103,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV57103,ai text,reasons[n_claims],,,,0,True,1.0,[],[],[],False
+PRV57103,ai text,reasons[n_admit_diag],,,,0,True,2.0,[],[],[],False
+PRV57103,ai text,reasons[claims_per_bene],,,,0,True,2.0,[],[],[],False
+PRV57103,ai text,reasons[n_op_claims],,,,0,True,1.0,[],[],[],False
+PRV57103,ai text,what_to_check[0],,,,0,True,0.0,[],[],[],False
+PRV57103,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV57103,ai text,what_to_check[2],,,,0,True,1.0,[],[],[],False
+PRV57103,ai text,what_to_check[3],,,,0,True,0.0,[],[],[],False
+PRV57103,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV57103,ai text,patterns[T1],,,,0,True,0.0,[],[],[],False
+PRV57103,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV57103,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV57306,evidence line,total_paid,total_paid,$629K paid,True,0,True,,,,,
+PRV57306,evidence line,beyond_size,beyond_size,Variety of main diagnoses 58%,True,0,True,,,,,
+PRV56008,evidence line,total_paid,total_paid,$477K paid,True,0,True,,,,,
+PRV56008,evidence line,beyond_size,beyond_size,Variety of main diagnoses 66%,True,0,True,,,,,
+PRV56008,ai text,summary,,,,0,True,2.0,[],[],[],False
+PRV56008,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV56008,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV56008,ai text,beyond[claims_per_bene],,,,0,True,1.0,[],[],[],False
+PRV56008,ai text,beyond[claims_per_attending],,,,0,True,1.0,[],[],[],False
+PRV56008,ai text,reasons[total_reimb],,,,0,True,1.0,[],[],[],False
+PRV56008,ai text,reasons[n_claims],,,,0,True,2.0,[],[],[],False
+PRV56008,ai text,reasons[n_admit_diag],,,,0,True,2.0,[],[],[],False
+PRV56008,ai text,reasons[n_op_claims],,,,0,True,2.0,[],[],[],False
+PRV56008,ai text,reasons[claims_per_bene],,,,0,True,2.0,[],[],[],False
+PRV56008,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV56008,ai text,what_to_check[1],,,,0,True,1.0,[],[],[],False
+PRV56008,ai text,what_to_check[2],,,,0,True,1.0,[],[],[],False
+PRV56008,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV56008,ai text,patterns[T1],,,,0,True,0.0,[],[],[],False
+PRV56008,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV56008,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV56008,ai text,cautions[2],,,,0,True,0.0,[],[],[],False
+PRV55039,evidence line,total_paid,total_paid,$816K paid,True,0,True,,,,,
+PRV55039,evidence line,beyond_size,beyond_size,Variety of main diagnoses 61%,True,0,True,,,,,
+PRV55039,ai text,summary,,,,0,True,2.0,[],[],[],False
+PRV55039,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV55039,ai text,beyond[distinct_diag1_per_claim],,,,0,True,0.0,[],[],[],False
+PRV55039,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV55039,ai text,beyond[claims_per_bene],,,,0,True,2.0,[],[],[],False
+PRV55039,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV55039,ai text,reasons[n_claims],,,,0,True,1.0,[],[],[],False
+PRV55039,ai text,reasons[los_max],,,,0,True,2.0,[],[],[],False
+PRV55039,ai text,reasons[claims_per_bene],,,,0,True,2.0,[],[],[],False
+PRV55039,ai text,reasons[n_admit_diag],,,,0,True,1.0,[],[],[],False
+PRV55039,ai text,what_to_check[0],,,,0,True,0.0,[],[],[],False
+PRV55039,ai text,what_to_check[1],,,,0,True,1.0,[],[],[],False
+PRV55039,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV55039,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV55039,ai text,patterns[T1],,,,0,True,0.0,[],[],[],False
+PRV55039,ai text,patterns[T7],,,,0,True,1.0,[],[],[],False
+PRV55039,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV55039,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV53884,evidence line,overlapping_stays,overlapping_stays,1 overlapping hospital stay,True,0,True,,,,,
+PRV53884,evidence line,total_paid,total_paid,$1.04M paid,True,0,True,,,,,
+PRV53884,evidence line,beyond_size,beyond_size,Longest hospital stay 23 days,True,0,True,,,,,
+PRV53884,ai text,summary,,,,0,True,0.0,[],[],[],False
+PRV53884,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV53884,ai text,beyond[los_max],,,,0,True,1.0,[],[],[],False
+PRV53884,ai text,beyond[ip_reimb_max],,,,0,True,1.0,[],[],[],False
+PRV53884,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV53884,ai text,reasons[total_reimb],,,,0,True,1.0,[],[],[],False
+PRV53884,ai text,reasons[los_max],,,,0,True,1.0,[],[],[],False
+PRV53884,ai text,reasons[n_ip_claims],,,,0,True,1.0,[],[],[],False
+PRV53884,ai text,reasons[ip_total_reimb],,,,0,True,1.0,[],[],[],False
+PRV53884,ai text,reasons[n_admit_diag],,,,0,True,1.0,[],[],[],False
+PRV53884,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV53884,ai text,what_to_check[1],,,,0,True,1.0,[],[],[],False
+PRV53884,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV53884,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV53884,ai text,patterns[T7],,,,0,True,0.0,[],[],[],False
+PRV53884,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV53884,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV53786,evidence line,total_paid,total_paid,$716K paid,True,0,True,,,,,
+PRV53786,evidence line,beyond_size,beyond_size,Variety of main diagnoses 68%,True,0,True,,,,,
+PRV53786,ai text,summary,,,,0,True,0.0,[],[],[],False
+PRV53786,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV53786,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV53786,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV53786,ai text,beyond[claims_per_bene],,,,0,True,2.0,[],[],[],False
+PRV53786,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV53786,ai text,reasons[los_max],,,,0,True,2.0,[],[],[],False
+PRV53786,ai text,reasons[n_claims],,,,0,True,2.0,[],[],[],False
+PRV53786,ai text,reasons[n_admit_diag],,,,0,True,2.0,[],[],[],False
+PRV53786,ai text,reasons[claims_per_bene],,,,0,True,2.0,[],[],[],False
+PRV53786,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV53786,ai text,what_to_check[1],,,,0,True,1.0,[],[],[],False
+PRV53786,ai text,what_to_check[2],,,,0,True,1.0,[],[],[],False
+PRV53786,ai text,patterns[T6],,,,0,True,2.0,[],[],[],False
+PRV53786,ai text,patterns[T4],,,,0,True,2.0,[],[],[],False
+PRV53786,ai text,patterns[T1],,,,0,True,2.0,[],[],[],False
+PRV53786,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV53786,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV55483,evidence line,overlapping_stays,overlapping_stays,2 overlapping hospital stays,True,0,True,,,,,
+PRV55483,evidence line,total_paid,total_paid,$778K paid,True,0,True,,,,,
+PRV55483,evidence line,beyond_size,beyond_size,Longest hospital stay 35 days,True,0,True,,,,,
+PRV55483,ai text,summary,,,,0,True,1.0,[],[],[],False
+PRV55483,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV55483,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV55483,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV55483,ai text,beyond[los_long_share],,,,0,True,3.0,[],[],[],False
+PRV55483,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV55483,ai text,reasons[los_max],,,,0,True,2.0,[],[],[],False
+PRV55483,ai text,reasons[ip_total_reimb],,,,0,True,2.0,[],[],[],False
+PRV55483,ai text,reasons[claims_per_bene],,,,0,True,2.0,[],[],[],False
+PRV55483,ai text,reasons[n_ip_claims],,,,0,True,2.0,[],[],[],False
+PRV55483,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV55483,ai text,what_to_check[1],,,,0,True,1.0,[],[],[],False
+PRV55483,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV55483,ai text,what_to_check[3],,,,0,True,0.0,[],[],[],False
+PRV55483,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV55483,ai text,patterns[T7],,,,0,True,0.0,[],[],[],False
+PRV55483,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV55483,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV52063,evidence line,overlapping_stays,overlapping_stays,1 overlapping hospital stay,True,0,True,,,,,
+PRV52063,evidence line,total_paid,total_paid,$1.12M paid,True,0,True,,,,,
+PRV52063,evidence line,beyond_size,beyond_size,Longest hospital stay 35 days,True,0,True,,,,,
+PRV52063,ai text,summary,,,,0,True,0.0,[],[],[],False
+PRV52063,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV52063,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV52063,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV52063,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV52063,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV52063,ai text,reasons[los_max],,,,0,True,1.0,[],[],[],False
+PRV52063,ai text,reasons[ip_total_reimb],,,,0,True,2.0,[],[],[],False
+PRV52063,ai text,reasons[n_admit_diag],,,,0,True,2.0,[],[],[],False
+PRV52063,ai text,reasons[n_claims],,,,0,True,2.0,[],[],[],False
+PRV52063,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV52063,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV52063,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV52063,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV52063,ai text,patterns[T7],,,,0,True,1.0,[],[],[],False
+PRV52063,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV52063,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV56438,evidence line,total_paid,total_paid,$827K paid,True,0,True,,,,,
+PRV56438,evidence line,beyond_size,beyond_size,Longest hospital stay 31 days,True,0,True,,,,,
+PRV56438,ai text,summary,,,,0,True,0.0,[],[],[],False
+PRV56438,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV56438,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV56438,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV56438,ai text,beyond[los_long_share],,,,0,True,3.0,[],[],[],False
+PRV56438,ai text,reasons[los_max],,,,0,True,1.0,[],[],[],False
+PRV56438,ai text,reasons[total_reimb],,,,0,True,1.0,[],[],[],False
+PRV56438,ai text,reasons[ip_reimb_mean],,,,0,True,2.0,[],[],[],False
+PRV56438,ai text,reasons[ip_total_reimb],,,,0,True,1.0,[],[],[],False
+PRV56438,ai text,reasons[n_ip_claims],,,,0,True,1.0,[],[],[],False
+PRV56438,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV56438,ai text,what_to_check[1],,,,0,True,1.0,[],[],[],False
+PRV56438,ai text,what_to_check[2],,,,0,True,1.0,[],[],[],False
+PRV56438,ai text,patterns[T4],,,,0,True,0.0,[],[],[],False
+PRV56438,ai text,patterns[T7],,,,0,True,0.0,[],[],[],False
+PRV56438,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV56438,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV53675,evidence line,overlapping_stays,overlapping_stays,1 overlapping hospital stay,True,0,True,,,,,
+PRV53675,evidence line,total_paid,total_paid,$748K paid,True,0,True,,,,,
+PRV53675,evidence line,beyond_size,beyond_size,Longest hospital stay 35 days,True,0,True,,,,,
+PRV53675,ai text,summary,,,,0,True,0.0,[],[],[],False
+PRV53675,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV53675,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV53675,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV53675,ai text,beyond[los_long_share],,,,0,True,3.0,[],[],[],False
+PRV53675,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV53675,ai text,reasons[los_max],,,,0,True,2.0,[],[],[],False
+PRV53675,ai text,reasons[ip_total_reimb],,,,0,True,2.0,[],[],[],False
+PRV53675,ai text,reasons[n_admit_diag],,,,0,True,2.0,[],[],[],False
+PRV53675,ai text,reasons[n_ip_claims],,,,0,True,2.0,[],[],[],False
+PRV53675,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV53675,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV53675,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV53675,ai text,what_to_check[3],,,,0,True,0.0,[],[],[],False
+PRV53675,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV53675,ai text,patterns[T7],,,,0,True,1.0,[],[],[],False
+PRV53675,ai text,patterns[T4],,,,0,True,0.0,[],[],[],False
+PRV53675,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV53675,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV53269,evidence line,total_paid,total_paid,$1.05M paid,True,0,True,,,,,
+PRV53269,evidence line,beyond_size,beyond_size,Longest hospital stay 26 days,True,0,True,,,,,
+PRV53269,ai text,summary,,,,0,True,2.0,[],[],[],False
+PRV53269,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV53269,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV53269,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV53269,ai text,beyond[los_long_share],,,,0,True,3.0,[],[],[],False
+PRV53269,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV53269,ai text,reasons[los_max],,,,0,True,1.0,[],[],[],False
+PRV53269,ai text,reasons[n_ip_claims],,,,0,True,2.0,[],[],[],False
+PRV53269,ai text,reasons[ip_total_reimb],,,,0,True,2.0,[],[],[],False
+PRV53269,ai text,reasons[claims_per_bene],,,,0,True,2.0,[],[],[],False
+PRV53269,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV53269,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV53269,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV53269,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV53269,ai text,patterns[T7],,,,0,True,1.0,[],[],[],False
+PRV53269,ai text,patterns[T1],,,,0,True,2.0,[],[],[],False
+PRV53269,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV53269,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV55676,evidence line,total_paid,total_paid,$1.04M paid,True,0,True,,,,,
+PRV55676,evidence line,beyond_size,beyond_size,Longest hospital stay 28 days,True,0,True,,,,,
+PRV55913,evidence line,total_paid,total_paid,$373K paid,True,0,True,,,,,
+PRV55913,evidence line,beyond_size,beyond_size,Variety of main diagnoses 67%,True,0,True,,,,,
+PRV55913,ai text,summary,,,,0,True,2.0,[],[],[],False
+PRV55913,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV55913,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV55913,ai text,beyond[claims_per_bene],,,,0,True,1.0,[],[],[],False
+PRV55913,ai text,beyond[claims_per_attending],,,,0,True,1.0,[],[],[],False
+PRV55913,ai text,reasons[total_reimb],,,,0,True,1.0,[],[],[],False
+PRV55913,ai text,reasons[n_claims],,,,0,True,1.0,[],[],[],False
+PRV55913,ai text,reasons[claims_per_bene],,,,0,True,1.0,[],[],[],False
+PRV55913,ai text,reasons[n_admit_diag],,,,0,True,1.0,[],[],[],False
+PRV55913,ai text,reasons[op_total_reimb],,,,0,True,1.0,[],[],[],False
+PRV55913,ai text,what_to_check[0],,,,0,True,0.0,[],[],[],False
+PRV55913,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV55913,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV55913,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV55913,ai text,patterns[T1],,,,0,True,0.0,[],[],[],False
+PRV55913,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV55913,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV51567,evidence line,total_paid,total_paid,$465K paid,True,0,True,,,,,
+PRV51567,evidence line,beyond_size,beyond_size,Variety of main diagnoses 63%,True,0,True,,,,,
+PRV51567,ai text,summary,,,,0,True,2.0,[],[],[],False
+PRV51567,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV51567,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV51567,ai text,beyond[claims_per_attending],,,,0,True,0.0,[],[],[],False
+PRV51567,ai text,beyond[claims_per_bene],,,,0,True,1.0,[],[],[],False
+PRV51567,ai text,reasons[n_claims],,,,0,True,1.0,[],[],[],False
+PRV51567,ai text,reasons[total_reimb],,,,0,True,1.0,[],[],[],False
+PRV51567,ai text,reasons[n_admit_diag],,,,0,True,2.0,[],[],[],False
+PRV51567,ai text,reasons[n_op_claims],,,,0,True,1.0,[],[],[],False
+PRV51567,ai text,reasons[claims_per_bene],,,,0,True,2.0,[],[],[],False
+PRV51567,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV51567,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV51567,ai text,what_to_check[2],,,,0,True,1.0,[],[],[],False
+PRV51567,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV51567,ai text,patterns[T1],,,,0,True,0.0,[],[],[],False
+PRV51567,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV51567,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV54514,evidence line,total_paid,total_paid,$644K paid,True,0,True,,,,,
+PRV54514,evidence line,beyond_size,beyond_size,Longest hospital stay 32 days,True,0,True,,,,,
+PRV54514,ai text,summary,,,,0,True,1.0,[],[],[],False
+PRV54514,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV54514,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV54514,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV54514,ai text,beyond[los_long_share],,,,0,True,3.0,[],[],[],False
+PRV54514,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV54514,ai text,reasons[los_max],,,,0,True,1.0,[],[],[],False
+PRV54514,ai text,reasons[ip_reimb_max],,,,0,True,1.0,[],[],[],False
+PRV54514,ai text,reasons[ip_total_reimb],,,,0,True,2.0,[],[],[],False
+PRV54514,ai text,reasons[claims_per_bene],,,,0,True,2.0,[],[],[],False
+PRV54514,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV54514,ai text,what_to_check[1],,,,0,True,1.0,[],[],[],False
+PRV54514,ai text,what_to_check[2],,,,0,True,1.0,[],[],[],False
+PRV54514,ai text,what_to_check[3],,,,0,True,0.0,[],[],[],False
+PRV54514,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV54514,ai text,patterns[T4],,,,0,True,0.0,[],[],[],False
+PRV54514,ai text,patterns[T7],,,,0,True,0.0,[],[],[],False
+PRV54514,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV54514,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV54093,evidence line,total_paid,total_paid,$515K paid,True,0,True,,,,,
+PRV54093,evidence line,beyond_size,beyond_size,Longest hospital stay 35 days,True,0,True,,,,,
+PRV54093,ai text,summary,,,,0,True,0.0,[],[],[],False
+PRV54093,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV54093,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV54093,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV54093,ai text,beyond[los_long_share],,,,0,True,3.0,[],[],[],False
+PRV54093,ai text,reasons[los_max],,,,0,True,2.0,[],[],[],False
+PRV54093,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV54093,ai text,reasons[ip_reimb_mean],,,,0,True,2.0,[],[],[],False
+PRV54093,ai text,reasons[claims_per_bene],,,,0,True,2.0,[],[],[],False
+PRV54093,ai text,reasons[n_ip_claims],,,,0,True,2.0,[],[],[],False
+PRV54093,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV54093,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV54093,ai text,what_to_check[2],,,,0,True,1.0,[],[],[],False
+PRV54093,ai text,patterns[T4],,,,0,True,0.0,[],[],[],False
+PRV54093,ai text,patterns[T7],,,,0,True,0.0,[],[],[],False
+PRV54093,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV54093,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV54093,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV55443,evidence line,overlapping_stays,overlapping_stays,1 overlapping hospital stay,True,0,True,,,,,
+PRV55443,evidence line,total_paid,total_paid,$341K paid,True,0,True,,,,,
+PRV55443,evidence line,beyond_size,beyond_size,Longest hospital stay 24 days,True,0,True,,,,,
+PRV55443,ai text,summary,,,,0,True,0.0,[],[],[],False
+PRV55443,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV55443,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV55443,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV55443,ai text,beyond[reimb_per_bene],,,,0,True,2.0,[],[],[],False
+PRV55443,ai text,reasons[los_max],,,,0,True,1.0,[],[],[],False
+PRV55443,ai text,reasons[total_reimb],,,,0,True,1.0,[],[],[],False
+PRV55443,ai text,reasons[ip_total_reimb],,,,0,True,1.0,[],[],[],False
+PRV55443,ai text,reasons[n_ip_claims],,,,0,True,2.0,[],[],[],False
+PRV55443,ai text,reasons[reimb_per_bene],,,,0,True,2.0,[],[],[],False
+PRV55443,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV55443,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV55443,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV55443,ai text,patterns[T4],,,,0,True,0.0,[],[],[],False
+PRV55443,ai text,patterns[T7],,,,0,True,0.0,[],[],[],False
+PRV55443,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV55443,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV55443,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV57310,evidence line,overlapping_stays,overlapping_stays,1 overlapping hospital stay,True,0,True,,,,,
+PRV57310,evidence line,total_paid,total_paid,$673K paid,True,0,True,,,,,
+PRV57310,evidence line,beyond_size,beyond_size,Longest hospital stay 22 days,True,0,True,,,,,
+PRV57310,ai text,summary,,,,0,True,0.0,[],[],[],False
+PRV57310,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV57310,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV57310,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV57310,ai text,beyond[los_long_share],,,,0,True,3.0,[],[],[],False
+PRV57310,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV57310,ai text,reasons[los_max],,,,0,True,2.0,[],[],[],False
+PRV57310,ai text,reasons[ip_total_reimb],,,,0,True,2.0,[],[],[],False
+PRV57310,ai text,reasons[n_ip_claims],,,,0,True,2.0,[],[],[],False
+PRV57310,ai text,reasons[reimb_per_bene],,,,0,True,2.0,[],[],[],False
+PRV57310,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV57310,ai text,what_to_check[1],,,,0,True,1.0,[],[],[],False
+PRV57310,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV57310,ai text,what_to_check[3],,,,0,True,0.0,[],[],[],False
+PRV57310,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV57310,ai text,patterns[T4],,,,0,True,0.0,[],[],[],False
+PRV57310,ai text,patterns[T7],,,,0,True,0.0,[],[],[],False
+PRV57310,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV57310,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV55023,evidence line,overlapping_stays,overlapping_stays,1 overlapping hospital stay,True,0,True,,,,,
+PRV55023,evidence line,total_paid,total_paid,$420K paid,True,0,True,,,,,
+PRV55023,evidence line,beyond_size,beyond_size,Longest hospital stay 35 days,True,0,True,,,,,
+PRV55023,ai text,summary,,,,0,True,0.0,[],[],[],False
+PRV55023,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV55023,ai text,beyond[los_max],,,,0,False,0.0,[],"['eighty', 'thirty']",[],False
+PRV55023,ai text,beyond[ip_reimb_max],,,,0,False,0.0,[],"['eighty', 'fifty', 'thousand']",[],False
+PRV55023,ai text,beyond[reimb_per_bene],,,,0,False,0.0,[],"['eighty', 'ninety', 'thousand']",[],False
+PRV55023,ai text,reasons[los_max],,,,0,False,0.0,[],['thirty'],[],False
+PRV55023,ai text,reasons[total_reimb],,,,0,False,0.0,[],"['hundred', 'thousand', 'twenty']",[],False
+PRV55023,ai text,reasons[ip_reimb_mean],,,,0,False,0.0,[],"['thousand', 'twelve']",[],False
+PRV55023,ai text,reasons[ip_total_reimb],,,,0,False,0.0,[],"['hundred', 'thousand']",[],False
+PRV55023,ai text,reasons[n_ip_claims],,,,0,False,0.0,[],['thirty'],[],False
+PRV55023,ai text,what_to_check[0],,,,0,False,0.0,[],['thirty'],[],False
+PRV55023,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV55023,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV55023,ai text,patterns[T4],,,,0,True,0.0,[],[],[],False
+PRV55023,ai text,patterns[T7],,,,0,False,0.0,[],['thirty'],[],False
+PRV55023,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV55023,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV52511,evidence line,overlapping_stays,overlapping_stays,1 overlapping hospital stay,True,0,True,,,,,
+PRV52511,evidence line,total_paid,total_paid,$720K paid,True,0,True,,,,,
+PRV52511,evidence line,beyond_size,beyond_size,Longest hospital stay 23 days,True,0,True,,,,,
+PRV52511,ai text,summary,,,,0,True,2.0,[],[],[],False
+PRV52511,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV52511,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV52511,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV52511,ai text,beyond[claims_per_bene],,,,0,True,2.0,[],[],[],False
+PRV52511,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV52511,ai text,reasons[los_max],,,,0,True,1.0,[],[],[],False
+PRV52511,ai text,reasons[claims_per_bene],,,,0,True,1.0,[],[],[],False
+PRV52511,ai text,reasons[ip_total_reimb],,,,0,True,2.0,[],[],[],False
+PRV52511,ai text,reasons[n_admit_diag],,,,0,True,2.0,[],[],[],False
+PRV52511,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV52511,ai text,what_to_check[1],,,,0,True,1.0,[],[],[],False
+PRV52511,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV52511,ai text,patterns[T6],,,,0,True,2.0,[],[],[],False
+PRV52511,ai text,patterns[T7],,,,0,True,1.0,[],[],[],False
+PRV52511,ai text,patterns[T1],,,,0,True,1.0,[],[],[],False
+PRV52511,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV52511,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV53710,evidence line,total_paid,total_paid,$615K paid,True,0,True,,,,,
+PRV53710,evidence line,beyond_size,beyond_size,Variety of main diagnoses 81%,True,0,True,,,,,
+PRV54786,evidence line,duplicate_claims,duplicate_claims,1 duplicate claim,True,0,True,,,,,
+PRV54786,evidence line,total_paid,total_paid,$416K paid,True,0,True,,,,,
+PRV54786,evidence line,beyond_size,beyond_size,Variety of main diagnoses 68%,True,0,True,,,,,
+PRV54786,ai text,summary,,,,0,True,1.0,[],[],[],False
+PRV54786,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV54786,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV54786,ai text,beyond[claims_per_bene],,,,0,True,1.0,[],[],[],False
+PRV54786,ai text,beyond[op_reimb_max],,,,0,True,1.0,[],[],[],False
+PRV54786,ai text,reasons[total_reimb],,,,0,True,1.0,[],[],[],False
+PRV54786,ai text,reasons[n_claims],,,,0,True,2.0,[],[],[],False
+PRV54786,ai text,reasons[n_admit_diag],,,,0,True,2.0,[],[],[],False
+PRV54786,ai text,reasons[n_op_claims],,,,0,True,2.0,[],[],[],False
+PRV54786,ai text,reasons[op_total_reimb],,,,0,True,1.0,[],[],[],False
+PRV54786,ai text,what_to_check[0],,,,0,True,0.0,[],[],[],False
+PRV54786,ai text,what_to_check[1],,,,0,True,1.0,[],[],[],False
+PRV54786,ai text,what_to_check[2],,,,0,True,1.0,[],[],[],False
+PRV54786,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV54786,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV54786,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV53781,evidence line,total_paid,total_paid,$963K paid,True,0,True,,,,,
+PRV53781,evidence line,beyond_size,beyond_size,Longest hospital stay 35 days,True,0,True,,,,,
+PRV53781,ai text,summary,,,,0,True,0.0,[],[],[],False
+PRV53781,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV53781,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV53781,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV53781,ai text,beyond[los_long_share],,,,0,True,3.0,[],[],[],False
+PRV53781,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV53781,ai text,reasons[los_max],,,,0,True,2.0,[],[],[],False
+PRV53781,ai text,reasons[ip_total_reimb],,,,0,True,2.0,[],[],[],False
+PRV53781,ai text,reasons[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV53781,ai text,reasons[n_admit_diag],,,,0,True,2.0,[],[],[],False
+PRV53781,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV53781,ai text,what_to_check[1],,,,0,True,1.0,[],[],[],False
+PRV53781,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV53781,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV53781,ai text,patterns[T4],,,,0,True,0.0,[],[],[],False
+PRV53781,ai text,patterns[T7],,,,0,True,0.0,[],[],[],False
+PRV53781,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV53781,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV53961,evidence line,total_paid,total_paid,$811K paid,True,0,True,,,,,
+PRV53961,evidence line,beyond_size,beyond_size,Longest hospital stay 35 days,True,0,True,,,,,
+PRV53961,ai text,summary,,,,0,True,0.0,[],[],[],False
+PRV53961,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV53961,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV53961,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV53961,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV53961,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV53961,ai text,reasons[los_max],,,,0,True,2.0,[],[],[],False
+PRV53961,ai text,reasons[n_ip_claims],,,,0,True,2.0,[],[],[],False
+PRV53961,ai text,reasons[ip_total_reimb],,,,0,True,2.0,[],[],[],False
+PRV53961,ai text,reasons[n_dgc],,,,0,True,2.0,[],[],[],False
+PRV53961,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV53961,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV53961,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV53961,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV53961,ai text,patterns[T7],,,,0,True,0.0,[],[],[],False
+PRV53961,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV53961,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV56588,evidence line,total_paid,total_paid,$1.03M paid,True,0,True,,,,,
+PRV56588,evidence line,beyond_size,beyond_size,Longest hospital stay 35 days,True,0,True,,,,,
+PRV53911,evidence line,total_paid,total_paid,$374K paid,True,0,True,,,,,
+PRV53911,evidence line,beyond_size,beyond_size,Longest hospital stay 32 days,True,0,True,,,,,
+PRV53911,ai text,summary,,,,0,True,2.0,[],[],[],False
+PRV53911,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV53911,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV53911,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV53911,ai text,beyond[claims_per_bene],,,,0,True,2.0,[],[],[],False
+PRV53911,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV53911,ai text,reasons[los_max],,,,0,True,2.0,[],[],[],False
+PRV53911,ai text,reasons[claims_per_bene],,,,0,True,2.0,[],[],[],False
+PRV53911,ai text,reasons[ip_reimb_mean],,,,0,True,2.0,[],[],[],False
+PRV53911,ai text,reasons[n_admit_diag],,,,0,True,2.0,[],[],[],False
+PRV53911,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV53911,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV53911,ai text,what_to_check[2],,,,0,True,1.0,[],[],[],False
+PRV53911,ai text,patterns[T6],,,,0,True,3.0,[],[],[],False
+PRV53911,ai text,patterns[T4],,,,0,True,0.0,[],[],[],False
+PRV53911,ai text,patterns[T1],,,,0,True,2.0,[],[],[],False
+PRV53911,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV53911,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV53911,ai text,cautions[2],,,,0,True,0.0,[],[],[],False
+PRV56268,evidence line,duplicate_claims,duplicate_claims,1 duplicate claim,True,0,True,,,,,
+PRV56268,evidence line,overlapping_stays,overlapping_stays,2 overlapping hospital stays,True,0,True,,,,,
+PRV56268,evidence line,total_paid,total_paid,$941K paid,True,0,True,,,,,
+PRV56268,evidence line,beyond_size,beyond_size,Longest hospital stay 35 days,True,0,True,,,,,
+PRV56268,ai text,summary,,,,0,True,0.0,[],[],[],False
+PRV56268,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV56268,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV56268,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV56268,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV56268,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV56268,ai text,reasons[los_max],,,,0,True,2.0,[],[],[],False
+PRV56268,ai text,reasons[claims_per_bene],,,,0,True,2.0,[],[],[],False
+PRV56268,ai text,reasons[n_admit_diag],,,,0,True,2.0,[],[],[],False
+PRV56268,ai text,reasons[ip_total_reimb],,,,0,True,2.0,[],[],[],False
+PRV56268,ai text,what_to_check[0],,,,0,True,0.0,[],[],[],False
+PRV56268,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV56268,ai text,what_to_check[2],,,,0,True,1.0,[],[],[],False
+PRV56268,ai text,what_to_check[3],,,,0,True,1.0,[],[],[],False
+PRV56268,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV56268,ai text,patterns[T7],,,,0,True,1.0,[],[],[],False
+PRV56268,ai text,patterns[T1],,,,0,True,0.0,[],[],[],False
+PRV56268,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV56268,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV55732,evidence line,total_paid,total_paid,$179K paid,True,0,True,,,,,
+PRV55732,evidence line,beyond_size,beyond_size,Longest hospital stay 21 days,True,0,True,,,,,
+PRV53894,evidence line,total_paid,total_paid,$268K paid,True,0,True,,,,,
+PRV53894,evidence line,beyond_size,beyond_size,Longest hospital stay 35 days,True,0,True,,,,,
+PRV53894,ai text,summary,,,,0,True,2.0,[],[],[],False
+PRV53894,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV53894,ai text,beyond[los_max],,,,0,True,2.0,[],[],[],False
+PRV53894,ai text,beyond[ip_reimb_max],,,,0,True,2.0,[],[],[],False
+PRV53894,ai text,beyond[claims_per_bene],,,,0,True,2.0,[],[],[],False
+PRV53894,ai text,reasons[los_max],,,,0,True,1.0,[],[],[],False
+PRV53894,ai text,reasons[total_reimb],,,,0,True,1.0,[],[],[],False
+PRV53894,ai text,reasons[claims_per_bene],,,,0,True,2.0,[],[],[],False
+PRV53894,ai text,reasons[ip_reimb_mean],,,,0,True,2.0,[],[],[],False
+PRV53894,ai text,reasons[ip_total_reimb],,,,0,True,1.0,[],[],[],False
+PRV53894,ai text,what_to_check[0],,,,0,True,1.0,[],[],[],False
+PRV53894,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV53894,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV53894,ai text,what_to_check[3],,,,0,True,1.0,[],[],[],False
+PRV53894,ai text,patterns[T4],,,,0,True,0.0,[],[],[],False
+PRV53894,ai text,patterns[T6],,,,0,True,2.0,[],[],[],False
+PRV53894,ai text,patterns[T1],,,,0,True,1.0,[],[],[],False
+PRV53894,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV53894,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV53894,ai text,cautions[2],,,,0,True,0.0,[],[],[],False
+PRV53245,evidence line,total_paid,total_paid,$215K paid,True,0,True,,,,,
+PRV53245,evidence line,beyond_size,beyond_size,Longest hospital stay 35 days,True,0,True,,,,,
+PRV57715,evidence line,total_paid,total_paid,$688K paid,True,0,True,,,,,
+PRV57715,evidence line,beyond_size,beyond_size,Variety of main diagnoses 73%,True,0,True,,,,,
+PRV55996,evidence line,total_paid,total_paid,$264K paid,True,0,True,,,,,
+PRV55996,evidence line,beyond_size,beyond_size,Longest hospital stay 24 days,True,0,True,,,,,
+PRV52292,evidence line,total_paid,total_paid,$303K paid,True,0,True,,,,,
+PRV52292,evidence line,beyond_size,beyond_size,Longest hospital stay 26 days,True,0,True,,,,,
+PRV53623,evidence line,duplicate_claims,duplicate_claims,1 duplicate claim,True,0,True,,,,,
+PRV53623,evidence line,total_paid,total_paid,$245K paid,True,0,True,,,,,
+PRV53623,evidence line,beyond_size,beyond_size,Variety of main diagnoses 71%,True,0,True,,,,,
+PRV53623,ai text,summary,,,,0,True,1.0,[],[],[],False
+PRV53623,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV53623,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV53623,ai text,beyond[claims_per_bene],,,,0,True,1.0,[],[],[],False
+PRV53623,ai text,beyond[op_reimb_max],,,,0,True,1.0,[],[],[],False
+PRV53623,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV53623,ai text,reasons[claims_per_bene],,,,0,True,2.0,[],[],[],False
+PRV53623,ai text,reasons[n_admit_diag],,,,0,True,2.0,[],[],[],False
+PRV53623,ai text,reasons[n_claims],,,,0,True,2.0,[],[],[],False
+PRV53623,ai text,reasons[share_rheumatoidarthritis],,,,0,True,2.0,[],[],[],False
+PRV53623,ai text,what_to_check[0],,,,0,True,0.0,[],[],[],False
+PRV53623,ai text,what_to_check[1],,,,0,True,1.0,[],[],[],False
+PRV53623,ai text,what_to_check[2],,,,0,True,1.0,[],[],[],False
+PRV53623,ai text,what_to_check[3],,,,0,True,1.0,[],[],[],False
+PRV53623,ai text,patterns[T6],,,,0,True,1.0,[],[],[],False
+PRV53623,ai text,patterns[T1],,,,0,True,0.0,[],[],[],False
+PRV53623,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV53623,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV55521,evidence line,duplicate_claims,duplicate_claims,1 duplicate claim,True,0,True,,,,,
+PRV55521,evidence line,total_paid,total_paid,$158K paid,True,0,True,,,,,
+PRV55521,evidence line,beyond_size,beyond_size,Variety of main diagnoses 78%,True,0,True,,,,,
+PRV55521,ai text,summary,,,,0,True,1.0,[],[],[],False
+PRV55521,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV55521,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV55521,ai text,beyond[claims_per_bene],,,,0,True,1.0,[],[],[],False
+PRV55521,ai text,beyond[share_depression],,,,0,True,1.0,[],[],[],False
+PRV55521,ai text,reasons[claims_per_bene],,,,0,True,1.0,[],[],[],False
+PRV55521,ai text,reasons[total_reimb],,,,0,True,1.0,[],[],[],False
+PRV55521,ai text,reasons[n_claims],,,,0,True,1.0,[],[],[],False
+PRV55521,ai text,reasons[n_admit_diag],,,,0,True,1.0,[],[],[],False
+PRV55521,ai text,reasons[los_max],,,,0,True,0.0,[],[],[],False
+PRV55521,ai text,what_to_check[0],,,,0,True,0.0,[],[],[],False
+PRV55521,ai text,what_to_check[1],,,,0,True,1.0,[],[],[],False
+PRV55521,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV55521,ai text,what_to_check[3],,,,0,True,0.0,[],[],[],False
+PRV55521,ai text,patterns[T1],,,,0,True,0.0,[],[],[],False
+PRV55521,ai text,patterns[T6],,,,0,True,1.0,[],[],[],False
+PRV55521,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV55521,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV52829,evidence line,duplicate_claims,duplicate_claims,1 duplicate claim,True,0,True,,,,,
+PRV52829,evidence line,total_paid,total_paid,$227K paid,True,0,True,,,,,
+PRV52829,evidence line,beyond_size,beyond_size,Variety of main diagnoses 77%,True,0,True,,,,,
+PRV52829,ai text,summary,,,,0,True,1.0,[],[],[],False
+PRV52829,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV52829,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV52829,ai text,beyond[dead_share],,,,0,True,1.0,[],[],[],False
+PRV52829,ai text,beyond[op_reimb_max],,,,0,True,1.0,[],[],[],False
+PRV52829,ai text,reasons[total_reimb],,,,0,True,1.0,[],[],[],False
+PRV52829,ai text,reasons[los_max],,,,0,True,1.0,[],[],[],False
+PRV52829,ai text,reasons[n_admit_diag],,,,0,True,1.0,[],[],[],False
+PRV52829,ai text,reasons[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV52829,ai text,reasons[dead_share],,,,0,True,1.0,[],[],[],False
+PRV52829,ai text,what_to_check[0],,,,0,True,0.0,[],[],[],False
+PRV52829,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV52829,ai text,what_to_check[2],,,,0,True,1.0,[],[],[],False
+PRV52829,ai text,patterns[T6],,,,0,True,0.0,[],[],[],False
+PRV52829,ai text,patterns[T4],,,,0,True,0.0,[],[],[],False
+PRV52829,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV52829,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+PRV54255,evidence line,duplicate_claims,duplicate_claims,1 duplicate claim,True,0,True,,,,,
+PRV54255,evidence line,total_paid,total_paid,$107K paid,True,0,True,,,,,
+PRV54255,evidence line,beyond_size,beyond_size,Possible duplicate claims 0.9%,True,0,True,,,,,
+PRV54255,ai text,summary,,,,0,True,1.0,[],[],[],False
+PRV54255,ai text,size_note,,,,0,True,0.0,[],[],[],False
+PRV54255,ai text,beyond[dup_same_share],,,,0,True,0.0,[],[],[],False
+PRV54255,ai text,beyond[claims_per_attending],,,,0,True,1.0,[],[],[],False
+PRV54255,ai text,beyond[distinct_diag1_per_claim],,,,0,True,1.0,[],[],[],False
+PRV54255,ai text,reasons[los_max],,,,0,True,1.0,[],[],[],False
+PRV54255,ai text,reasons[total_reimb],,,,0,True,2.0,[],[],[],False
+PRV54255,ai text,reasons[dup_same_share],,,,0,True,1.0,[],[],[],False
+PRV54255,ai text,reasons[share_rheumatoidarthritis],,,,0,True,2.0,[],[],[],False
+PRV54255,ai text,reasons[share_stroke],,,,0,True,2.0,[],[],[],False
+PRV54255,ai text,what_to_check[0],,,,0,True,0.0,[],[],[],False
+PRV54255,ai text,what_to_check[1],,,,0,True,0.0,[],[],[],False
+PRV54255,ai text,what_to_check[2],,,,0,True,0.0,[],[],[],False
+PRV54255,ai text,patterns[T6],,,,0,True,3.0,[],[],[],False
+PRV54255,ai text,patterns[T4],,,,0,True,2.0,[],[],[],False
+PRV54255,ai text,patterns[T2],,,,0,True,0.0,[],[],[],False
+PRV54255,ai text,cautions[0],,,,0,True,0.0,[],[],[],False
+PRV54255,ai text,cautions[1],,,,0,True,0.0,[],[],[],False
+overview,ai text,headline,,,,0,True,1.0,[],[],[],False
+overview,ai text,summary,,,,0,True,5.0,[],[],[],False
+overview,ai text,actions,,,,0,True,4.0,[],[],[],False
+overview,ai text,how_to_read,,,,0,True,0.0,[],[],[],False
+overview,ai text,watch_out_for[0],,,,0,True,0.0,[],[],[],False
+overview,ai text,watch_out_for[1],,,,0,True,1.0,[],[],[],False
+overview,ai text,caveats,,,,0,True,2.0,[],[],[],False
+overview,ai text,glossary,,,,0,True,0.0,[],[],[],False

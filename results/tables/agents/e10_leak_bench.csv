@@ -1,4 +1,0 @@
-run,leaks,leaks_caught,clean,false_alarms,uncertain,missing_verdicts,split_ok
-1,5,5,10,0,0,0,True
-2,5,5,10,0,1,0,True
-3,5,5,10,0,1,0,True

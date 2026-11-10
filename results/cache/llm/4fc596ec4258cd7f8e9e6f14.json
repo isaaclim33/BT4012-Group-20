@@ -1,0 +1,237 @@
+{
+ "request": {
+  "model": "gemini-3.6-flash",
+  "system": "You are a fraud analytics feature engineer. Task: rank Medicare providers for audit. Each of 5,410 providers carries a PotentialFraud label (9.35% flagged) whose origin is undocumented; treat it as suspicion, not confirmed fraud. Claims run 27 Nov 2008 to 31 Dec 2009. The primary metric is PR-AUC; the audit queue holds about 100 providers. Existing provider features are grouped into families below. Propose new provider-level features that describe HOW a provider bills rather than HOW MUCH, because claim volume already explains most of the label. Use only the claim columns and provider bases the schema allows. Never use the label. (Independent run 1.)",
+  "messages": [
+   {
+    "role": "user",
+    "content": "<data>\n{\n \"size\": [\n  \"n_claims\",\n  \"n_ip_claims\",\n  \"n_op_claims\",\n  \"n_bene\",\n  \"total_reimb\",\n  \"ip_total_reimb\",\n  \"op_total_reimb\",\n  \"n_attending\",\n  \"n_operating\",\n  \"n_other_phys\",\n  \"n_states\",\n  \"n_dgc\",\n  \"n_admit_diag\"\n ],\n \"service_mix\": [\n  \"has_ip\",\n  \"has_op\",\n  \"ip_claim_share\",\n  \"ip_reimb_share\"\n ],\n \"money\": [\n  \"reimb_per_claim\",\n  \"reimb_per_bene\",\n  \"ip_reimb_mean\",\n  \"ip_reimb_max\",\n  \"op_reimb_mean\",\n  \"op_reimb_median\",\n  \"op_reimb_max\",\n  \"op_deductible_mean\",\n  \"zero_reimb_share\"\n ],\n \"intensity\": [\n  \"los_mean\",\n  \"los_max\",\n  \"los_long_share\",\n  \"ip_claim_days_mean\",\n  \"op_claim_days_mean\",\n  \"claims_per_bene\"\n ],\n \"coding\": [\n  \"diag_per_claim\",\n  \"ip_proc_per_claim\",\n  \"ip_surgery_share\",\n  \"dgc_per_ip_claim\",\n  \"admit_diag_per_claim\",\n  \"distinct_diag1_per_claim\"\n ],\n \"physicians\": [\n  \"claims_per_attending\",\n  \"top_attending_share\",\n  \"operating_present_share\",\n  \"other_present_share\",\n  \"att_is_op_share\"\n ],\n \"duplication\": [\n  \"dup_any_share\",\n  \"dup_same_share\"\n ],\n \"patient_mix\": [\n  \"age_mean\",\n  \"dead_share\",\n  \"n_chronic_mean\",\n  \"renal_share\",\n  \"bene_ip_annual_mean\",\n  \"bene_op_annual_mean\",\n  \"states_per_bene\",\n  \"share_alzheimer\",\n  \"share_heartfailure\",\n  \"share_kidneydisease\",\n  \"share_cancer\",\n  \"share_obstrpulmonary\",\n  \"share_depression\",\n  \"share_diabetes\",\n  \"share_ischemicheart\",\n  \"share_osteoporasis\",\n  \"share_rheumatoidarthritis\",\n  \"share_stroke\"\n ]\n}\n</data>"
+   }
+  ],
+  "schema": {
+   "$defs": {
+    "ClaimAggFeature": {
+     "properties": {
+      "name": {
+       "pattern": "^agent_[a-z0-9_]{3,40}$",
+       "title": "Name",
+       "type": "string"
+      },
+      "column": {
+       "enum": [
+        "InscClaimAmtReimbursed",
+        "los",
+        "claim_days",
+        "n_diag",
+        "n_proc",
+        "OPDeductible",
+        "age",
+        "n_chronic",
+        "RenalDiseaseIndicator",
+        "bene_dead",
+        "dup_any_provider",
+        "dup_same_provider",
+        "att_is_op"
+       ],
+       "title": "Column",
+       "type": "string"
+      },
+      "agg": {
+       "enum": [
+        "mean",
+        "median",
+        "max",
+        "std",
+        "share_positive"
+       ],
+       "title": "Agg",
+       "type": "string"
+      },
+      "scope": {
+       "enum": [
+        "all",
+        "ip",
+        "op"
+       ],
+       "title": "Scope",
+       "type": "string"
+      },
+      "rationale": {
+       "title": "Rationale",
+       "type": "string"
+      }
+     },
+     "required": [
+      "name",
+      "column",
+      "agg",
+      "scope",
+      "rationale"
+     ],
+     "title": "ClaimAggFeature",
+     "type": "object"
+    },
+    "RatioFeature": {
+     "properties": {
+      "name": {
+       "pattern": "^agent_[a-z0-9_]{3,40}$",
+       "title": "Name",
+       "type": "string"
+      },
+      "numerator": {
+       "enum": [
+        "n_claims",
+        "n_ip_claims",
+        "n_op_claims",
+        "n_bene",
+        "total_reimb",
+        "ip_total_reimb",
+        "op_total_reimb",
+        "n_attending",
+        "n_operating",
+        "n_states",
+        "n_dgc",
+        "n_admit_diag"
+       ],
+       "title": "Numerator",
+       "type": "string"
+      },
+      "denominator": {
+       "enum": [
+        "n_claims",
+        "n_ip_claims",
+        "n_op_claims",
+        "n_bene",
+        "total_reimb",
+        "ip_total_reimb",
+        "op_total_reimb",
+        "n_attending",
+        "n_operating",
+        "n_states",
+        "n_dgc",
+        "n_admit_diag"
+       ],
+       "title": "Denominator",
+       "type": "string"
+      },
+      "rationale": {
+       "title": "Rationale",
+       "type": "string"
+      }
+     },
+     "required": [
+      "name",
+      "numerator",
+      "denominator",
+      "rationale"
+     ],
+     "title": "RatioFeature",
+     "type": "object"
+    }
+   },
+   "properties": {
+    "claim_aggregates": {
+     "items": {
+      "$ref": "#/$defs/ClaimAggFeature"
+     },
+     "maxItems": 12,
+     "title": "Claim Aggregates",
+     "type": "array"
+    },
+    "ratios": {
+     "items": {
+      "$ref": "#/$defs/RatioFeature"
+     },
+     "maxItems": 8,
+     "title": "Ratios",
+     "type": "array"
+    }
+   },
+   "required": [
+    "claim_aggregates",
+    "ratios"
+   ],
+   "title": "FeatureProposal",
+   "type": "object"
+  },
+  "effort": "low"
+ },
+ "output": {
+  "claim_aggregates": [
+   {
+    "name": "agent_op_deductible_std",
+    "column": "OPDeductible",
+    "agg": "std",
+    "scope": "op",
+    "rationale": "High standard deviation in outpatient deductible amounts indicates inconsistent billing practices or billing across wildly varied specialty services within a single provider base."
+   },
+   {
+    "name": "agent_reimb_std_all",
+    "column": "InscClaimAmtReimbursed",
+    "agg": "std",
+    "scope": "all",
+    "rationale": "Measures variance in claim reimbursement amounts. Fraudulent providers often exhibit artificial clustering or abnormal dispersion compared to standard medical pricing distribution."
+   },
+   {
+    "name": "agent_n_diag_std_all",
+    "column": "n_diag",
+    "agg": "std",
+    "scope": "all",
+    "rationale": "High variance in diagnosis code counts suggests erratic coding patterns (upcoding/padding diagnoses on specific claims)."
+   },
+   {
+    "name": "agent_n_proc_max_op",
+    "column": "n_proc",
+    "agg": "max",
+    "scope": "op",
+    "rationale": "Captures maximum procedure counts in outpatient settings, identifying extreme unbundling or procedure stuffing on single outpatient claims."
+   },
+   {
+    "name": "agent_claim_days_std_op",
+    "column": "claim_days",
+    "agg": "std",
+    "scope": "op",
+    "rationale": "Standard deviation of outpatient claim duration measures non-standard billing spans across outpatient visits."
+   },
+   {
+    "name": "agent_los_std_ip",
+    "column": "los",
+    "agg": "std",
+    "scope": "ip",
+    "rationale": "Measures variance in length of stay for inpatient claims to detect abnormal discharge timing patterns or forced stay durations."
+   }
+  ],
+  "ratios": [
+   {
+    "name": "agent_attending_per_bene",
+    "numerator": "n_attending",
+    "denominator": "n_bene",
+    "rationale": "Ratio of attending physicians to unique beneficiaries. A high ratio can signal doctor-shopping networks or fake provider referral schemes."
+   },
+   {
+    "name": "agent_operating_per_attending",
+    "numerator": "n_operating",
+    "denominator": "n_attending",
+    "rationale": "Measures doctor operational structure; extreme ratios indicate abnormal delegation or improper billing of operating physicians."
+   },
+   {
+    "name": "agent_admit_diag_per_dgc",
+    "numerator": "n_admit_diag",
+    "denominator": "n_dgc",
+    "rationale": "Ratio of distinct admitting diagnoses to distinct diagnosis group codes, highlighting non-standard diagnostic coding diversity relative to final groups."
+   },
+   {
+    "name": "agent_states_per_attending",
+    "numerator": "n_states",
+    "denominator": "n_attending",
+    "rationale": "Geographic dispersion of claims per attending physician. High values reveal improbable multi-state billing by single attending networks."
+   }
+  ]
+ },
+ "stop_reason": "end_turn",
+ "usage": {
+  "input": 801,
+  "output": 771
+ },
+ "model_version": "gemini-3.6-flash"
+}

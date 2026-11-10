@@ -1,0 +1,81 @@
+{
+  "verdicts": [
+    {
+      "feature": "top_attending_share",
+      "verdict": "ok",
+      "reason": "Uses only claim characteristics per provider without label or future leakage."
+    },
+    {
+      "feature": "ppr_all_labels",
+      "verdict": "leak",
+      "reason": "Uses test and validation labels as seeds for Personalised PageRank."
+    },
+    {
+      "feature": "reimb_zscore_global",
+      "verdict": "leak",
+      "reason": "Uses global standardisation with test set statistics and multiplies by the PotentialFraud label rank."
+    },
+    {
+      "feature": "net_nbr_fraud_share",
+      "verdict": "ok",
+      "reason": "Properly restricts flags to training-fold providers and excludes the provider's own fold."
+    },
+    {
+      "feature": "state_flag_rate",
+      "verdict": "leak",
+      "reason": "Computes state flag rate over all 5410 labelled providers including test set."
+    },
+    {
+      "feature": "n_chronic_mean",
+      "verdict": "ok",
+      "reason": "Calculated from beneficiary chronic conditions available within claims."
+    },
+    {
+      "feature": "audit_opened_flag",
+      "verdict": "leak",
+      "reason": "Uses information about investigations opened after the review period."
+    },
+    {
+      "feature": "claims_per_bene",
+      "verdict": "ok",
+      "reason": "Standard provider-level claim aggregation."
+    },
+    {
+      "feature": "ip_claim_share",
+      "verdict": "ok",
+      "reason": "Standard provider-level claim ratio."
+    },
+    {
+      "feature": "los_mean",
+      "verdict": "ok",
+      "reason": "Calculated from inpatient claims within the review period."
+    },
+    {
+      "feature": "reimb_per_claim",
+      "verdict": "ok",
+      "reason": "Standard provider-level financial aggregation."
+    },
+    {
+      "feature": "provider_flag_rate_smoothed",
+      "verdict": "leak",
+      "reason": "Target encoding of the PotentialFraud label fitted on all providers including test."
+    },
+    {
+      "feature": "net_degree",
+      "verdict": "ok",
+      "reason": "Network degree based on shared beneficiaries from claims."
+    },
+    {
+      "feature": "dup_same_share",
+      "verdict": "ok",
+      "reason": "Internal claim duplication share."
+    },
+    {
+      "feature": "diag_per_claim",
+      "verdict": "ok",
+      "reason": "Claim-level diagnostic count average."
+    }
+  ],
+  "split_ok": false,
+  "split_comment": "The split design itself is standard, but multiple features leak information from the test set or labels."
+}

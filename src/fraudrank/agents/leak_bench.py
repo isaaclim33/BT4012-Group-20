@@ -1,4 +1,4 @@
-"""E10: a benchmark of feature specifications with known leaks.
+"""LEAK_AGENT: a benchmark of feature specifications with known leaks.
 
 Ten clean specifications come from the real feature table; five leaky ones are
 planted with plausible-sounding descriptions. The Leakage agent sees only the

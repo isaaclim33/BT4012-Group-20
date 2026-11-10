@@ -1,6 +1,6 @@
 """The six agents from the proposal. Each is one structured LLM call with a fixed
 system prompt; untrusted data goes inside tagged blocks and is declared to be
-evidence, not instructions (lecture 05's injection defence)."""
+evidence, not instructions (a prompt-injection defence)."""
 from __future__ import annotations
 
 import json
@@ -18,13 +18,20 @@ TASK = ("Task: rank Medicare providers for audit. Each of 5,410 providers carrie
         "about 100 providers.")
 
 
-def cleaning_agent(llm: LLMClient, profile: str) -> CleaningPlan:
+def cleaning_agent(llm: LLMClient, profile: str, columns: list[str], run_tag: str = "") -> CleaningPlan:
+    """One raw file at a time; the caller checks that every listed column got a step."""
     system = ("You are a data-cleaning specialist preparing healthcare claims for fraud modelling. "
-              f"{TASK} Propose one step for every column that needs action, including recodings, "
-              "constant columns to drop, and how missing values should be handled. Prefer missing "
-              "indicators over imputation when a value is missing by design. A team member approves "
-              f"your plan before it runs. {DATA_RULE}")
-    return llm.structured(system, f"<data>\n{profile}\n</data>", CleaningPlan, "cleaning_plan")
+              f"{TASK} You see a profile of one raw file: for each column its type, share missing, number "
+              "of distinct values and most common values. Return exactly one step for every listed column, "
+              "using the exact column name; use 'keep' when no action is needed. Check every column for: "
+              "(a) a yes/no flag coded with values other than 0/1, such as 1/2 or Y/N: recode_binary, stating "
+              "the mapping; (b) a single distinct value among the non-missing rows: drop_column; (c) dates "
+              "stored as text: parse_date; (d) values missing because the field does not apply to that record "
+              "rather than because they are unknown: missing_indicator, never impute; (e) identifiers and "
+              "medical codes: keep. Base each decision on the profile values, not on the column name alone. "
+              f"An analyst compares your plan with their own before anything runs. {DATA_RULE} {run_tag}")
+    user = f"<data>\nColumns to cover ({len(columns)}): {', '.join(columns)}\n\n{profile}\n</data>"
+    return llm.structured(system, user, CleaningPlan, "cleaning_plan", effort="high")
 
 
 def feature_agent(llm: LLMClient, existing: dict, run_tag: str = "") -> FeatureProposal:
@@ -59,17 +66,14 @@ def experiment_agent(llm: LLMClient, context: dict, run_tag: str = "") -> Experi
 def critic_agent(llm: LLMClient, context: dict, rounds_left: int, run_tag: str = "",
                  tool_ctx: dict | None = None) -> CriticVerdict:
     system = ("You are a sceptical results reviewer. " + TASK +
-              " Pick the configuration to carry forward. Use fold-level evidence to decide: "
-              "a config that wins a majority of folds is more trustworthy than one with a higher mean "
-              "but inconsistent fold performance. Between two configs with similar fold-win rates, "
-              "prefer the simpler model. Flag any result that looks too good. "
-              f"You may request up to {rounds_left} more round(s) of experiments; "
-              "set stop=true if further search is unlikely to help. "
-              "Rate your confidence in chosen_run (0-1): 1.0 means one config clearly wins most folds "
-              "and no reasonable reviewer would disagree; 0.5 means fold wins are split roughly evenly "
-              "or something looks off. " +
-              ("You can inspect the per-fold PR-AUC breakdown of any completed run. Compare fold-by-fold: "
-               "count how many folds each config wins to assess which is genuinely better vs lucky. "
+              " Code has already chosen the configuration to carry forward with a paired fold rule; "
+              "the choice and the paired comparisons behind it are under 'selection'. Your job is to "
+              "decide whether more search is worthwhile and to flag concerns, especially any result that "
+              "looks too good. "
+              f"You may request up to {rounds_left} more round(s) of experiments; propose configurations "
+              "that could plausibly beat the current choice on paired folds, and set stop=true if further "
+              "search is unlikely to help. " +
+              ("You can inspect the per-fold PR-AUC breakdown of any completed run. "
                if tool_ctx is not None else "") + run_tag)
     user = f"<data>\n{json.dumps(context, indent=1)}\n</data>"
     if tool_ctx is not None:
@@ -85,7 +89,9 @@ def case_file_agent(llm: LLMClient, evidence: dict, with_playbook: bool,
                     tool_ctx: dict | None = None) -> CaseBrief:
     system = ("You are a fraud case analyst writing a brief for a Medicare investigator. " + TASK +
               " Use only the evidence provided: copy feature values, peer percentiles and SHAP values "
-              "exactly as given. Choose 1-5 drivers from the evidence. " +
+              "exactly as given. Choose 1-5 drivers from the evidence. 'billing_checks' counts claims that "
+              "repeat an earlier claim and hospital stays that start before the same patient's previous stay "
+              "ended; mention any non-zero count in the summary. " +
               ("Cite playbook sections only by the chunk_id shown, and only when the section's signals "
                "match the provider's drivers. " if with_playbook else
                "No playbook is available; leave typologies empty. ") +
@@ -118,10 +124,11 @@ def dashboard_overview_agent(llm: LLMClient, facts: dict, run_tag: str = ""):
     """Writes the home-page text of the review dashboard. Counts and charts come from code."""
     from .schemas import OVERVIEW_SLOTS, DashboardOverview, slot_rules
     system = ("You write the opening text of a review dashboard for " + READER + ". The dashboard ranks providers "
-              "by how closely their billing resembles providers flagged in the past; the top of the ranking is this "
-              "cycle's review queue. The analysts read this first, so lead with what matters for their decisions this "
-              "cycle: how many providers look unusual beyond their size, and which recommendations need a second "
-              "look. Write one action note for each recommendation listed under 'recommendations' and for no other: "
+              "by how closely their billing resembles providers flagged in the past. This cycle's review queue is built in "
+              "two steps, described under 'how_the_queue_is_built': a rule check refers billing that is clearly "
+              "wrong, then the risk ranking adds the highest-ranked of the rest. The analysts read this first, so lead "
+              "with what matters for their decisions this cycle: how the queue was built, how many providers look "
+              "unusual beyond their size, and which desk reviews are borderline. Write one action note for each recommendation listed under 'recommendations' and for no other: "
               "providers outside the queue have no recommendation, so never describe them as 'Monitor' or give "
               "them an action note. Explain each recommendation using only the counts given. The page already shows every count as "
               "a number or chart; your words say what the counts mean. " + slot_rules(OVERVIEW_SLOTS) + " " +
@@ -140,8 +147,9 @@ def dashboard_provider_agent(llm: LLMClient, evidence: dict, run_tag: str = ""):
               "using the feature key exactly as given; three to five concrete review steps naming the records or "
               "comparisons an analyst should pull, tied to this provider's own factors; one sentence per matched "
               "pattern; and one to three cautions specific to this provider. Do not change or argue with the "
-              "recommendation. If 'recommendation_check' is set, mention in the summary that the recommendation "
-              "should be double-checked and why. The case analyst's notes are background; rewrite them in plain "
+              "recommendation. If 'selected_by' names a rule check, say in the summary which billing check referred the "
+              "provider. If 'recommendation_check' is set, say in the summary that the case is borderline and why. "
+              "The case analyst's notes are background; rewrite them in plain "
               "words. " + slot_rules(PAGE_SLOTS) + " " + PLAIN_RULES + f" {DATA_RULE} {run_tag}")
     return llm.structured(system, f"<data>\n{json.dumps(evidence, indent=1)}\n</data>", ProviderPage,
                           "provider_page")

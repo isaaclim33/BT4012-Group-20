@@ -42,7 +42,7 @@ def cv_evaluate(make_model: Callable, cols: list[str], df: pd.DataFrame, splits:
                 folds: list | None = None) -> tuple[pd.DataFrame, pd.Series]:
     """Run over every CV fold. Returns per-fold metrics and the mean out-of-fold score.
 
-    label_transform(y, fold_index) lets E7 corrupt training labels; validation
+    label_transform(y, fold_index) lets NOISE corrupt training labels; validation
     labels always stay clean.
     """
     rows, oof = [], {}
