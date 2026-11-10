@@ -1,4 +1,4 @@
-"""Read-only tools for agents (L9 tool-calling, least privilege).
+"""Read-only tools for agents (least privilege).
 
 Each tool is (params: dict, ctx: dict) -> dict. The ctx dict is injected by the
 harness and holds the data each tool needs; agents never access it directly.

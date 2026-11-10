@@ -39,7 +39,7 @@ FIX = {
         {"model": "logistic", "feature_set": "no_size", "imbalance": "class_weight", "params": {"C": 0.3},
          "rationale": "b"},
         {"model": "lightgbm", "feature_set": "no_size+agent", "imbalance": "none", "params": {}, "rationale": "c"}]},
-    "critic_verdict": {"chosen_run": 1, "confidence": 0.9, "stop": True, "concerns": ["none"], "next_experiments": []},
+    "critic_verdict": {"stop": True, "concerns": ["none"], "next_experiments": []},
 }
 
 
@@ -56,8 +56,9 @@ def fake_overview(f):
                         "bill unusually even when their size is set aside.",
             "summary": "Rehearsal: start with the full audits, then look again at the desk reviews flagged for a "
                        "second look.",
-            "actions": [{"action": "priority_audit", "why": f"Rehearsal: all {rec.get('Full audit', 0)} bill unusually."},
-                        {"action": "desk_review", "why": "Rehearsal: some of these also bill unusually."}],
+            "actions": [{"action": "priority_audit", "why": f"Rehearsal: all {rec.get('Full audit', 0)} bill unusually."}]
+                       + ([{"action": "desk_review", "why": "Rehearsal: some of these also bill unusually."}]
+                          if rec.get("Desk review") else []),                 # only when the queue has desk reviews
             "how_to_read": "Rehearsal: rank 1 looks most like providers flagged before. A rank is a reason to look. "
                            f"The other {f['providers_outside_queue']:,} are outside the queue.",
             "watch_out_for": ["Rehearsal: large hospitals rank high.", "Rehearsal: sicker patients cost more."],
@@ -101,7 +102,7 @@ LLMClient._raw = fake_raw
 llm = LLMClient(mode="replay")
 df, FAM, SPLITS = runner.load_all()
 
-plan = A.cleaning_agent(llm, "profile")
+plan = A.cleaning_agent(llm, "profile", ["ChronicCond_Alzheimer"])
 assert plan.steps[0].action == "recode_binary"
 prop = A.feature_agent(llm, FAM)
 feats = X.compute_agent_features(prop, df)
@@ -124,6 +125,54 @@ detail_missing = get_fold_detail({"run_id": 99}, {"fold_details": fold_details})
 assert "error" in detail_missing
 print("fold detail tool: ok")
 
+# ------------------------------------------------------------------ selection rule
+from fraudrank.agents.selection import choose_config
+
+hist = [{"run_id": 1, "model": "logistic", "imbalance": "none", "n_features": 63, "pr_auc_mean": 0.70},
+        {"run_id": 2, "model": "random_forest", "imbalance": "none", "n_features": 63, "pr_auc_mean": 0.718},
+        {"run_id": 3, "model": "lightgbm", "imbalance": "none", "n_features": 63, "pr_auc_mean": 0.722}]
+folds = {1: [0.66, 0.70, 0.71, 0.70, 0.73],           # beaten on every fold
+         2: [0.70, 0.73, 0.69, 0.75, 0.72],           # mixed: lightgbm is not reliably better
+         3: [0.72, 0.72, 0.73, 0.73, 0.71]}
+sel = choose_config(hist, folds)
+assert sel["best_mean_run"] == 3 and sel["chosen"] == 2 and sel["kept_simpler"], sel
+folds[2] = [0.69, 0.70, 0.71, 0.70, 0.69]             # now lightgbm wins every fold clearly
+assert choose_config(hist, folds)["chosen"] == 3
+assert choose_config(hist[:1], {1: folds[1]})["chosen"] == 1
+print("selection rule: ok")
+
+# ------------------------------------------------------------------ two-gate audit selection
+from fraudrank import audit_selection as AS  # noqa: E402
+from fraudrank.config import RISK_QUEUE_SIZE  # noqa: E402
+
+ids = [f"P{i:03d}" for i in range(RISK_QUEUE_SIZE + 60)]
+score = pd.Series([1 - i / 1000 for i in range(len(ids))], index=ids)
+score["P011"] = score["P010"]                                     # a tie, broken by provider ID
+chk = pd.DataFrame(0, index=ids, columns=["duplicate_claims", "overlapping_stays"])
+low = ids[-1]
+chk.loc[low, "duplicate_claims"] = 1                              # lowest rank, but clearly wrong billing
+chk.loc["P002", "overlapping_stays"] = 2
+chk.loc["P003", "overlapping_stays"] = 1                          # one overlap: a warning, not a referral
+votes = pd.Series(10, index=ids)
+votes.loc[["P004", "P005"]] = [5, 0]
+q = AS.two_gate_selection(score, chk, votes)
+qi = q.set_index("provider")
+assert set(q[q.gate == "1_rule_check"].provider) == {"P002", low} and qi.loc[low, "action"] == "priority_audit"
+assert (q.gate == "2_risk_ranking").sum() == RISK_QUEUE_SIZE and "P003" in set(q.provider)
+assert qi.loc["P004", "reason"] == "borderline" and (qi.loc["P005", "action"], qi.loc["P005", "reason"]) == ("desk_review", "")
+assert q.provider.iloc[-1] == low and q.risk_score.is_monotonic_decreasing       # the rule does not jump the queue
+assert list(q.provider).index("P010") < list(q.provider).index("P011")              # tie broken by provider ID
+assert q.equals(AS.two_gate_selection(score.sample(frac=1, random_state=1), chk, votes))   # order-independent
+saved, seeds = ROOT / "results/tables/agents/audit_queue.csv", ROOT / "results/cache/size_free_seed_scores.pkl"
+if saved.exists() and seeds.exists():                                               # real data: rebuild == saved
+    real = AS.two_gate_selection(pd.read_pickle(ROOT / "results/cache/test_scores.pkl")["lightgbm"],
+                                 AS.billing_checks(df.index), AS.seed_votes(dict(pd.read_pickle(seeds).items())))
+    pd.testing.assert_frame_equal(real.fillna({"reason": ""}), pd.read_csv(saved).fillna({"reason": ""}),
+                                  check_dtype=False, rtol=1e-9)
+    print("two-gate audit selection: ok (real queue rebuilt identically)")
+else:
+    print("two-gate audit selection: ok")
+
 cache = ROOT / "results" / "cache"
 if (cache / "shap_test_lightgbm.pkl").exists():
     shap = pd.read_pickle(cache / "shap_test_lightgbm.pkl")
@@ -133,7 +182,7 @@ if (cache / "shap_test_lightgbm.pkl").exists():
     chk = check_brief(A.case_file_agent(llm, ev, True), ev)
     assert chk["drivers_faithful"] == 1 and chk["citations_exist"] == 1, chk
     print("case-file check:", chk)
-if (ROOT / "results/tables/agents/e8_briefs.json").exists() and (cache / "shap_test_lgbm_no_size.pkl").exists():
+if (ROOT / "results/tables/agents/briefs.json").exists() and (cache / "shap_test_lgbm_no_size.pkl").exists():
     import copy
     from fraudrank.agents import dashboard_agent as G
     from fraudrank.agents import dashboard_data as DD
@@ -178,6 +227,20 @@ if (ROOT / "results/tables/agents/e8_briefs.json").exists() and (cache / "shap_t
                          dict(checks, **{pid: lc}))
     assert ai_l["overview"]["headline"] is None and ai_l["overview"]["summary"] == ov["summary"]
     assert ai_l["providers"][pid]["summary"] is None and ai_l["providers"][pid]["what_to_check"] == pages[pid]["what_to_check"]
+    # grounding gate: evidence lines re-derived from case evidence; ungrounded AI fields removed
+    from fraudrank.agents.grounding import case_evidence, check_item, ground
+    tampered, tp = copy.deepcopy(ai), next(iter(ai["providers"]))
+    tampered["providers"][tp] = dict(tampered["providers"][tp], summary="It was paid $9.87M.", cautions=["SHAP is high."])
+    grounded, grows = ground(data, tampered)
+    assert grounded["providers"][tp]["summary"] is None and grounded["providers"][tp]["cautions"] is None
+    spelled = copy.deepcopy(ai)                                     # a number in words cannot be checked: removed
+    spelled["providers"][tp] = dict(spelled["providers"][tp], what_to_check=["Pull the claims worth eighty-nine thousand dollars.",
+                                                                           "Sample two claims."])
+    assert ground(data, spelled)[0]["providers"][tp]["what_to_check"] == ["Sample two claims."]
+    assert all(r["passed"] for r in grows if r["part"] == "evidence line")
+    q0 = next(p for p in data["providers"] if p["in_queue"])
+    assert q0["evidence_line"] and not check_item({"kind": "total_paid", "text": "$9.99M paid"}, case_evidence(q0, data))["passed"]
+    print("grounding: evidence lines", sum(r["part"] == "evidence line" for r in grows), "checked; invented number and jargon removed")
     html = render(data, ai, {"generated": "2026-10-18", "checks_failed": failed})
     assert "</script><script" not in html.split('id="dashboard-data"')[1].split("</script>")[0]
     print("dashboard checks: overview", oc["passed"], "| pages passed", sum(c["passed"] for c in checks.values()),

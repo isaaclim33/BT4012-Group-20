@@ -6,7 +6,7 @@ What it does:
  1. checks Python packages, the 8 Kaggle CSVs in data/raw/ and the API key in .env;
  2. rebuilds what the agents depend on if it is missing (feature table, tuned models,
     the held-out test scores and SHAP values): about 10 minutes;
- 3. runs scripts/03_run_agents.py (CLEAN, E10, E4, E8, RETRIEVAL): about 15-30 minutes,
+ 3. runs scripts/03_run_agents.py (RETRIEVAL, CLEAN, LEAK_AGENT, AGENT_MODEL, QUEUE, BRIEFS, DASHBOARD): about 15-30 minutes,
     roughly 70 API calls;
  4. writes agent_outputs_group20.zip in the repo root: the agent result tables, the
     cached LLM responses (prompts and answers, no key), the run log and package
@@ -37,7 +37,7 @@ ap = argparse.ArgumentParser()
 ap.add_argument("--full", action="store_true")
 ap.add_argument("--skip-prereq", action="store_true")
 ap.add_argument("--model", default=None)
-ap.add_argument("--steps", default=None, help="comma-separated agent steps, e.g. E11 (default: all)")
+ap.add_argument("--steps", default=None, help="comma-separated agent steps, e.g. DASHBOARD (default: all)")
 args = ap.parse_args()
 
 LOG = ROOT / "results" / "agent_run_log.txt"
@@ -66,22 +66,31 @@ def run(cmd: list[str]) -> bool:
 LOG.write_text(f"agent run started {datetime.now().isoformat(timespec='seconds')}\n")
 
 # ---------------------------------------------------------------- 1 checks
-missing_pkgs = [p for p in ["numpy", "pandas", "sklearn", "lightgbm", "imblearn", "pydantic", "anthropic",
-                            "matplotlib", "scipy"] if importlib.util.find_spec(p) is None]
+def _has(p):
+    try:
+        return importlib.util.find_spec(p) is None
+    except ModuleNotFoundError:      # parent package missing, e.g. google for google.genai
+        return True
+
+
+missing_pkgs = [p for p in ["numpy", "pandas", "sklearn", "lightgbm", "imblearn", "pydantic", "google.genai",
+                            "matplotlib", "scipy"] if _has(p)]
 if missing_pkgs:
     sys.exit(f"Missing packages {missing_pkgs}. Run: pip install -r requirements.txt")
 
 from fraudrank.config import RAW_DIR, TRAIN_FILES  # noqa: E402
-from fraudrank.agents.llm import load_dotenv  # noqa: E402
+from fraudrank.agents.llm import API_KEY_VAR, DEFAULT_MODEL, load_dotenv  # noqa: E402
 
 absent = [f for f in TRAIN_FILES.values() if not (RAW_DIR / f).exists()]
 if absent:
     sys.exit(f"Missing data files in data/raw/: {absent}. See README step 2.")
 
 load_dotenv()
-KEY = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+MODEL = args.model or DEFAULT_MODEL
+KEY_VAR = API_KEY_VAR
+KEY = os.environ.get(KEY_VAR, "").strip()
 if not KEY:
-    sys.exit("No API key found. Copy .env.example to .env and paste your key after ANTHROPIC_API_KEY=")
+    sys.exit(f"No API key found. Copy .env.example to .env and paste your key after {KEY_VAR}=")
 say("checks passed: packages, data files, API key found (not printed)")
 
 # ---------------------------------------------------------------- 2 prerequisites
@@ -90,26 +99,26 @@ needed = [ROOT / "data/processed/provider_features.pkl", ROOT / "results/tables/
           ROOT / "results/cache/shap_test_lgbm_no_size.pkl"]
 if args.full or (not args.skip_prereq and not all(p.exists() for p in needed)):
     ok = run([PY, "scripts/01_build_features.py"])
-    steps = [] if args.full else ["TUNE", "E1", "TEST", "SUMMARY"]
+    steps = [] if args.full else ["TUNE", "MODELS", "TEST", "SUMMARY"]
     ok = ok and run([PY, "scripts/02_run_experiments.py", *steps])
     if not ok:
         sys.exit("Prerequisite steps failed; see results/agent_run_log.txt")
 
 # ---------------------------------------------------------------- 3 agents
 agent_cmd = [PY, "scripts/03_run_agents.py"] + (["--model", args.model] if args.model else [])
-ap_steps = args.steps.split(",") if args.steps else ["RETRIEVAL", "CLEAN", "E10", "E4", "E8", "E11"]
+ap_steps = args.steps.split(",") if args.steps else ["RETRIEVAL", "CLEAN", "LEAK_AGENT", "AGENT_MODEL", "QUEUE", "BRIEFS", "DASHBOARD"]
 results = {step: run(agent_cmd + [step]) for step in ap_steps}
 say(f"\nstep results: {results}")
 
 # ---------------------------------------------------------------- 4 bundle
 versions = {}
-for p in ["numpy", "pandas", "scipy", "sklearn", "lightgbm", "imblearn", "pydantic", "anthropic"]:
+for p in ["numpy", "pandas", "scipy", "sklearn", "lightgbm", "imblearn", "pydantic", "google.genai"]:
     try:
         versions[p] = importlib.import_module(p).__version__
     except Exception as e:  # noqa: BLE001
         versions[p] = f"unavailable ({e})"
 env = {"python": sys.version, "platform": platform.platform(), "packages": versions,
-       "model": args.model or os.environ.get("FRAUDRANK_LLM_MODEL", "claude-sonnet-5-5"),
+       "model": MODEL,
        "steps": results, "finished": datetime.now().isoformat(timespec="seconds")}
 (ROOT / "results" / "agent_environment.json").write_text(json.dumps(env, indent=2))
 
@@ -121,7 +130,7 @@ files = (sorted((ROOT / "results/tables/agents").glob("*"))
          + [LOG, ROOT / "results/agent_environment.json"])
 files = [f for f in files if f.is_file()]
 
-key_patterns = [re.escape(KEY), r"sk-ant-[A-Za-z0-9_\-]{10,}"]
+key_patterns = [re.escape(KEY), r"sk-ant-[A-Za-z0-9_\-]{10,}", r"AIza[0-9A-Za-z_\-]{30,}"]
 for f in files:
     text = f.read_text(errors="ignore")
     if any(re.search(p, text) for p in key_patterns):

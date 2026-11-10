@@ -1,6 +1,6 @@
 {
-  "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
-  "platform": "Windows-10-10.0.19045-SP0",
+  "python": "3.13.5 (main, Jun 11 2025, 15:36:57) [Clang 16.0.0 (clang-1600.0.26.6)]",
+  "platform": "macOS-14.5-arm64-arm-64bit-Mach-O",
   "packages": {
     "numpy": "2.5.3",
     "pandas": "3.0.5",
@@ -9,11 +9,17 @@
     "lightgbm": "4.7.0",
     "imblearn": "0.14.2",
     "pydantic": "2.13.5",
+    "google.genai": "2.34.0",
     "anthropic": "1.15.0"
   },
-  "model": "claude-sonnet-5-5",
+  "model": "gemini-3.5-flash-lite",
   "steps": {
-    "E11": true
+    "RETRIEVAL": true,
+    "CLEAN": true,
+    "LEAK_AGENT": true,
+    "AGENT_MODEL": true,
+    "BRIEFS": true,
+    "DASHBOARD": true
   },
-  "finished": "2026-10-19T23:25:10"
+  "finished": "2026-11-10T10:21:56"
 }

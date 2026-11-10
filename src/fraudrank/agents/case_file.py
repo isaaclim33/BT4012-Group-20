@@ -57,7 +57,7 @@ def build_evidence(provider: str, rank: int, score: float, X: pd.DataFrame, shap
           "drivers": drivers}
     if retriever is not None:
         seen, chunks = set(), []
-        for d in drivers[:3]:                       # one focused query per driver (lecture 06)
+        for d in drivers[:3]:                       # one focused query per driver
             if d["shap"] <= 0:
                 continue
             for c in retriever.search(f"provider with {d['description']}", k=2):

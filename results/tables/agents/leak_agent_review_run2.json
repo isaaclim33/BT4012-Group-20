@@ -1,0 +1,81 @@
+{
+  "verdicts": [
+    {
+      "feature": "top_attending_share",
+      "verdict": "ok",
+      "reason": "Computed using only the provider's own claims."
+    },
+    {
+      "feature": "ppr_all_labels",
+      "verdict": "leak",
+      "reason": "Uses PotentialFraud labels from validation and test providers."
+    },
+    {
+      "feature": "reimb_zscore_global",
+      "verdict": "leak",
+      "reason": "Uses test set statistics for standardisation and directly incorporates the PotentialFraud label rank."
+    },
+    {
+      "feature": "net_nbr_fraud_share",
+      "verdict": "ok",
+      "reason": "Properly restricts flags to training-fold providers and excludes the provider's own fold."
+    },
+    {
+      "feature": "state_flag_rate",
+      "verdict": "leak",
+      "reason": "Computed over all 5,410 labelled providers, including test set providers."
+    },
+    {
+      "feature": "n_chronic_mean",
+      "verdict": "ok",
+      "reason": "Derived from beneficiary chronic conditions associated with the provider's claims."
+    },
+    {
+      "feature": "audit_opened_flag",
+      "verdict": "leak",
+      "reason": "Uses information that only exists after an audit decision (investigation case opened after the review period)."
+    },
+    {
+      "feature": "claims_per_bene",
+      "verdict": "ok",
+      "reason": "Standard provider-level claims and beneficiary aggregate."
+    },
+    {
+      "feature": "ip_claim_share",
+      "verdict": "ok",
+      "reason": "Ratio computed entirely from the provider's own claims."
+    },
+    {
+      "feature": "los_mean",
+      "verdict": "ok",
+      "reason": "Mean length of stay computed from the provider's inpatient claims."
+    },
+    {
+      "feature": "reimb_per_claim",
+      "verdict": "ok",
+      "reason": "Derived from total reimbursement and total claims per provider."
+    },
+    {
+      "feature": "provider_flag_rate_smoothed",
+      "verdict": "leak",
+      "reason": "Target encoding directly uses the PotentialFraud label fitted on all providers."
+    },
+    {
+      "feature": "net_degree",
+      "verdict": "ok",
+      "reason": "Structural network degree based on shared beneficiaries from claims."
+    },
+    {
+      "feature": "dup_same_share",
+      "verdict": "ok",
+      "reason": "Computed from internal claim duplication patterns."
+    },
+    {
+      "feature": "diag_per_claim",
+      "verdict": "ok",
+      "reason": "Calculated directly from the provider's claims."
+    }
+  ],
+  "split_ok": true,
+  "split_comment": "The provider-level split with 80% development and 20% test, combined with cross-validation on the development set, is appropriate."
+}

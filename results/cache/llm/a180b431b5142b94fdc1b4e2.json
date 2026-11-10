@@ -1,0 +1,273 @@
+{
+ "request": {
+  "model": "gemini-3.6-flash",
+  "system": "You are an experiment designer for a fraud ranking model. Task: rank Medicare providers for audit. Each of 5,410 providers carries a PotentialFraud label (9.35% flagged) whose origin is undocumented; treat it as suspicion, not confirmed fraud. Claims run 27 Nov 2008 to 31 Dec 2009. The primary metric is PR-AUC; the audit queue holds about 100 providers. Propose 3 or 4 distinct configurations to test next with 5-fold cross-validation. Each must differ meaningfully (model family, feature set, imbalance handling or capacity). You only see cross-validation results; the test set is hidden from you. (Independent run 1.)",
+  "messages": [
+   {
+    "role": "user",
+    "content": "<data>\n{\n \"feature_sets\": {\n  \"all\": 63,\n  \"no_size\": 50,\n  \"agent\": 10\n },\n \"models_available\": [\n  \"logistic\",\n  \"random_forest\",\n  \"lightgbm\"\n ],\n \"imbalance_options\": [\n  \"none\",\n  \"class_weight\",\n  \"smote\"\n ],\n \"history\": []\n}\n</data>"
+   }
+  ],
+  "schema": {
+   "$defs": {
+    "ExperimentProposal": {
+     "properties": {
+      "model": {
+       "enum": [
+        "logistic",
+        "random_forest",
+        "lightgbm"
+       ],
+       "title": "Model",
+       "type": "string"
+      },
+      "feature_set": {
+       "enum": [
+        "all",
+        "no_size",
+        "all+agent",
+        "no_size+agent"
+       ],
+       "title": "Feature Set",
+       "type": "string"
+      },
+      "imbalance": {
+       "enum": [
+        "none",
+        "class_weight",
+        "smote"
+       ],
+       "title": "Imbalance",
+       "type": "string"
+      },
+      "params": {
+       "$ref": "#/$defs/ModelParams"
+      },
+      "rationale": {
+       "title": "Rationale",
+       "type": "string"
+      }
+     },
+     "required": [
+      "model",
+      "feature_set",
+      "imbalance",
+      "params",
+      "rationale"
+     ],
+     "title": "ExperimentProposal",
+     "type": "object"
+    },
+    "ModelParams": {
+     "properties": {
+      "C": {
+       "anyOf": [
+        {
+         "maximum": 100,
+         "minimum": 0.0001,
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "C"
+      },
+      "min_samples_leaf": {
+       "anyOf": [
+        {
+         "maximum": 50,
+         "minimum": 1,
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Min Samples Leaf"
+      },
+      "max_features": {
+       "anyOf": [
+        {
+         "maximum": 1.0,
+         "minimum": 0.05,
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Max Features"
+      },
+      "num_leaves": {
+       "anyOf": [
+        {
+         "maximum": 64,
+         "minimum": 4,
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Num Leaves"
+      },
+      "learning_rate": {
+       "anyOf": [
+        {
+         "maximum": 0.2,
+         "minimum": 0.005,
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Learning Rate"
+      },
+      "n_estimators": {
+       "anyOf": [
+        {
+         "maximum": 1500,
+         "minimum": 50,
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "N Estimators"
+      },
+      "min_child_samples": {
+       "anyOf": [
+        {
+         "maximum": 100,
+         "minimum": 5,
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Min Child Samples"
+      },
+      "colsample_bytree": {
+       "anyOf": [
+        {
+         "maximum": 1.0,
+         "minimum": 0.3,
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Colsample Bytree"
+      }
+     },
+     "title": "ModelParams",
+     "type": "object"
+    }
+   },
+   "properties": {
+    "proposals": {
+     "items": {
+      "$ref": "#/$defs/ExperimentProposal"
+     },
+     "maxItems": 4,
+     "minItems": 3,
+     "title": "Proposals",
+     "type": "array"
+    }
+   },
+   "required": [
+    "proposals"
+   ],
+   "title": "ExperimentBatch",
+   "type": "object"
+  },
+  "effort": "low"
+ },
+ "output": {
+  "proposals": [
+   {
+    "model": "lightgbm",
+    "feature_set": "all+agent",
+    "imbalance": "class_weight",
+    "params": {
+     "C": null,
+     "min_samples_leaf": null,
+     "max_features": null,
+     "num_leaves": 31,
+     "learning_rate": 0.05,
+     "n_estimators": 300,
+     "min_child_samples": 20,
+     "colsample_bytree": 0.8
+    },
+    "rationale": "LightGBM gradient boosting with engineered agent features and balanced class weights to capture complex nonlinear interactions while targeting class imbalance for ranking optimization."
+   },
+   {
+    "model": "random_forest",
+    "feature_set": "all",
+    "imbalance": "none",
+    "params": {
+     "C": null,
+     "min_samples_leaf": 5,
+     "max_features": 0.3,
+     "num_leaves": null,
+     "learning_rate": null,
+     "n_estimators": 500,
+     "min_child_samples": null,
+     "colsample_bytree": null
+    },
+    "rationale": "Random Forest baseline with constrained feature subsampling and leaf sizes to build a robust ensemble using all features without synthetic resampling."
+   },
+   {
+    "model": "logistic",
+    "feature_set": "no_size+agent",
+    "imbalance": "class_weight",
+    "params": {
+     "C": 1.0,
+     "min_samples_leaf": null,
+     "max_features": null,
+     "num_leaves": null,
+     "learning_rate": null,
+     "n_estimators": null,
+     "min_child_samples": null,
+     "colsample_bytree": null
+    },
+    "rationale": "Regularized Logistic Regression removing direct provider size features to reduce potential volume-driven confounding and focus on normalized risk indicators."
+   },
+   {
+    "model": "lightgbm",
+    "feature_set": "no_size",
+    "imbalance": "smote",
+    "params": {
+     "C": null,
+     "min_samples_leaf": null,
+     "max_features": null,
+     "num_leaves": 15,
+     "learning_rate": 0.03,
+     "n_estimators": 400,
+     "min_child_samples": 30,
+     "colsample_bytree": 0.7
+    },
+    "rationale": "Conservative LightGBM model combined with SMOTE oversampling and a reduced feature set excluding size factors to test SMOTE's impact on precision-recall performance."
+   }
+  ]
+ },
+ "stop_reason": "end_turn",
+ "usage": {
+  "input": 265,
+  "output": 442
+ },
+ "model_version": "gemini-3.6-flash"
+}

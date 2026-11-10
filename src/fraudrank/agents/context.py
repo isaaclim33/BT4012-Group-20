@@ -1,4 +1,4 @@
-"""Context builders that trim what each agent sees (L10 context engineering).
+"""Context builders that trim what each agent sees.
 
 Each builder returns the minimal dict an agent needs — no raw column names,
 no data the agent shouldn't reason about.
@@ -25,10 +25,10 @@ def experiment_context(families: dict[str, list[str]], agent_cols: list[str],
     }
 
 
-def critic_context(history: list[dict], rounds_left: int) -> dict:
+def critic_context(history: list[dict], rounds_left: int, selection: dict) -> dict:
     return {
         "history": history,
         "rounds_left": rounds_left,
         "n_configs_tried": len(history),
-        "best_so_far": max(history, key=lambda h: h["pr_auc_mean"]) if history else None,
+        "selection": selection,
     }

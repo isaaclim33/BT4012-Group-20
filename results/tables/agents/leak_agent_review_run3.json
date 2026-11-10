@@ -1,0 +1,81 @@
+{
+  "verdicts": [
+    {
+      "feature": "top_attending_share",
+      "verdict": "ok",
+      "reason": "Calculated solely from the provider's own claims."
+    },
+    {
+      "feature": "ppr_all_labels",
+      "verdict": "leak",
+      "reason": "Uses PotentialFraud labels from validation and test providers as seeds."
+    },
+    {
+      "feature": "reimb_zscore_global",
+      "verdict": "leak",
+      "reason": "Uses global test set statistics and multiplies by the target label rank."
+    },
+    {
+      "feature": "net_nbr_fraud_share",
+      "verdict": "ok",
+      "reason": "Properly isolates training folds and excludes the provider's own fold."
+    },
+    {
+      "feature": "state_flag_rate",
+      "verdict": "leak",
+      "reason": "Computed over all 5,410 labelled providers including test sets, leaking target information."
+    },
+    {
+      "feature": "n_chronic_mean",
+      "verdict": "ok",
+      "reason": "Derived from beneficiary characteristics associated with the provider's claims."
+    },
+    {
+      "feature": "audit_opened_flag",
+      "verdict": "leak",
+      "reason": "Uses information from after the review period and correlates with audit decisions."
+    },
+    {
+      "feature": "claims_per_bene",
+      "verdict": "ok",
+      "reason": "Standard usage statistic derived directly from claim counts and distinct beneficiaries."
+    },
+    {
+      "feature": "ip_claim_share",
+      "verdict": "ok",
+      "reason": "Ratio of inpatient claims to total claims per provider."
+    },
+    {
+      "feature": "los_mean",
+      "verdict": "ok",
+      "reason": "Calculated from inpatient claim lengths of stay."
+    },
+    {
+      "feature": "reimb_per_claim",
+      "verdict": "ok",
+      "reason": "Derived from total reimbursement and claim counts."
+    },
+    {
+      "feature": "provider_flag_rate_smoothed",
+      "verdict": "leak",
+      "reason": "Target encoding directly uses the PotentialFraud label fitted on all providers."
+    },
+    {
+      "feature": "net_degree",
+      "verdict": "ok",
+      "reason": "Graph connectivity metric based on shared beneficiaries."
+    },
+    {
+      "feature": "dup_same_share",
+      "verdict": "ok",
+      "reason": "Internal duplicate claim rate."
+    },
+    {
+      "feature": "diag_per_claim",
+      "verdict": "ok",
+      "reason": "Mean diagnosis codes per claim."
+    }
+  ],
+  "split_ok": false,
+  "split_comment": "The split design is mostly standard, but multiple features leak target or test set information across the boundaries."
+}

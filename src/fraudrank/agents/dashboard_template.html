@@ -187,6 +187,101 @@ kbd{font:inherit;font-size:11.5px;font-weight:700;border:1px solid var(--hero-li
 
 /* ---------- overview ---------- */
 .trow{display:grid;grid-template-columns:1fr 1fr 1.45fr 1.45fr 1.45fr;gap:16px}
+.trow.trow3{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:860px){.trow.trow3{grid-template-columns:1fr 1fr}.trow.trow3>:last-child{grid-column:1/-1}}
+.cg{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(300px,1fr);gap:16px;align-items:start}
+.cmain{display:flex;flex-direction:column;gap:16px;min-width:0}
+.cside{position:sticky;top:16px;display:flex;flex-direction:column;gap:16px;min-width:0}
+@media (max-width:900px){.cg{grid-template-columns:minmax(0,1fr)}.cside{position:static}}
+.cdet{min-width:0;width:100%}
+.cdet>summary{list-style:none;cursor:pointer;background:var(--card);border-radius:var(--r);padding:16px 20px;box-shadow:var(--soft);display:flex;gap:12px;align-items:center;justify-content:space-between}
+.cdet>summary::-webkit-details-marker{display:none}
+.cdet>summary b{font-family:var(--serif);font-weight:500;font-size:19px}
+.cdet[open]>summary{margin-bottom:16px}
+.cdet[open]>summary .chev{transform:rotate(180deg)}
+.cdet-b{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+.cdet-b>.wide{grid-column:1/-1}
+@media (max-width:900px){.cdet-b{grid-template-columns:minmax(0,1fr)}}
+.cwrap{display:flex;flex-direction:column;gap:16px}
+.dopts{display:flex;flex-direction:column;gap:8px}
+.dopt{display:flex;gap:10px;align-items:center;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:10px 12px;cursor:pointer;font-weight:700;font-size:14px}
+.dopt small{font-weight:600;opacity:.75}
+.dopt:has(input:checked){background:rgba(255,255,255,.24);border-color:#fff}
+.kim{margin-top:16px;font-size:13px;color:var(--ink-2)}
+.kim ul{margin:6px 0 0;padding-left:18px}.kim li+li{margin-top:3px}
+.cnote{display:flex;gap:8px;align-items:center;margin:12px 0 0;font-size:13px;color:var(--amber-ink)}
+.cnote svg{flex:none}
+.slides.static .slide+.slide{margin-top:10px}
+.wbar{display:flex;align-items:center;gap:14px 20px;flex-wrap:wrap;background:var(--card);border-radius:var(--r);padding:14px 18px;box-shadow:var(--soft)}
+.wbar .wprog{display:flex;align-items:center;gap:10px;min-width:220px;flex:1 1 260px}
+.wbar .wprog b{font-size:22px;font-weight:800;letter-spacing:-.02em;white-space:nowrap}
+.wbar .wprog b small{font-size:13px;color:var(--quiet);font-weight:600}
+.wbar .wnext{font-size:13.5px;color:var(--ink-2)}
+.wbar .wnext a{font-weight:700;color:var(--ink)}
+.actd{position:relative}
+.actd>summary{list-style:none;cursor:pointer}
+.actd>summary::-webkit-details-marker{display:none}
+.actd .acts{position:absolute;right:0;top:calc(100% + 8px);z-index:20;width:min(360px,86vw);background:var(--card);border-radius:var(--r-sm);box-shadow:var(--soft),0 12px 32px rgba(0,0,0,.18);padding:8px;margin:0}
+.ltabs{display:flex;gap:8px;flex-wrap:wrap}
+.ltab{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:7px 14px;font-size:13.5px;font-weight:700;cursor:pointer}
+.ltab small{color:var(--quiet);font-weight:600}
+.ltab[aria-pressed=true]{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.ltab[aria-pressed=true] small{color:inherit;opacity:.75}
+.qt td{padding-top:10px;padding-bottom:10px}
+.qt .qcase{display:flex;gap:10px;align-items:flex-start}
+.qt .qcase b{display:block}
+.qt .qev{display:block;font-size:12.5px;color:var(--ink-2);margin-top:2px;line-height:1.4}
+.qt .qacts{display:flex;gap:6px;flex-wrap:wrap}
+@container (max-width:620px){.qt .c-pay{display:none}}
+.dec .note{padding:8px}
+.dec .note textarea{min-height:52px;transition:min-height .15s}
+.dec .note textarea:focus,.dec .note textarea.filled{min-height:104px}
+.nextln{display:block;margin-top:12px;font-size:13px;color:#fff;opacity:.9}
+.nextln b{font-weight:800}
+.caselead{font-size:15px;color:var(--hero-mute);margin-top:6px}
+.hero.compact .hb{padding-top:16px}
+.hero.compact .hb h1{font-size:26px}
+.hero.compact .hb .lead{margin-top:4px;font-size:14px}
+.hscrim{position:fixed;inset:0;background:rgba(10,12,20,.42);z-index:40;opacity:0;transition:opacity .2s}
+.hscrim.on{opacity:1}
+.help{position:fixed;top:0;right:0;bottom:0;width:min(440px,100vw);background:var(--card);color:var(--ink);z-index:41;box-shadow:-16px 0 40px rgba(0,0,0,.22);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease}
+.help.on{transform:none}
+.help .hh{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px;border-bottom:1px solid var(--line)}
+.help .hh h2{font-family:var(--serif);font-weight:500;font-size:21px;margin:0}
+.help .hb2{overflow-y:auto;padding:8px 20px 24px}
+.hsec{border-bottom:1px solid var(--line)}
+.hsec>summary{list-style:none;cursor:pointer;padding:14px 0;font-weight:700;font-size:14.5px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.hsec>summary::-webkit-details-marker{display:none}
+.hsec[open]>summary .chev{transform:rotate(180deg)}
+.hsec p,.hsec ul{font-size:13.5px;color:var(--ink-2);line-height:1.55;margin:0 0 14px}
+.hsec ul{padding-left:18px}.hsec li+li{margin-top:5px}
+.hsec h4{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--quiet);margin:2px 0 6px}
+.hsec li b{color:var(--ink)}
+.hsec.flash>summary{color:var(--violet)}
+.ib.q{font-weight:800;font-size:16px}
+.infob{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--quiet);cursor:pointer;padding:0;vertical-align:middle;margin-left:6px;flex:none}
+.infob:hover{color:var(--ink)}
+.ins .infob,.callout .infob{background:transparent;border-color:currentColor;color:inherit;opacity:.8}
+.sech{font-family:var(--serif);font-weight:500;font-size:22px;margin:6px 4px 0}
+.trow5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px}
+@media (max-width:1100px){.trow5{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:640px){.trow5{grid-template-columns:1fr 1fr}}
+.rbar{display:flex;height:44px;border-radius:12px;overflow:hidden;gap:3px}
+.rbar button{border:0;padding:0 10px;font:inherit;font-weight:800;font-size:14px;cursor:pointer;min-width:34px;display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden}
+.rbar button:hover{filter:brightness(1.08)}
+.rleg{list-style:none;margin:16px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
+.rleg li{display:grid;grid-template-columns:14px minmax(0,1fr) auto;gap:10px;align-items:start;font-size:13.5px}
+.rleg i{width:12px;height:12px;border-radius:3px;margin-top:4px}
+.rleg b{color:var(--ink)}.rleg span{color:var(--ink-2)}
+.rleg .n{font-weight:800;color:var(--ink);font-size:15px}
+.rtab td,.rtab th{padding:10px 12px}
+.rtab tbody tr{cursor:pointer}
+.howread{margin:6px 0 0;padding-left:18px;font-size:13px;color:var(--quiet)}
+.howread li+li{margin-top:2px}
+.ct,.sech,.cdet>summary b,.help .hh h2,.prof h2,.about h3{word-spacing:-.12em}
+.wel{display:flex;gap:16px 24px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--violet-soft);border-radius:var(--r);padding:16px 20px}
+.wel ol{margin:6px 0 0;padding-left:20px;font-size:13.5px;color:var(--ink-2)}
+.wel b{font-size:15px}
 .act{border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font:inherit;font-weight:700;font-size:14px;text-decoration:none;border:0;cursor:pointer;min-height:132px;padding:14px;text-align:center;transition:transform .25s,box-shadow .25s}
 .act:hover{transform:translateY(-3px);box-shadow:var(--lift)}
 .act small{font-weight:600;font-size:11.5px;opacity:.75}
@@ -204,6 +299,16 @@ kbd{font:inherit;font-size:11.5px;font-weight:700;border:1px solid var(--hero-li
 .d-up{background:var(--green-soft);color:var(--green-ink)}.d-down{background:var(--pink-soft);color:var(--pink-ink)}
 .meter{height:6px;border-radius:3px;background:var(--sub-2);overflow:hidden;flex:1 1 60px;min-width:40px}
 .meter i{display:block;height:100%;background:var(--violet);border-radius:3px;width:0;transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.lanes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.lanes{grid-template-columns:minmax(0,1fr)}}
+.lane{border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.lane-h{display:flex;align-items:center;gap:8px;font-size:15px}
+.lane-p{display:flex;align-items:center;gap:10px}
+.lane-p small{color:var(--quiet);font-size:12px;font-weight:600;white-space:nowrap}
+tr.grp td{background:var(--sub-2);font-weight:800;font-size:12.5px;color:var(--ink-2);padding:8px 12px}
+.evl{font-size:12.5px;color:var(--ink-2);margin:8px 0 0;line-height:1.45}
+.evchips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:14px}
+.evlab{font-size:12px;font-weight:800;color:var(--quiet);margin-right:2px}
 @media (max-width:1240px){.trow{grid-template-columns:1fr 1fr 1fr 1fr 1fr}.stat .big b{font-size:34px}}
 @media (max-width:860px){.trow{grid-template-columns:1fr 1fr}.trow .stat:last-child{grid-column:1/-1}}
 
@@ -325,7 +430,7 @@ tbody tr:hover .arrow,.arrow:focus-visible{background:var(--solid);color:var(--s
 .dots span{display:inline-flex;align-items:center;gap:6px}
 .dots i{width:9px;height:9px;border-radius:50%}
 svg text{fill:var(--quiet);font-size:12px;font-family:var(--sans)}
-.map svg{width:100%;height:auto;display:block}
+.map svg{width:100%;height:auto;display:block;max-height:430px;margin:0 auto}
 
 .cols3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .cols3>div{background:var(--sub);border-radius:16px;padding:16px}
@@ -421,14 +526,13 @@ dl.gloss dt{font-weight:700}dl.gloss dd{margin:0 0 8px;color:var(--ink-2)}
 .ftile .fc{font-size:12.5px;color:var(--ink-2)}
 .ftile .fw{font-size:13.5px;color:var(--ink-2);margin-top:6px;line-height:1.5}
 .frows{list-style:none;margin:0;padding:0}
-.frow{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr) minmax(0,1.5fr);gap:8px 24px;padding:16px 4px;align-items:start}
+.frow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:8px 24px;padding:16px 4px;align-items:start}
 .frow+.frow{border-top:1px solid var(--line)}
 .frow .nm{font-weight:800;font-size:14px}
 .frow .vl{font-size:18px;font-weight:800;margin-top:4px;letter-spacing:-.01em}
 .frow .cp{font-size:12.5px;color:var(--ink-2)}
 .frow .ex{font-size:13.5px;color:var(--ink-2);line-height:1.55}
 .frow .row{margin-top:6px}
-@media (max-width:900px){.frow{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.frow .ex{grid-column:1/-1}}
 @media (max-width:560px){.frow{grid-template-columns:minmax(0,1fr)}}
 .legend-line{font-size:12.5px;color:var(--quiet);display:flex;gap:6px 16px;flex-wrap:wrap;margin-top:6px}
 .legend-line i{display:inline-block;width:18px;height:6px;border-radius:3px;vertical-align:1px;margin-right:6px}
@@ -515,7 +619,7 @@ footer{color:var(--quiet);font-size:12.5px;padding:22px 6px 0;display:flex;justi
     <div class="top">
       <a class="logo" href="#/" aria-label="Provider review, overview"><i id="logo-ic"></i><span>Provider review</span></a>
       <nav class="nav" aria-label="Main">
-        <a href="#/" id="nav-home">Overview</a><a href="#/providers" id="nav-prov">Providers</a><a href="#/about" id="nav-about">How it works</a>
+        <a href="#/" id="nav-home">Today's work</a><a href="#/providers" id="nav-prov">All providers</a><a href="#/ranking" id="nav-rank">Ranking insights</a>
       </nav>
       <div class="icons" id="icons"></div>
     </div>
@@ -534,14 +638,22 @@ const D = JSON.parse(document.getElementById("dashboard-data").textContent);
 const AI = D.ai || null;
 const P = D.providers, BY = Object.fromEntries(P.map(p => [p.id, p]));
 const M = D.metrics, MI = Object.fromEntries(M.map((m, i) => [m.key, i]));
-const QUEUE = P.filter(p => p.in_queue);
+const QUEUE = P.filter(p => p.in_queue).sort((a, b) => a.position - b.position);
 const O = D.overview, N = P.length;
 const ACTION = {priority_audit: "Full audit", desk_review: "Desk review", monitor: "Monitor"};
 const ACTION_NOTE = {priority_audit: "Open a full audit: request records and review claims in detail.",
   desk_review: "Review records remotely before deciding on a full audit.", monitor: "No action now; watch next cycle."};
 const REC_CLASS = {priority_audit: "pl-audit", desk_review: "pl-desk", monitor: "pl-mon"};
-const STATUS = ["Not started", "In review", "Referred", "Closed, no issue"];
-const STATUS_CLASS = ["pl-none", "pl-violet", "pl-pink", "pl-green"];
+const LANES = {audit: ["Full audit", "Open a case: request records and review claims in detail."],
+  borderline: ["Borderline", "Some models see unusual billing beyond size, some do not. Decide between a full audit and a desk review."],
+  desk: ["Desk review", "High rank mainly because of size. A short records check."]};
+const evLine = p => p.evidence_line && p.evidence_line.length ? p.evidence_line.join(" · ") : null;
+const isDone = id => statusOf(id) >= 2;
+// 0-1: working; 2-4: the decision recorded in the decision panel
+const STATUS = ["Not started", "In progress", "Full audit opened", "Desk review", "No further action"];
+const STATUS_CLASS = ["pl-none", "pl-violet", "pl-audit", "pl-desk", "pl-green"];
+const OUTCOME = {2: "Open full audit", 3: "Desk review", 4: "No further action"};
+const recOutcome = p => p.action === "priority_audit" ? 2 : 3;
 const CARES = ["Hospital and outpatient", "Hospital only", "Outpatient only"];
 
 /* ---------- helpers ---------- */
@@ -633,12 +745,13 @@ function compare(pct, care) {
   if (pct >= 50) return `higher than ${Math.floor(pct)}% of ${peerWord(care)}`;
   return `lower than ${Math.floor(100 - pct)}% of ${peerWord(care)}`;
 }
-const rankShort = pct => pct >= 50 ? `Top ${Math.max(1, Math.ceil(100 - pct))}%` : `Bottom ${Math.max(1, Math.ceil(pct))}%`;
 function toast(msg) {
   const t = $("#toast"); t.replaceChildren(icon("check", 16, 2.4), msg); t.classList.add("on");
   clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("on"), 2200);
 }
-const statusOf = id => store.get("status:" + id, 0);
+const statusOf = id => store.get("st:" + id, 0);
+const markStarted = id => { if (statusOf(id) === 0) { store.set("st:" + id, 1); logEvent(id, "status", 1); } };
+const prio = p => p.in_queue ? `Priority ${p.position}` : `Rank ${p.rank}`;
 const ai = id => (AI && AI.providers && AI.providers[id]) || null;
 const recPill = p => p.action ? h("span", {class: "pl pl-dot " + REC_CLASS[p.action]}, ACTION[p.action]) : h("span", {class: "pl pl-none"}, "Not in queue");
 const statusPill = st => h("span", {class: "pl " + STATUS_CLASS[st]}, STATUS[st]);
@@ -650,10 +763,9 @@ function avatar(p, size = 36, round = true) {
 const label = k => D.driver_names[k].label;
 const nice = d => { const [y, m, dd] = String(d).split("-").map(Number); return new Date(Date.UTC(y, m - 1, dd)).toLocaleDateString("en-GB", {day: "numeric", month: "short", year: "numeric", timeZone: "UTC"}); };
 const cycleText = () => { const c = (D.meta && D.meta.cycle) || `claims ${nice(O.period.from)} to ${nice(O.period.to)}`; return c.charAt(0).toUpperCase() + c.slice(1); };
-function greeting() { const hr = new Date().getHours(); return hr < 12 ? "Good morning" : hr < 18 ? "Good afternoon" : "Good evening"; }
-const nextToReview = () => QUEUE.find(q => statusOf(q.id) === 0) || null;
-const sizeVerdict = p => p.in_queue ? (p.unusual_without_size ? "Unusual beyond size" : "Mainly size") : `Rank ${int(p.size_free_rank)} without size`;
+const nextToReview = () => QUEUE.find(q => !isDone(q.id)) || null;
 function logEvent(id, k, v) { const l = store.get("log", []); l.unshift({id, k, v, t: Date.now()}); store.set("log", l.slice(0, 40)); }
+const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
 function ago(t) {
   const sec = (Date.now() - t) / 1000;
   if (sec < 60) return "just now"; if (sec < 3600) return Math.floor(sec / 60) + "m ago"; if (sec < 86400) return Math.floor(sec / 3600) + "h ago";
@@ -665,30 +777,13 @@ function sel(attrs, options) { return h("span", {class: "sel"}, h("select", attr
 function fallbackHeadline() { return `${O.queue_unusual_without_size} of this cycle's ${O.queue_size} queued providers bill unusually even when their size is set aside.`; }
 function fallbackSummary(p) {
   const top = p.drivers.filter(d => d[1]).slice(0, 2).map(d => label(d[0]).toLowerCase());
-  const lead = p.in_queue ? `Ranked ${p.rank} of ${int(N)} and in this cycle's review queue.` :
+  const lead = p.in_queue ? `Ranked ${p.rank} of ${int(N)} and in this cycle's review queue.` + (p.gate === 1 ? ` Referred by the rule check: ${p.rule_reason}.` : "") :
     `Ranked ${p.rank} of ${int(N)}; not in this cycle's review queue.`;
   const why = top.length ? ` The ranking is pushed up mainly by ${top.join(" and ")}.` : "";
   const size = p.in_queue ? (p.unusual_without_size ? " It would stay in the queue even if its size were ignored, so how it bills looks unusual, not only how much."
+    : p.gate === 1 ? " Its rank mostly reflects how large it is; the rule check, not the rank, put it in the queue."
     : " It would drop out of the queue if its size were ignored, so its rank mostly reflects how large it is.") : "";
   return lead + why + size;
-}
-function fallbackReason(p, d) {
-  const n = D.driver_names[d[0]];
-  if (n.size) return d[1] ? "Bigger providers score higher on this, so on its own it says more about size than about how the provider bills."
-    : "This measure of size lowers the rank.";
-  if (!d[1]) return "This is in line with or better than similar providers, which lowers the rank.";
-  const pct = d[3];
-  if (pct >= 90) return "Unusually high for this type of provider. Worth checking in the claims and medical records.";
-  if (pct <= 10) return "Unusually low for this type of provider. Among providers flagged in the past, a low value here was more common.";
-  if (pct >= 60) return "Higher than most similar providers. Not unusual on its own, but it adds to the overall picture.";
-  if (pct <= 40) return "Lower than most similar providers. Not unusual on its own, but it adds to the overall picture.";
-  return "Close to typical for this type of provider; it adds only a little to the rank.";
-}
-function fallbackSizeNote(p) {
-  return p.in_queue ? (p.unusual_without_size
-    ? `Even with size set aside it would rank ${int(p.size_free_rank)} of ${int(N)}, so how it bills stands out, not only how much it bills.`
-    : `With size set aside it would rank ${int(p.size_free_rank)} of ${int(N)}, so it is in the queue mainly because it is large.`)
-    : `With size set aside it would rank ${int(p.size_free_rank)} of ${int(N)}.`;
 }
 
 /* ---------- charts ---------- */
@@ -763,9 +858,9 @@ function sizeMap() {
   const Y = r => T + (Math.log10(Math.min(r, yMax)) / Math.log10(yMax)) * (H - T - B);
   const svg = s("svg", {id: "size-map", viewBox: `0 0 ${W} ${H}`, role: "img",
     "aria-label": "Map of providers by total payments and by rank when size is ignored. Queue providers are coloured by recommendation."});
-  const yq = Y(O.queue_size + .5);
+  const yq = Y(O.risk_queue_size + .5);
   svg.append(s("rect", {x: L, y: T, width: W - L - R, height: yq - T, rx: 10, fill: "var(--green-soft)"}));
-  svg.append(s("text", {x: L + 10, y: T + 17, style: "fill:var(--green-ink);font-weight:800"}, nw ? `Top ${O.queue_size} even ignoring size` : `Unusual even ignoring size (top ${O.queue_size} without size)`));
+  svg.append(s("text", {x: L + 10, y: T + 17, style: "fill:var(--green-ink);font-weight:800"}, nw ? `Top ${O.risk_queue_size} even ignoring size` : `Unusual even ignoring size (top ${O.risk_queue_size} without size)`));
   (close ? [1, 2, 5, 10, 20, 50] : [1, 10, 100, 1000]).filter(r => r <= yMax).forEach(r => {
     svg.append(s("line", {x1: L, x2: W - R, y1: Y(r), y2: Y(r), stroke: "var(--line)", "stroke-dasharray": "3 5"}));
     svg.append(s("text", {x: L - 8, y: Y(r) + 4, "text-anchor": "end"}, r === 1 ? "1st" : int(r)));
@@ -783,7 +878,7 @@ function sizeMap() {
     const c = s("circle", {cx: X(v), cy: Y(p.size_free_rank), r: p.in_queue ? (close ? 8.5 : 7) : (close ? 4 : 2.8), fill: col,
       stroke: p.in_queue ? "var(--card)" : "none", "stroke-width": 2, tabindex: p.in_queue ? 0 : null,
       role: p.in_queue ? "link" : null, "aria-label": p.in_queue ? `${p.id}, rank ${p.rank}, open provider` : null, style: "cursor:pointer"});
-    const show = ev => { tip.textContent = `${p.id} · rank ${p.rank} of ${int(N)} · ${money(v)} paid · rank ${p.size_free_rank} if size ignored`;
+    const show = ev => { tip.textContent = `${p.id} · Rank ${p.rank} of ${int(N)} · ${money(v)} paid · Rank ${p.size_free_rank} if size ignored`;
       tip.style.display = "block"; const r = ev.target.getBoundingClientRect();
       tip.style.left = Math.max(8, Math.min(window.innerWidth - 310, r.left + 12)) + "px"; tip.style.top = (r.top - 44) + "px"; };
     c.addEventListener("mouseenter", show); c.addEventListener("focus", show);
@@ -801,8 +896,8 @@ const narrow = () => window.innerWidth < 640;
 let redraws = [], wasNarrow = narrow();
 window.addEventListener("resize", () => { const n = narrow(); if (n !== wasNarrow) { wasNarrow = n; redraws.forEach(f => f()); } }, {passive: true});
 function go(id) { location.hash = "#/p/" + id; }
-const DEFAULT_T = () => ({mode: "queue", q: "", cares: [...CARES], recs: ["priority_audit", "desk_review", "monitor", "none"], focus: "", sort: "rank", dir: 1, limit: 24});
-const view = {map: "all", qf: "", t: DEFAULT_T(), cards: store.get("cards", true)};
+const DEFAULT_T = () => ({mode: "all", q: "", cares: [...CARES], lane: "", sort: "rank", dir: 1, limit: 100});
+const view = {map: "queue", qg: "", qb: 0, t: DEFAULT_T(), cards: store.get("cards2", false)};
 function openProviders(patch = {}) { view.t = Object.assign(DEFAULT_T(), patch); if (location.hash === "#/providers") route(); else location.hash = "#/providers"; }
 let timers = [];
 const later = (fn, ms) => timers.push(setTimeout(fn, ms));
@@ -811,169 +906,173 @@ function hero(...kids) { $("#hero-body").replaceChildren(...kids); }
 /* ---------- overview ---------- */
 function overviewPage() {
   const A = AI && AI.overview;
-  const started = QUEUE.filter(q => statusOf(q.id) > 0).length;
-  const nxt = nextToReview();
+  const nxt = nextToReview(), done = QUEUE.filter(q => isDone(q.id)).length;
   hero(h("div", {class: "hb-row"},
-    h("div", {}, h("h1", {}, greeting()), h("p", {class: "lead"}, (A && A.headline) || fallbackHeadline())),
+    h("div", {}, h("h1", {}, "Today's work"), h("p", {class: "lead"}, (A && A.headline) || fallbackHeadline())),
     h("div", {class: "hact"}, h("span", {class: "chip"}, icon("calendar", 18), cycleText()),
-      h("a", {class: "cta", href: "#/providers", onclick: e => { e.preventDefault(); openProviders(); }}, icon("plus", 17, 2.4), "Open the review queue"))));
-
-  const tr = O.track_record, diff = tr.top100_previously_flagged - tr.top100_payments_alone;
+      nxt ? h("a", {class: "cta", href: "#/p/" + nxt.id}, icon("arrow", 17), (done ? "Continue: " : "Start: ") + nxt.id)
+        : h("span", {class: "chip"}, icon("check", 18), "Every case has a decision"))));
   const meter = h("i");
-  later(() => meter.style.width = `${100 * started / QUEUE.length}%`, 60);
-  const trow = h("div", {class: "trow o1"},
-    h("button", {class: "act green", onclick: () => nxt ? go(nxt.id) : openProviders()}, icon("login", 24),
-      nxt ? (started ? "Continue review" : "Start review") : "Queue complete", h("small", {}, nxt ? `Rank ${nxt.rank} · ${nxt.id}` : "Every queue provider has a status")),
-    h("button", {class: "act black", onclick: exportCsv}, icon("download", 24), "Download list", h("small", {}, `CSV · all ${int(N)}`)),
-    statCard("Unusual beyond size", `Compared to ${O.queue_size - O.queue_unusual_without_size} queued mainly for size`,
-      h("b", {}, O.queue_unusual_without_size, h("small", {}, "/" + O.queue_size)), h("span", {class: "delta d-up"}, Math.round(100 * O.queue_unusual_without_size / O.queue_size) + "%")),
-    statCard("Flagged before, in top 100", `Compared to ${tr.top100_payments_alone} when sorted by payments alone`,
-      h("b", {}, tr.top100_previously_flagged), h("span", {class: "delta " + (diff >= 0 ? "d-up" : "d-down")}, (diff >= 0 ? "+" : "−") + Math.abs(diff))),
-    statCard("Your progress", `Compared to ${QUEUE.length} in this cycle's queue`,
-      h("b", {}, started, h("small", {}, "/" + QUEUE.length)), h("span", {class: "meter", role: "progressbar", "aria-label": "Queue progress",
-        "aria-valuemin": 0, "aria-valuemax": QUEUE.length, "aria-valuenow": started}, meter)));
-
-  const app = $("#app");
-  app.append(h("div", {class: "ov rise"},
-    h("div", {class: "stack"}, trow, checkCarousel(), queueTable(), mapCard()),
-    h("div", {class: "stack"}, trackCard(), insightsOverview(A), mixCard(), activityCard())),
-    h("div", {style: "height:16px"}), beforeCard(A));
+  later(() => meter.style.width = `${100 * done / QUEUE.length}%`, 60);
+  if (!view.qbSet) view.qb = nxt ? nxt.batch : 0;      // open on the batch being worked
+  const bar = h("div", {class: "wbar rise"},
+    h("div", {class: "wprog"}, h("b", {}, done, h("small", {}, ` / ${QUEUE.length} decided`)),
+      h("span", {class: "meter", role: "progressbar", "aria-label": "Queue progress", "aria-valuemin": 0, "aria-valuemax": QUEUE.length, "aria-valuenow": done}, meter)),
+    nxt ? h("span", {class: "wnext"}, "Next: ", h("a", {href: "#/p/" + nxt.id}, `#${nxt.position} ${nxt.id}`), ` · ${LANES[nxt.lane][0]}`) : null,
+    activityDrop(),
+    h("button", {class: "btn pill sm", onclick: exportNotes}, icon("download", 15), "Download case notes"));
+  const wel = store.get("welcomed", false) ? null : h("div", {class: "wel rise"},
+    h("div", {}, h("b", {}, "Welcome to this cycle's review"),
+      h("ol", {}, h("li", {}, "Start with the first case: the queue is in order of risk."),
+        h("li", {}, "Check the evidence, tick what you checked, and decide in the panel on the right."),
+        h("li", {}, "Download case notes when you are done."))),
+    h("div", {class: "row"}, nxt ? h("a", {class: "btn solid pill sm", href: "#/p/" + nxt.id}, "Start first case", icon("right", 16)) : null,
+      h("button", {class: "btn pill sm", onclick: () => openHelp()}, "How it works"),
+      h("button", {class: "btn ghost pill sm", onclick: e => { store.set("welcomed", true); e.target.closest(".wel").remove(); }}, "Don't show again")));
+  $("#app").append(h("div", {class: "stack"}, wel, bar, queueTable()));
+}
+function activityDrop() {
+  const log = store.get("log", []).filter(e => BY[e.id]);
+  const ICON_OF = e => e.k === "note" ? ["pencil", "vi"] : e.v === 2 ? ["send", "hot"] : e.v === 3 ? ["file", "vi"] : e.v === 4 ? ["check", "ok"] : e.v === 1 ? ["clock", "vi"] : ["file", ""];
+  return h("details", {class: "actd"}, h("summary", {class: "btn pill sm"}, icon("clock", 15), `Recent activity${log.length ? ` (${Math.min(log.length, 8)})` : ""}`),
+    log.length ? h("ul", {class: "acts"}, log.slice(0, 8).map(e => { const [ic, cls] = ICON_OF(e), p = BY[e.id];
+      return h("li", {}, h("a", {href: "#/p/" + e.id}, h("span", {class: "ai " + cls}, icon(ic, 18)),
+        h("div", {}, h("b", {}, e.k === "note" ? `Note on ${e.id}` : `${e.id}: ${STATUS[e.v].toLowerCase()}`),
+          h("small", {}, `${prio(p)} · ${p.action ? ACTION[p.action] : "Not in queue"}`)), h("span", {class: "t"}, ago(e.t)))); }))
+      : h("div", {class: "acts"}, h("p", {class: "empty", style: "margin:0"}, "Nothing yet. Decisions and notes you make on case pages appear here.")));
+}
+const REASON_STYLE = {"Rule check": ["var(--pink)", "#fff", "audit"], "Unusual billing": ["var(--solid)", "var(--solid-ink)", "audit"],
+  "Possibly unusual billing": ["var(--violet)", "#fff", "borderline"], "Mainly provider size": ["var(--amber-soft)", "var(--amber-ink)", "desk"]};
+const REASON_NOTE = {"Rule check": "Billing that is clearly wrong was found. Full audit.",
+  "Unusual billing": "Stands out even compared with providers of its size. Full audit.",
+  "Possibly unusual billing": "A mixed picture. Decide between a full audit and a desk review.",
+  "Mainly provider size": "Large providers. Confirm the volume is legitimate first; a desk review is enough."};
+const PATTERN_NOTE = {"High-volume billing operations": "Compare claim volume with the provider's capacity and staffing.",
+  "Upcoding to a more complex or expensive service": "Sample claims and check the codes match the treatment given.",
+  "Excessive length of stay": "Check the medical records support each day billed.",
+  "Billing for services not provided": "Confirm the services were delivered, from patient records and schedules."};
+function goQueue(lane, group) {                     // open Today's work on a lane, grouped
+  view.ql = lane || ""; view.qg = group || ""; view.qb = 0; view.qbSet = true;
+  if (location.hash === "#/" || location.hash === "") route(); else location.hash = "#/";
+}
+function rankingPage() {
+  const reasonOf = p => p.gate === 1 ? "Rule check" : p.group;
+  const count = f => QUEUE.filter(f).length;
+  const mi = MI.total_reimb, paidQ = QUEUE.reduce((a, p) => a + p.v[mi], 0), paidAll = P.reduce((a, p) => a + p.v[mi], 0);
+  hero(h("h1", {}, "Ranking insights"), h("p", {class: "lead", style: "max-width:none"},
+    `This cycle's queue has ${QUEUE.length} providers. Out of ${int(N)} providers ranked, ${int(N - QUEUE.length)} are outside the queue.`));
+  // 1. at a glance
+  const glance = h("div", {class: "trow5"},
+    statCard("Cases to review", `of ${int(N)} providers`, h("b", {}, QUEUE.length)),
+    statCard("Full audits", `${O.gate1_rule_check} rule check · ${count(p => p.group === "Unusual billing")} unusual billing`, h("b", {}, O.lanes.audit)),
+    statCard("Borderline", "Possibly unusual billing", h("b", {}, O.lanes.borderline)),
+    statCard("Desk reviews", "Mainly provider size", h("b", {}, O.lanes.desk)),
+    statCard("Payments under review", `${Math.round(100 * paidQ / paidAll)}% of ${money(paidAll)} paid`, h("b", {}, money(paidQ))));
+  // 2. why cases are here: one bar, each part opens its lane
+  const parts = Object.keys(REASON_STYLE).map(r => [r, count(p => reasonOf(p) === r)]).filter(([, n]) => n);
+  const why = h("section", {class: "card", "aria-labelledby": "why-q"},
+    h("div", {class: "ch"}, h("h2", {class: "ct", id: "why-q"}, "Why cases are here", infoBtn("reasons", "the reasons"))),
+    h("div", {class: "rbar", role: "group", "aria-label": "Cases by reason"}, parts.map(([r, n]) => {
+      const [bg, ink, lane] = REASON_STYLE[r];
+      return h("button", {style: `flex:${n};background:${bg};color:${ink}`, title: `${r}: ${n} cases. Open the lane.`,
+        "aria-label": `${r}: ${n} cases. Open the lane.`, onclick: () => goQueue(lane, "group")}, n);
+    })),
+    h("ul", {class: "rleg"}, parts.map(([r, n]) => h("li", {}, h("i", {style: `background:${REASON_STYLE[r][0]}`}),
+      h("div", {}, h("b", {}, r), h("br"), h("span", {}, REASON_NOTE[r])), h("span", {class: "n"}, n)))));
+  // 3. what you'll find in the records
+  const pats = new Map();
+  QUEUE.forEach(p => { if (p.pattern_group && p.pattern_group !== "No pattern matched") pats.set(p.pattern_group, (pats.get(p.pattern_group) || 0) + 1); });
+  const rows = [...pats].sort((a, b) => b[1] - a[1]).map(([t, n]) => [t, n, PATTERN_NOTE[t] || "Review the matching playbook pattern.", "pattern"])
+    .concat([["Overlapping hospital stays", count(p => p.overlapping_stays > 0), "Request admission and discharge records.", "group"],
+             ["Duplicate claims", count(p => p.duplicate_claims > 0), "Pull the repeated claims side by side.", "group"]].filter(r => r[1]));
+  const recs = h("section", {class: "card tcard", "aria-labelledby": "rec-h"},
+    h("div", {class: "ch"}, h("div", {}, h("h2", {class: "ct", id: "rec-h"}, "What you'll find in the records"),
+      h("p", {class: "cs"}, "Patterns and billing checks across this cycle's queue. Select a row to see the cases."))),
+    h("div", {class: "tw"}, h("table", {class: "rtab"}, h("caption", {class: "sr"}, "Patterns and evidence in the queue"),
+      h("thead", {}, h("tr", {}, h("th", {scope: "col"}, "Pattern or evidence"), h("th", {scope: "col", class: "num"}, "Cases"),
+        h("th", {scope: "col"}, "What it means for you"))),
+      h("tbody", {}, rows.map(([t, n, note, g]) => h("tr", {tabindex: 0, onclick: () => goQueue("", g),
+        onkeydown: e => { if (e.key === "Enter") goQueue("", g); }},
+        h("td", {}, h("b", {}, t)), h("td", {class: "num", style: "font-weight:800"}, n), h("td", {class: "why"}, note)))))));
+  view.map = view.map || "queue";
+  $("#app").append(h("div", {class: "stack rise"},
+    h("h2", {class: "sech"}, "This cycle at a glance"), glance,
+    h("div", {class: "ov"}, h("div", {class: "stack"}, recs), h("div", {class: "stack"}, why)),
+    mapCard()));
 }
 function statCard(title, sub, big, extra) {
   return h("div", {class: "card stat"}, h("h3", {}, title), h("p", {}, sub), h("div", {class: "big"}, big, extra));
 }
-function trackCard() {
-  const tr = O.track_record, chance = 100 * tr.flagged_in_test / O.providers_scored;
-  const bars = [{v: tr.top100_previously_flagged, t: String(tr.top100_previously_flagged), lab: "This ranking", cls: "f-black", me: true},
-    {v: tr.top100_payments_alone, t: String(tr.top100_payments_alone), lab: "Payments alone", cls: "f-pink", dp: tr.top100_payments_alone - tr.top100_previously_flagged},
-    {v: chance, t: "≈" + Math.round(chance), lab: "By chance", cls: "f-stripe"}];
-  return h("section", {class: "card o2", "aria-labelledby": "tr-h"},
-    h("div", {class: "ch"}, h("div", {}, h("h2", {class: "ct", id: "tr-h"}, "Track record"),
-      h("p", {class: "cs"}, "Providers flagged before, among the top 100 on held-out test data")), h("span", {class: "pl pl-white"}, "of 100")),
-    h("div", {class: "bars", role: "img", "aria-label": `Of the top 100: ${bars[0].t} flagged before with this ranking, ${bars[1].t} when sorted by payments alone, about ${Math.round(chance)} by chance.`},
-      bars.map(b => { const f = h("div", {class: "fill " + b.cls}, b.dp != null ? h("span", {class: "dp"}, (b.dp >= 0 ? "+" : "−") + Math.abs(b.dp)) : null);
-        later(() => f.style.height = `${Math.max(2, b.v)}%`, 80);
-        return h("div", {class: "bcol" + (b.me ? " me" : "")}, h("div", {class: "v"}, b.t), h("div", {class: "plot"}, f), h("div", {class: "lab"}, b.lab)); })));
-}
-function insightsOverview(A) {
-  const o = O, ub = o.actions_unusual_beyond_size;
-  const acts = ((A && A.actions) || [
-    {action: "priority_audit", why: `${ub.priority_audit} of these ${o.actions.priority_audit} bill unusually even when their size is set aside.`},
-    {action: "desk_review", why: `${ub.desk_review} of these ${o.actions.desk_review} also bill unusually beyond their size; the rest rank high mainly because they are large.`},
-    {action: "monitor", why: "No action this cycle; check again next cycle."}]).filter(a => o.actions[a.action] > 0);
-  const how = (A && A.how_to_read) || `Rank 1 is the provider whose billing looks most like providers flagged in the past. On earlier data, ${o.track_record.top100_previously_flagged} of the top 100 had been flagged before, against ${o.track_record.top100_payments_alone} when providers were simply sorted by how much they were paid.`;
-  const q = [0, 0, 0, 0, o.queue_size];
-  const slides = [
-    h("div", {class: "icard"}, h("div", {class: "ih"}, h("span", {class: "ii"}, icon("alert", 18)),
-      h("div", {}, h("h4", {}, A ? "This cycle" : "This cycle's queue"), h("p", {class: "isub"}, `${o.queue_unusual_without_size} of ${o.queue_size} unusual beyond size`))),
-      h("p", {class: "ib2"}, (A && A.summary) || `The ranking puts ${int(o.providers_scored)} providers in order of how closely their billing resembles providers flagged in the past. The top ${o.queue_size} form this cycle's review queue. A high rank is a reason to look, not evidence of wrongdoing.`),
-      countBar(o.queue_unusual_without_size, o.queue_size)),
-    ...acts.map(a => h("div", {class: "icard"}, h("div", {class: "ih"}, h("span", {class: "ii"}, icon("sparkle", 18)),
-      h("div", {}, h("h4", {}, `${ACTION[a.action]} · ${o.actions[a.action]} provider${o.actions[a.action] === 1 ? "" : "s"}`), h("p", {class: "isub"}, ACTION_NOTE[a.action]))),
-      h("p", {class: "ib2"}, a.why))),
-    h("div", {class: "icard"}, h("div", {class: "ih"}, h("span", {class: "ii"}, icon("book", 18)),
-      h("div", {}, h("h4", {}, "How to read the ranking"), h("p", {class: "isub"}, "A rank is a reason to look"))), h("p", {class: "ib2"}, how))];
-  void q;
-  return h("section", {class: "ins o2", "aria-labelledby": "ins-h"},
-    h("div", {class: "ch"}, h("h2", {class: "ct", id: "ins-h"}, A ? "AI insights" : "Insights"),
-      h("span", {class: "badge"}, A ? "Written by AI, checked" : "Standard wording")),
-    carousel(slides));
-}
-function countBar(n, of) {
-  const x = 3 + 94 * n / of;
-  return h("div", {class: "rng rng-d", role: "img", "aria-label": `${n} of ${of}`},
-    h("div", {class: "rng-t"}, h("i", {class: "rng-band", style: `left:3%;width:${x - 3}%`})),
-    h("div", {class: "rng-m" + (x > 90 ? " r" : ""), style: `left:${x}%`}, h("span", {}, `${n} of ${of}`)),
-    h("div", {class: "rng-l"}, h("span", {}, "0"), h("span", {style: x > 76 ? "visibility:hidden" : null}, String(of))));
-}
-function carousel(slides) {
-  const wrap = h("div", {class: "slides", "aria-roledescription": "carousel"});
-  const segs = h("div", {class: "segs", role: "tablist", "aria-label": "Insights"});
-  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let i = 0, t = null, stopped = reduce;
-  slides.forEach((sl, k) => { sl.classList.add("slide"); sl.setAttribute("role", "tabpanel"); sl.setAttribute("aria-label", `${k + 1} of ${slides.length}`); wrap.append(sl);
-    segs.append(h("button", {role: "tab", "aria-label": `Insight ${k + 1} of ${slides.length}`, onclick: () => { stopped = true; segs.classList.add("still"); show(k); }})); });
-  const DUR = 8000;
-  segs.style.setProperty("--dur", DUR + "ms");
-  function show(k) {
-    i = k; clearTimeout(t);
-    slides.forEach((sl, j) => sl.classList.toggle("on", j === k));
-    [...segs.children].forEach((b, j) => { b.classList.remove("on"); b.classList.toggle("done", j < k); b.setAttribute("aria-selected", String(j === k)); });
-    void segs.offsetWidth; segs.children[k].classList.add("on");
-    if (!stopped && slides.length > 1) { t = setTimeout(() => { if (!paused) show((i + 1) % slides.length); else wait(); }, DUR); timers.push(t); }
-  }
-  let paused = false;
-  function wait() { t = setTimeout(() => paused ? wait() : show((i + 1) % slides.length), 600); timers.push(t); }
-  const box = h("div", {}, wrap, segs);
-  box.addEventListener("mouseenter", () => { paused = true; segs.classList.add("paused"); });
-  box.addEventListener("mouseleave", () => { paused = false; segs.classList.remove("paused"); });
-  box.addEventListener("focusin", () => { paused = true; segs.classList.add("paused"); });
-  box.addEventListener("focusout", () => { paused = false; segs.classList.remove("paused"); });
-  if (reduce) segs.classList.add("still");
-  show(0);
-  return box;
-}
-function checkCarousel() {
-  const list = QUEUE.filter(p => p.recommendation_check);
-  if (!list.length) return null;
-  const rail = h("div", {class: "rail", tabindex: 0, "aria-label": "Recommendations to double-check"});
-  const prev = h("button", {class: "circ", "aria-label": "Previous", onclick: () => step(-1)}, icon("chevl", 18));
-  const next = h("button", {class: "circ", "aria-label": "Next", onclick: () => step(1)}, icon("chevr", 18));
-  function step(d) { const c = rail.firstElementChild; if (!c) return; rail.scrollBy({left: d * (c.getBoundingClientRect().width + 12), behavior: "smooth"}); }
-  function upd() { prev.disabled = rail.scrollLeft < 4; next.disabled = rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 4; }
-  rail.addEventListener("scroll", () => requestAnimationFrame(upd));
-  list.forEach(p => { const b = p.beyond[0];
-    rail.append(h("a", {class: "rc", href: "#/p/" + p.id},
-      h("div", {class: "who"}, avatar(p, 44), h("div", {}, h("b", {}, p.id),
-        b ? h("p", {class: "m"}, label(b[0]) + " ", h("b", {}, fmt(b[1], D.driver_names[b[0]].unit))) : h("p", {class: "m"}, p.care))),
-      h("div", {class: "ft"}, h("span", {class: "pl pl-white"}, p.recommendation_check === "unusual_but_desk" ? "Desk review → audit?" : "Audit → size only?"),
-        h("span", {}, `Rank ${p.rank}`)))); });
-  later(upd, 50);
-  window.addEventListener("resize", upd, {passive: true});
-  return h("section", {class: "card o3", "aria-labelledby": "dc-h"},
-    h("div", {class: "ch"}, h("div", {}, h("h2", {class: "ct", id: "dc-h"}, "Recommendations to double-check", h("span", {class: "count-chip"}, list.length)),
-      h("p", {class: "cs"}, "Desk review was suggested, but billing looks unusual even when size is set aside. Decide whether a full audit is needed.")),
-      h("div", {class: "row"}, prev, next, h("button", {class: "btn pill sm", onclick: () => openProviders({focus: "check"})}, "View all", icon("right", 16)))),
-    rail);
-}
 function queueTable() {
   const tbody = h("tbody");
-  const FILTERS = {"": [`All ${QUEUE.length}`, () => true], audit: ["Full audit", p => p.action === "priority_audit"],
-    desk: ["Desk review", p => p.action === "desk_review"], check: ["To double-check", p => !!p.recommendation_check],
-    size: ["Mainly size", p => !p.unusual_without_size]};
-  function fill() {
-    const f = FILTERS[view.qf][1];
-    const rows = QUEUE.filter(f);
-    tbody.replaceChildren(...(rows.length ? rows.map(p => providerRow(p, true)) : [h("tr", {}, h("td", {colspan: 9}, h("p", {class: "empty"}, "No queue providers match.")))]));
+  const GROUPS = {"": ["No grouping"], group: ["Group by reason", p => p.group],
+    pattern: ["Group by pattern", p => p.pattern_group || "No pattern matched"], care: ["Group by type of care", p => p.care],
+    batch: ["Group by batch", p => "Batch " + p.batch]};
+  const tabs = h("div", {class: "ltabs", role: "group", "aria-label": "Lane"});
+  function drawTabs() {
+    const tab = (k, lab, list, tip) => h("button", {class: "ltab", "aria-pressed": String((view.ql || "") === k), title: tip,
+      onclick: () => { view.ql = k; drawTabs(); fill(); }},
+      lab, h("small", {}, k ? `${list.filter(p => isDone(p.id)).length}/${list.length}` : list.length));
+    tabs.replaceChildren(tab("", "All", QUEUE, "Every case in this cycle's queue"),
+      ...Object.entries(LANES).map(([k, [lab, note]]) => tab(k, lab, QUEUE.filter(p => p.lane === k), note)), infoBtn("reasons", "the lanes"));
   }
-  const pick = sel({"aria-label": "Show in queue", onchange: e => { view.qf = e.target.value; fill(); }},
-    Object.entries(FILTERS).map(([k, [lab]]) => h("option", {value: k, selected: view.qf === k}, lab)));
-  fill();
-  return h("section", {class: "card tcard o4", "aria-labelledby": "q-h"},
-    h("div", {class: "ch"}, h("div", {}, h("h2", {class: "ct", id: "q-h"}, "Review queue"), h("p", {class: "cs"}, `The ${QUEUE.length} providers ranked highest this cycle. Select a row to open the case.`)), pick),
-    h("div", {class: "tw"}, h("table", {}, h("caption", {class: "sr"}, "Review queue"), tableHead(null), tbody)));
+  function fill() {
+    const rows = QUEUE.filter(p => !view.ql || p.lane === view.ql).filter(p => !view.qb || p.batch === view.qb);
+    if (!rows.length) { tbody.replaceChildren(h("tr", {}, h("td", {colspan: 6}, h("p", {class: "empty"}, "No cases match.")))); return; }
+    if (!view.qg) { tbody.replaceChildren(...rows.map(queueRow)); return; }
+    const groups = new Map();
+    rows.forEach(p => { const g = GROUPS[view.qg][1](p); if (!groups.has(g)) groups.set(g, []); groups.get(g).push(p); });
+    tbody.replaceChildren(...[...groups].flatMap(([g, list]) => [h("tr", {class: "grp"}, h("td", {colspan: 6}, `${g} · ${list.length}`)),
+      ...list.map(queueRow)]));
+  }
+  const groupSel = sel({"aria-label": "Group the queue", onchange: e => { view.qg = e.target.value; fill(); }},
+    Object.entries(GROUPS).map(([k, [lab]]) => h("option", {value: k, selected: view.qg === k}, lab)));
+  const batchSel = sel({"aria-label": "Show batch", onchange: e => { view.qb = +e.target.value; view.qbSet = true; fill(); }},
+    [h("option", {value: 0, selected: !view.qb}, "All batches"),
+     ...Array.from({length: O.batches}, (_, i) => h("option", {value: i + 1, selected: view.qb === i + 1}, `Batch ${i + 1} of ${O.batches}`))]);
+  drawTabs(); fill();
+  return h("section", {class: "card tcard", "aria-labelledby": "q-h"},
+    h("div", {class: "ch"}, h("div", {}, h("h2", {class: "ct", id: "q-h"}, "Review queue", infoBtn("queue", "the review queue")),
+      h("p", {class: "cs"}, "In order of risk.")),
+      h("div", {class: "row"}, groupSel, batchSel)),
+    tabs, h("div", {style: "height:12px"}),
+    h("div", {class: "tw"}, h("table", {class: "qt"}, h("caption", {class: "sr"}, "Review queue"),
+      h("thead", {}, h("tr", {}, h("th", {scope: "col"}, "Priority"), h("th", {scope: "col"}, "Case and evidence"),
+        h("th", {scope: "col", class: "num c-pay"}, "Total paid"), h("th", {scope: "col"}, "Action"), h("th", {scope: "col"}, "Status"),
+        h("th", {scope: "col"}, h("span", {class: "sr"}, "Open")))), tbody)));
 }
-const COLS = [["rank", "Rank", ""], ["id", "Provider", ""], ["care", "Type of care", "c-care"], ["pay", "Total paid", "num c-pay"],
-  ["claims", "Claims", "num c-claims"], [null, "Stands out beyond size", "c-why"], ["sfr", "If size ignored", "num c-sfr"], ["action", "Recommendation", ""], [null, "Status", "c-status"], [null, "", ""]];
+function queueRow(p) {
+  return h("tr", {onclick: e => { if (!e.target.closest("a")) go(p.id); }},
+    h("td", {class: "rk"}, "#" + p.position),
+    h("td", {}, h("a", {class: "who qcase", href: "#/p/" + p.id, style: "text-decoration:none"}, avatar(p, 32),
+      h("div", {}, h("b", {}, p.id), h("span", {class: "qev"}, evLine(p) || p.care)))),
+    h("td", {class: "num c-pay"}, money(metric(p, "total_reimb").v)),
+    h("td", {}, h("div", {class: "qacts"}, recPill(p), p.gate === 1 ? h("span", {class: "pl pl-white"}, "Rule check") : null,
+      p.recommendation_check ? h("span", {class: "pl pl-white"}, "Borderline") : null)),
+    h("td", {}, statusPill(statusOf(p.id))),
+    h("td", {}, h("a", {class: "arrow", href: "#/p/" + p.id, "aria-label": `Open ${p.id}`}, icon("arrow", 17))));
+}
+const COLS = [["rank", "Rank", ""], ["id", "Provider and evidence", ""], ["pay", "Total paid", "num c-pay"], ["claims", "Claims", "num c-claims"],
+  ["reason", "Reason", "c-sfr"], ["action", "Recommendation", ""], [null, "Status", "c-status"], [null, "", ""]];
 function tableHead(onSort, t) {
-  return h("thead", {}, h("tr", {}, COLS.filter(c => onSort || c[0] !== "claims").map(([k, lab, cl]) => {
-    const th = h("th", {class: cl, scope: "col", "aria-sort": onSort && k ? (t.sort === k ? (t.dir > 0 ? "ascending" : "descending") : "none") : null});
-    th.append(onSort && k ? h("button", {onclick: () => onSort(k)}, lab) : lab ? lab : h("span", {class: "sr"}, "Open"));
+  return h("thead", {}, h("tr", {}, COLS.map(([k, lab, cl]) => {
+    const th = h("th", {class: cl, scope: "col", "aria-sort": k ? (t.sort === k ? (t.dir > 0 ? "ascending" : "descending") : "none") : null});
+    th.append(k ? h("button", {onclick: () => onSort(k)}, lab) : lab ? lab : h("span", {class: "sr"}, "Open"));
     return th;
   })));
 }
-function providerRow(p, compact) {
-  const b = p.beyond[0], st = statusOf(p.id);
+function providerRow(p) {
+  const b = p.beyond[0];
+  const line = evLine(p) || [p.care, b ? `${label(b[0])} ${fmt(b[1], D.driver_names[b[0]].unit)}` : null].filter(Boolean).join(" · ");
   return h("tr", {onclick: e => { if (!e.target.closest("a")) go(p.id); }},
     h("td", {class: "rk"}, "#" + p.rank),
-    h("td", {}, h("a", {class: "who", href: "#/p/" + p.id, style: "text-decoration:none"}, avatar(p, 34), h("div", {}, h("b", {}, p.id), compact ? h("small", {}, p.care) : null))),
-    h("td", {class: "c-care"}, p.care),
+    h("td", {}, h("a", {class: "who qcase", href: "#/p/" + p.id, style: "text-decoration:none"}, avatar(p, 32),
+      h("div", {}, h("b", {}, p.id), h("span", {class: "qev"}, line)))),
     h("td", {class: "num c-pay"}, money(metric(p, "total_reimb").v)),
-    compact ? null : h("td", {class: "num c-claims"}, int(metric(p, "n_claims").v)),
-    h("td", {class: "c-why why"}, b ? [label(b[0]) + " ", h("b", {}, fmt(b[1], D.driver_names[b[0]].unit))] : "–"),
-    h("td", {class: "num c-sfr"}, p.in_queue && p.unusual_without_size ? h("span", {class: "beyond-y"}, int(p.size_free_rank)) : int(p.size_free_rank)),
-    h("td", {}, recPill(p), p.recommendation_check ? h("span", {class: "flag"}, "Double-check") : null),
-    h("td", {class: "c-status"}, statusPill(st)),
+    h("td", {class: "num c-claims"}, int(metric(p, "n_claims").v)),
+    h("td", {class: "c-sfr why"}, p.in_queue ? (p.gate === 1 ? "Rule check" : p.reason_label) : "–"),
+    h("td", {}, h("div", {class: "qacts"}, recPill(p), p.recommendation_check ? h("span", {class: "pl pl-white"}, "Borderline") : null)),
+    h("td", {class: "c-status"}, p.in_queue ? statusPill(statusOf(p.id)) : h("span", {class: "cs", title: "Not in this cycle's review queue"}, "–")),
     h("td", {}, h("a", {class: "arrow", href: "#/p/" + p.id, "aria-label": `Open ${p.id}`}, icon("arrow", 17))));
 }
 function mapCard() {
@@ -984,121 +1083,49 @@ function mapCard() {
     onclick: e => { view.map = k; box.replaceChildren(sizeMap()); [...seg.children].forEach(b => b.setAttribute("aria-pressed", String(b === e.currentTarget))); }}, lab)));
   return h("section", {class: "card o6", "aria-labelledby": "map-h"},
     h("div", {class: "ch"}, h("div", {}, h("h2", {class: "ct", id: "map-h"}, "Size or behaviour?"),
-      h("p", {class: "cs"}, "Each provider placed by how much it was paid and where it would rank if size were ignored. Dots in the green band bill unusually even for their size; those below it are in the queue mainly because they are large. Select a dot to open it.")),
+      h("p", {class: "cs"}, "Each provider placed by how much it was paid and where it would rank if size were ignored."),
+      h("ul", {class: "howread"}, h("li", {}, "Dots in the green band bill unusually even for their size."),
+        h("li", {}, "Dots below it are in the queue mainly because they are large."), h("li", {}, "Select a dot to open the case."))),
       h("div", {class: "row"}, h("div", {class: "dots"}, h("span", {}, h("i", {style: "background:var(--pink)"}), "Full audit"),
         h("span", {}, h("i", {style: "background:var(--amber)"}), "Desk review"), h("span", {}, h("i", {style: "background:var(--dot)"}), "Not in queue")), seg)),
     box);
 }
-function mixCard() {
-  const items = [
-    {k: "audit", n: QUEUE.filter(p => p.action === "priority_audit").length, lab: "Full audit", fill: "var(--solid)", ink: "var(--solid-ink)", go: {recs: ["priority_audit"]}},
-    {k: "check", n: QUEUE.filter(p => p.action === "desk_review" && p.recommendation_check).length, lab: "Desk review, double-check", fill: "var(--violet)", ink: "#fff", go: {focus: "check"}},
-    {k: "size", n: QUEUE.filter(p => p.action === "desk_review" && !p.recommendation_check).length, lab: "Desk review, mainly size", fill: "var(--lav)", ink: "var(--lav-ink)", go: {recs: ["desk_review"], focus: "size"}},
-    {k: "mon", n: QUEUE.filter(p => p.action === "monitor").length, lab: "Monitor", fill: "var(--blue-soft)", ink: "var(--blue-ink)", go: {recs: ["monitor"]}}].filter(x => x.n > 0);
-  const tot = QUEUE.length, sorted = [...items].sort((a, b) => b.n - a.n).slice(0, 3);
-  const R0 = 96, spots = [[178, 102], null, null];
-  const r = sorted.map(x => R0 * Math.sqrt(x.n / sorted[0].n));
-  if (sorted[1]) spots[1] = [Math.max(r[1] + 6, 96), 292 - r[1] - 6];
-  if (sorted[2]) spots[2] = [326 - r[2] - 4, 292 - r[2] - 18];
-  const svg = s("svg", {class: "bub", viewBox: "0 0 330 296", role: "group", "aria-label": "Queue mix by recommendation"});
-  sorted.forEach((x, i) => { const [cx, cy] = spots[i], pct = Math.round(100 * x.n / tot);
-    const g = s("g", {tabindex: 0, role: "button", "aria-label": `${x.lab}: ${x.n} of ${tot}, ${pct}%. Show them.`},
-      s("circle", {cx, cy, r: r[i], fill: x.fill, stroke: i ? "var(--card)" : "none", "stroke-width": 5}),
-      s("text", {x: cx, y: cy + (r[i] > 60 ? 6 : 4), "text-anchor": "middle", style: `fill:${x.ink};font-weight:800;font-size:${r[i] > 60 ? 28 : 21}px`}, pct + "%"),
-      s("text", {x: cx, y: cy + (r[i] > 60 ? 26 : 20), "text-anchor": "middle", style: `fill:${x.ink};font-size:${r[i] > 60 ? 11 : 10}px;opacity:.85`}, x.lab.split(",")[0]));
-    g.addEventListener("click", () => openProviders(x.go));
-    g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openProviders(x.go); } });
-    svg.append(g); });
-  return h("section", {class: "card o5", "aria-labelledby": "mix-h"},
-    h("div", {class: "ch"}, h("div", {}, h("h2", {class: "ct", id: "mix-h"}, "Queue mix"), h("p", {class: "cs"}, `How this cycle's ${tot} recommendations split`))),
-    svg, h("div", {class: "legend"}, items.map(x => h("button", {onclick: () => openProviders(x.go)}, h("i", {style: `background:${x.fill}`}), x.lab, h("b", {}, x.n)))));
-}
-function activityCard() {
-  const log = store.get("log", []).filter(e => BY[e.id]);
-  const referred = QUEUE.filter(q => statusOf(q.id) === 2).length;
-  const ICON_OF = e => e.k === "note" ? ["pencil", "vi"] : e.v === 2 ? ["send", "hot"] : e.v === 3 ? ["check", "ok"] : e.v === 1 ? ["clock", "vi"] : ["file", ""];
-  return h("section", {class: "card o5", "aria-labelledby": "act-h"},
-    h("div", {class: "ch"}, h("h2", {class: "ct", id: "act-h"}, "Recent activity"), referred ? h("span", {class: "crit"}, `${referred} referred`) : null),
-    log.length ? h("ul", {class: "acts"}, log.slice(0, 5).map(e => { const [ic, cls] = ICON_OF(e), p = BY[e.id];
-      return h("li", {}, h("a", {href: "#/p/" + e.id}, h("span", {class: "ai " + cls}, icon(ic, 18)),
-        h("div", {}, h("b", {}, e.k === "note" ? `Note on ${e.id}` : `${e.id} marked ${STATUS[e.v].toLowerCase()}`),
-          h("small", {}, `Rank ${p.rank} · ${p.action ? ACTION[p.action] : "not in queue"}`)), h("span", {class: "t"}, ago(e.t)))); }))
-      : h("p", {class: "empty"}, "Nothing yet. Status changes and notes you make on provider pages appear here. They stay in this browser only."));
-}
-function beforeCard(A) {
-  return h("section", {class: "card", "aria-labelledby": "bya-h"},
-    h("div", {class: "ch"}, h("div", {}, h("h2", {class: "ct", id: "bya-h"}, "Before you act"), h("p", {class: "cs"}, "What the ranking can and cannot tell you."))),
-    h("div", {class: "cols3"},
-      h("div", {}, h("h3", {}, icon("alert", 17), "Watch out for"), h("ul", {}, ((A && A.watch_out_for) || [
-        "Large hospitals rank high partly because they are large. Check the size-or-behaviour verdict on each provider.",
-        "A provider treating sicker patients can look unusual for legitimate reasons.",
-        "The ranking learns from past flags, so it can miss schemes no one has flagged before."]).map(t => h("li", {}, t)))),
-      h("div", {}, h("h3", {}, icon("info", 17), "Limits of this ranking"), h("ul", {}, ((A && A.caveats) ? A.caveats.map(c => c.text) : [
-        "A flag means a provider was previously suspected, not that fraud was proven.",
-        "How the past flags were assigned is not documented.",
-        "The claims come from a public, probably synthetic, Medicare dataset (2008 to 2009), so this is a demonstration.",
-        "A person decides every case. The ranking never denies or delays a payment."]).map(t => h("li", {}, t)))),
-      h("div", {}, h("h3", {}, icon("book", 17), "Words used here"), (A && A.glossary && A.glossary.length)
-        ? h("dl", {class: "gloss"}, A.glossary.flatMap(g => [h("dt", {}, g.term), h("dd", {}, g.meaning)]))
-        : h("dl", {class: "gloss"}, [["Rank", `Position out of ${int(N)}; 1 looks most like providers flagged before.`],
-          ["Rank if size ignored", "Where the provider would rank if how large it is were set aside."],
-          ["Full audit", ACTION_NOTE.priority_audit], ["Desk review", ACTION_NOTE.desk_review]].flatMap(([a, b]) => [h("dt", {}, a), h("dd", {}, b)])))));
-}
-
-/* ---------- providers list ---------- */
-const PRESETS = [
-  {lab: "Review queue", n: () => QUEUE.length, ic: ["list", "ic-violet"], patch: {}},
-  {lab: "Full audit", n: () => O.actions.priority_audit, ic: ["shield", "ic-pink"], patch: {recs: ["priority_audit"]}},
-  {lab: "Desk review", n: () => O.actions.desk_review, ic: ["file", "ic-amber"], patch: {recs: ["desk_review"]}},
-  {lab: "To double-check", n: () => O.recommendations_to_check, ic: ["alert", "ic-green"], patch: {focus: "check"}}];
-const sameT = (a, b) => ["mode", "q", "focus"].every(k => a[k] === b[k]) && ["cares", "recs"].every(k => [...a[k]].sort().join() === [...b[k]].sort().join());
 function applyFilters(t) {
   let r = P.filter(p => t.mode === "queue" ? p.in_queue : t.mode === "top100" ? p.rank <= 100 : true);
   if (t.q) r = r.filter(p => p.id.includes(t.q));
-  r = r.filter(p => t.cares.includes(p.care) && t.recs.includes(p.action || "none"));
-  if (t.focus === "check") r = r.filter(p => !!p.recommendation_check);
-  if (t.focus === "beyond") r = r.filter(p => p.size_free_rank <= O.queue_size || (p.in_queue && p.unusual_without_size));
-  if (t.focus === "size") r = r.filter(p => p.in_queue && !p.unusual_without_size);
-  const key = {rank: p => p.rank, id: p => p.id, care: p => p.care, pay: p => metric(p, "total_reimb").v,
-    claims: p => metric(p, "n_claims").v, sfr: p => p.size_free_rank, action: p => p.action ? Object.keys(ACTION).indexOf(p.action) : 9}[t.sort];
+  r = r.filter(p => t.cares.includes(p.care));
+  if (t.lane) r = r.filter(p => p.lane === t.lane);
+  const key = {pos: p => p.in_queue ? p.position : 1e6 + p.rank, rank: p => p.rank, id: p => p.id, care: p => p.care, pay: p => metric(p, "total_reimb").v,
+    claims: p => metric(p, "n_claims").v, reason: p => p.reason_label || "~", action: p => p.action ? Object.keys(ACTION).indexOf(p.action) : 9}[t.sort];
   return r.sort((a, b) => (key(a) > key(b) ? 1 : key(a) < key(b) ? -1 : a.rank - b.rank) * t.dir);
 }
 function providersPage() {
   const t = view.t;
-  const tiles = PRESETS.map(pr => h("button", {class: "tile", "aria-pressed": "false", onclick: () => { view.t = Object.assign(DEFAULT_T(), pr.patch); route(); }},
-    h("span", {class: "lab"}, pr.lab), h("span", {class: "num"}, pr.n()), h("span", {class: "ic " + pr.ic[1]}, icon(pr.ic[0], 17))));
-  hero(h("div", {class: "hb-row"}, h("div", {}, h("h1", {}, "Providers"),
-    h("p", {class: "lead"}, `All ${int(N)} providers, ranked by how closely their billing resembles providers flagged in the past. Choose a tile to filter, or select a provider to see why it ranks there.`))),
-    h("div", {class: "tiles"}, tiles));
-
+  hero(h("h1", {}, "All providers"),
+    h("p", {class: "lead", style: "max-width:none"}, `Look up any of the ${int(N)} providers scored this cycle. Today's work holds the review queue.`));
   const radio = (name, val, lab, cur, n, on) => h("label", {class: "opt"}, h("input", {type: "radio", name, value: val, checked: cur === val, onchange: () => on(val)}), lab, n != null ? h("small", {}, n) : null);
   const box = (lab, checked, on, n) => h("label", {class: "opt"}, h("input", {type: "checkbox", checked, onchange: e => on(e.target.checked)}), lab, n != null ? h("small", {}, n) : null);
   const toggleIn = (arr, v, on) => on ? (arr.includes(v) ? arr : arr.concat(v)) : arr.filter(x => x !== v);
   const careN = c => P.filter(p => p.care === c).length;
+  const laneSet = h("fieldset", {class: "fg"}, h("legend", {}, "Lane (review queue only)"),
+    radio("lane", "", "All lanes", t.lane, null, v => { t.lane = v; refresh(); }),
+    Object.entries(LANES).map(([k, [lab]]) => radio("lane", k, lab, t.lane, O.lanes[k], v => { t.lane = v; refresh(); })));
   const form = h("form", {onsubmit: e => e.preventDefault()},
     h("fieldset", {class: "fg"}, h("legend", {}, "Show"),
-      radio("mode", "queue", "Review queue", t.mode, QUEUE.length, v => { t.mode = v; t.limit = 24; refresh(); }),
-      radio("mode", "top100", "Top 100", t.mode, 100, v => { t.mode = v; t.limit = 24; refresh(); }),
-      radio("mode", "all", "All providers", t.mode, int(N), v => { t.mode = v; t.limit = 24; refresh(); })),
-    h("fieldset", {class: "fg"}, h("legend", {}, "Recommendation"),
-      [["priority_audit", "Full audit"], ["desk_review", "Desk review"], ["monitor", "Monitor"], ["none", "Not in queue"]]
-        .filter(([k]) => k !== "monitor" || O.actions.monitor > 0)
-        .map(([k, lab]) => box(lab, t.recs.includes(k), on => { t.recs = toggleIn(t.recs, k, on); refresh(); }))),
+      radio("mode", "all", "All providers", t.mode, int(N), v => { t.mode = v; if (v !== "queue") t.lane = ""; t.limit = 100; route(); }),
+      radio("mode", "top100", "Top 100", t.mode, 100, v => { t.mode = v; t.lane = ""; t.limit = 100; route(); }),
+      radio("mode", "queue", "Review queue", t.mode, QUEUE.length, v => { t.mode = v; t.sort = "pos"; t.limit = 100; route(); })),
+    t.mode === "queue" ? laneSet : null,
     h("fieldset", {class: "fg"}, h("legend", {}, "Type of care"),
       CARES.map(c => box(c, t.cares.includes(c), on => { t.cares = toggleIn(t.cares, c, on); refresh(); }, careN(c)))),
-    h("fieldset", {class: "fg"}, h("legend", {}, "Focus"),
-      radio("focus", "", "Everything", t.focus, null, v => { t.focus = v; refresh(); }),
-      radio("focus", "check", "To double-check", t.focus, null, v => { t.focus = v; refresh(); }),
-      radio("focus", "beyond", "Unusual beyond size", t.focus, null, v => { t.focus = v; refresh(); }),
-      radio("focus", "size", "Queued mainly for size", t.focus, null, v => { t.focus = v; refresh(); })),
     h("label", {class: "switch"}, "Card view", h("input", {type: "checkbox", role: "switch", checked: view.cards,
-      onchange: e => { view.cards = e.target.checked; store.set("cards", view.cards); t.limit = view.cards ? 24 : 100; refresh(); }})),
-    h("button", {class: "reset", type: "button", onclick: () => { view.t = DEFAULT_T(); view.t.mode = t.mode; route(); }}, "Reset filters"));
+      onchange: e => { view.cards = e.target.checked; store.set("cards2", view.cards); t.limit = view.cards ? 24 : 100; refresh(); }})),
+    h("button", {class: "reset", type: "button", onclick: () => { view.t = DEFAULT_T(); route(); }}, "Reset filters"));
 
   const search = h("input", {id: "q", type: "search", placeholder: "Find a provider ID", "aria-label": "Find a provider ID", value: t.q,
     oninput: e => { t.q = e.target.value.trim().toUpperCase(); t.limit = view.cards ? 24 : 100; refresh(); }});
   const sortSel = sel({"aria-label": "Sort by", onchange: e => { t.sort = e.target.value; t.dir = (t.sort === "pay" || t.sort === "claims") ? -1 : 1; refresh(); }},
-    [["rank", "Sort: rank"], ["pay", "Sort: total paid"], ["claims", "Sort: claims"], ["sfr", "Sort: rank if size ignored"], ["action", "Sort: recommendation"], ["id", "Sort: provider ID"]]
+    [["rank", "Sort: rank"], ["pos", "Sort: queue order"], ["pay", "Sort: total paid"], ["claims", "Sort: claims"], ["reason", "Sort: reason"], ["id", "Sort: provider ID"]]
       .map(([v, lab]) => h("option", {value: v, selected: t.sort === v}, lab)));
   const dirBtn = h("button", {class: "circ", type: "button", "aria-label": "Reverse order", title: "Reverse order", onclick: () => { t.dir = -t.dir; refresh(); }}, icon("sort", 17));
   const cnt = h("span", {class: "cnt", "aria-live": "polite"});
@@ -1106,12 +1133,22 @@ function providersPage() {
   const more = h("button", {class: "btn pill more", onclick: () => { t.limit += view.cards ? 24 : 200; refresh(); }}, "Show more");
   function onSort(k) { t.dir = t.sort === k ? -t.dir : (k === "pay" || k === "claims" ? -1 : 1); t.sort = k; sortSel.querySelector("select").value = k; refresh(); }
   function refresh() {
-    tiles.forEach((b, i) => b.setAttribute("aria-pressed", String(sameT(t, Object.assign(DEFAULT_T(), PRESETS[i].patch)))));
     const all = applyFilters(t), show = all.slice(0, t.limit);
     cnt.textContent = `${int(all.length)} provider${all.length === 1 ? "" : "s"}`;
-    if (!all.length) res.replaceChildren(h("p", {class: "empty"}, "No providers match these filters. Try widening them or ", h("button", {class: "reset", style: "margin:0", onclick: () => { view.t = DEFAULT_T(); view.t.mode = "all"; route(); }}, "show everyone"), "."));
+    if (!all.length) res.replaceChildren(h("p", {class: "empty"}, "No providers match these filters. Try widening them or ", h("button", {class: "reset", style: "margin:0", onclick: () => { view.t = DEFAULT_T(); route(); }}, "show everyone"), "."));
     else if (view.cards) res.replaceChildren(h("div", {class: "cards"}, show.map(providerCard)));
-    else res.replaceChildren(h("div", {class: "card tcard"}, h("div", {class: "tw"}, h("table", {}, h("caption", {class: "sr"}, "Providers"), tableHead(onSort, t), h("tbody", {}, show.map(p => providerRow(p, false)))))));
+    else {
+      const rows = [];
+      let seenOut = false;
+      show.forEach(p => {
+        if (t.sort === "rank" && t.dir > 0 && !p.in_queue && !seenOut) {     // the review queue ends here
+          seenOut = true;
+          rows.push(h("tr", {class: "grp"}, h("td", {colspan: COLS.length}, "Not in this cycle's review queue · Cases below are for reference only")));
+        }
+        rows.push(providerRow(p));
+      });
+      res.replaceChildren(h("div", {class: "card tcard"}, h("div", {class: "tw"}, h("table", {class: "qt"}, h("caption", {class: "sr"}, "Providers"), tableHead(onSort, t), h("tbody", {}, rows)))));
+    }
     more.style.display = all.length > t.limit ? "" : "none";
   }
   $("#app").append(h("div", {class: "lay rise"},
@@ -1122,16 +1159,14 @@ function providersPage() {
 }
 function providerCard(p) {
   const pay = metric(p, "total_reimb"), st = statusOf(p.id);
-  const items = p.beyond.slice(0, 2);
   return h("article", {class: "oc", onclick: e => { if (!e.target.closest("a")) go(p.id); }},
-    h("div", {class: "hd"}, h("div", {class: "who"}, avatar(p, 40), h("div", {}, h("b", {}, p.id), h("small", {}, `Rank ${p.rank} · ${p.care}`))), recPill(p)),
+    h("div", {class: "hd"}, h("div", {class: "who"}, avatar(p, 40), h("div", {}, h("b", {}, p.id), h("small", {}, `${prio(p)} · ${p.care}`))), recPill(p)),
+    evLine(p) ? h("p", {class: "evl"}, evLine(p)) : null,
     h("div", {class: "subs"}, h("div", {class: "subc"}, h("span", {}, "Total paid"), h("b", {}, money(pay.v))),
-      h("div", {class: "subc"}, h("span", {}, "If size ignored"), h("b", {class: p.in_queue && p.unusual_without_size ? "beyond-y" : ""}, "Rank " + int(p.size_free_rank)))),
-    items.length ? h("div", {class: "items"}, items.map(b => h("div", {class: "item"}, h("span", {class: "ii"}, icon("sparkle", 15)),
-      h("div", {}, h("b", {}, label(b[0])), h("small", {}, fmt(b[1], D.driver_names[b[0]].unit))), h("span", {class: "pc"}, rankShort(b[2]))))) : null,
-    p.beyond.length > 2 ? h("p", {class: "plus"}, `+${p.beyond.length - 2} more`) : null,
-    p.recommendation_check ? h("div", {class: "notes warn"}, h("span", {}, "Double-check"), p.recommendation_check === "unusual_but_desk" ? "Desk review suggested, but unusual beyond size." : "Full audit suggested, but ranks high mainly for size.")
-      : h("div", {class: "notes"}, h("span", {}, st ? "Your status: " + STATUS[st] : "Size check"), sizeVerdict(p)),
+      h("div", {class: "subc"}, h("span", {}, "Reason"), h("b", {}, p.in_queue ? (p.gate === 1 ? "Rule check" : p.reason_label) : "Not in queue"))),
+    p.gate === 1 ? h("div", {class: "notes warn"}, h("span", {}, "Rule check"), p.rule_reason)
+      : p.recommendation_check ? h("div", {class: "notes warn"}, h("span", {}, "Borderline"), "Decide between a full audit and a desk review.")
+      : p.in_queue ? h("div", {class: "notes"}, h("span", {}, "Status"), STATUS[st]) : null,
     h("a", {class: "btn wide", href: "#/p/" + p.id}, "Open case", icon("arrow", 16)));
 }
 function exportCsv() {
@@ -1140,6 +1175,21 @@ function exportCsv() {
     Math.round(metric(p, "n_claims").v), p.size_free_rank, p.action ? ACTION[p.action] : "Not in queue", STATUS[statusOf(p.id)]].join(",")));
   const a = h("a", {href: URL.createObjectURL(new Blob([lines.join("\n")], {type: "text/csv"})), download: "provider_ranking.csv"});
   document.body.append(a); a.click(); a.remove(); toast("Ranking downloaded");
+}
+function exportNotes() {
+  const q = v => `"${String(v == null ? "" : v).replace(/"/g, '""')}"`;
+  const head = ["priority", "provider", "type_of_care", "lane", "reason", "recommended", "decision", "decision_reason",
+    "decided_at", "checklist_done", "case_note"];
+  const rows = QUEUE.map(p => {
+    const d = store.get("dec:" + p.id, null), n = store.get("note:" + p.id, null), A = ai(p.id);
+    const total = (A && A.what_to_check && A.what_to_check.length ? A.what_to_check : defaultChecks(p)).length;
+    const ticked = store.get("checks:" + p.id, []).filter(i => i < total).length;
+    return [p.position, p.id, p.care, LANES[p.lane][0], p.reason_label, OUTCOME[recOutcome(p)],
+      d ? STATUS[d.outcome] : STATUS[statusOf(p.id)], d ? d.reason : "",
+      d ? new Date(d.t).toISOString().slice(0, 16).replace("T", " ") : "", `${ticked} of ${total}`, n ? n.text : ""].map(q).join(",");
+  });
+  const a = h("a", {href: URL.createObjectURL(new Blob([[head.join(",")].concat(rows).join("\n")], {type: "text/csv"})), download: "case_notes.csv"});
+  document.body.append(a); a.click(); a.remove(); toast("Case notes downloaded");
 }
 
 /* ---------- provider page ---------- */
@@ -1155,130 +1205,104 @@ function providerPage(id) {
   const qi = QUEUE.findIndex(q => q.id === id);
   const prev = qi > 0 ? QUEUE[qi - 1] : null, next = qi >= 0 && qi < QUEUE.length - 1 ? QUEUE[qi + 1] : null;
   const pay = metric(p, "total_reimb"), cl = metric(p, "n_claims");
-  const stVal = h("b", {}, statusPill(statusOf(id)));
-  const statusSel = h("select", {id: "status", "aria-label": "Your status", onchange: e => {
-    const v = +e.target.value; store.set("status:" + id, v); logEvent(id, "status", v);
-    stVal.replaceChildren(statusPill(v)); toast(`Marked ${STATUS[v].toLowerCase()}`); }},
-    STATUS.map((st, i) => h("option", {value: i, selected: statusOf(id) === i}, st)));
-  const navBtn = (q, dir) => q ? h("a", {class: "ib light", href: "#/p/" + q.id, "aria-label": `${dir === "l" ? "Previous" : "Next"} in queue: rank ${q.rank}`, title: `${dir === "l" ? "Previous" : "Next"}: rank ${q.rank} (${dir === "l" ? "←" : "→"})`}, icon(dir === "l" ? "chevl" : "chevr", 18))
+  const navBtn = (q, dir) => q ? h("a", {class: "ib light", href: "#/p/" + q.id, "aria-label": `${dir === "l" ? "Previous" : "Next"} case: ${q.id}`,
+      title: `${dir === "l" ? "Previous" : "Next"}: ${prio(q)} (${dir === "l" ? "K" : "J"})`}, icon(dir === "l" ? "chevl" : "chevr", 18))
     : h("span", {class: "ib light", "aria-disabled": "true"}, icon(dir === "l" ? "chevl" : "chevr", 18));
   hero(h("div", {class: "crumbs"}, h("a", {href: "#/providers"}, icon("grid", 16), "Providers"), icon("chevr", 14),
-      p.in_queue ? [h("a", {href: "#/providers", onclick: e => { e.preventDefault(); openProviders(); }}, "Review queue"), icon("chevr", 14)] : null, h("b", {}, p.id)),
+      p.in_queue ? [h("a", {href: "#/"}, "Today's work"), icon("chevr", 14)] : null, h("b", {}, p.id)),
     h("div", {class: "hb-row"},
-      h("div", {}, h("h1", {}, p.id, h("span", {class: "pls"}, recPill(p))),
-        h("p", {class: "lead"}, `${p.care} · rank ${p.rank} of ${int(N)}${p.action ? " · recommendation from the AI case reviewer; you make the decision" : ""}`)),
+      h("div", {}, h("h1", {}, p.id, h("span", {class: "pls"}, recPill(p), statusOf(id) ? statusPill(statusOf(id)) : null)),
+        h("p", {class: "caselead"}, p.in_queue ? `${prio(p)} of ${QUEUE.length} · ${LANES[p.lane][0]} lane · Batch ${p.batch} · ${p.care}`
+          : `${p.care} · Rank ${p.rank} of ${int(N)} · Not in this cycle's queue`)),
       h("div", {class: "hact"},
-        h("label", {class: "wpill"}, icon("clock", 17), h("span", {class: "sr"}, "Your status"), statusSel, icon("chevd", 15, 2.2)),
         qi >= 0 ? [navBtn(prev, "l"), navBtn(next, "r")] : null,
-        h("button", {class: "cta", onclick: () => copySummary(p)}, icon("copy", 17), "Copy case summary"))),
-    h("div", {class: "tiles"},
-      tile("Overall rank", p.rank, `of ${int(N)}`, "trend", "ic-violet"),
-      tile("Total paid", money(pay.v), "", "chart", "ic-pink"),
-      tile("Claims", int(cl.v), "", "file", "ic-amber"),
-      tile("Rank if size ignored", int(p.size_free_rank), sizeVerdict(p).startsWith("Rank") ? "" : sizeVerdict(p).toLowerCase(), "scale", "ic-green")));
+        h("button", {class: "cta", onclick: () => copySummary(p)}, icon("copy", 17), "Copy case summary"))));
 
-  const app = $("#app");
-  const pgrid = h("div", {class: "pg rise"});
-  // profile (patient card)
-  pgrid.append(h("section", {class: "card prof", "aria-label": "Provider profile"},
-    h("div", {class: "pic"}, avatar(p, 84, false), h("div", {}, h("h2", {}, p.id), h("p", {class: "mrn"}, `Rank ${p.rank} of ${int(N)}`))),
-    h("div", {class: "subs"},
-      h("div", {class: "subc"}, h("span", {}, "Type of care"), h("b", {title: p.care}, p.care)),
-      h("div", {class: "subc"}, h("span", {}, "Recommendation"), h("b", {}, recPill(p))),
-      h("div", {class: "subc"}, h("span", {}, "Your status"), stVal),
-      h("div", {class: "subc"}, h("span", {}, "Patients"), h("b", {}, int(metric(p, "n_bene").v))),
-      h("div", {class: "subc"}, h("span", {}, "Payment per claim"), h("b", {}, money(metric(p, "reimb_per_claim").v))),
-      h("div", {class: "subc"}, h("span", {}, "Size check"), h("b", {class: p.in_queue && p.unusual_without_size ? "beyond-y" : ""}, p.in_queue ? sizeVerdict(p) : "Not assessed"))),
-    h("p", {class: "last"}, "Claims period: ", h("b", {}, `${nice(O.period.from)} to ${nice(O.period.to)}`))));
-  // summary
-  pgrid.append(h("section", {class: "card", "aria-labelledby": "sum-h"},
-    h("div", {class: "ch"}, h("h2", {class: "ct", id: "sum-h"}, "Summary")),
-    h("p", {class: "lede"}, (A && A.summary) || fallbackSummary(p)),
-    h("div", {class: "facts"},
-      h("div", {class: "subc"}, h("span", {}, "Paid over the period"), h("b", {}, money(pay.v)), h("em", {}, compare(pay.pct, p.care))),
-      h("div", {class: "subc"}, h("span", {}, "Claims"), h("b", {}, int(cl.v)), h("em", {}, compare(cl.pct, p.care)))),
-    p.action ? h("div", {class: "recn"}, recPill(p), h("span", {}, ACTION_NOTE[p.action])) : null,
-    p.recommendation_check === "unusual_but_desk" ? h("div", {class: "callout", role: "note"}, icon("alert", 18), h("div", {}, h("b", {}, "Double-check this recommendation"),
-      "Desk review was suggested, but this provider's billing looks unusual even when its size is set aside. Consider whether a full audit is warranted.")) :
-    p.recommendation_check === "size_but_audit" ? h("div", {class: "callout", role: "note"}, icon("alert", 18), h("div", {}, h("b", {}, "Double-check this recommendation"),
-      "A full audit was suggested, but this provider ranks high mainly because it is large. Check that size alone is not driving the referral.")) : null));
-  // insights panel
-  pgrid.append(insightsPanel(p, A));
-  // checklist (lab reports list)
+  const main = h("div", {class: "cmain"});
+  // 1. why it is here: the evidence first, then the plain-language reading of it
+  const cautions = A && A.cautions && A.cautions.length ? A.cautions : [
+    "A high rank means this provider's billing resembles providers flagged in the past. It is not evidence of fraud.",
+    "Comparisons are with providers giving the same type of care; a provider with an unusual specialty can look unusual for good reasons.",
+    "Data covers claims from 2008 to 2009 in a public benchmark dataset."];
+  main.append(h("section", {class: "card", "aria-labelledby": "here-h"},
+    h("div", {class: "ch"}, h("h2", {class: "ct", id: "here-h"}, p.in_queue ? "Why it's here" : "Summary"),
+      p.in_queue ? h("span", {class: "row"}, h("span", {class: "pl pl-white"}, "Reason: " + (p.gate === 1 ? "Rule check" : p.reason_label)),
+        infoBtn("reasons", "this reason")) : null),
+    evLine(p) ? h("div", {class: "evchips", style: "margin-top:0"}, p.evidence_line.map(t => h("span", {class: "pl pl-white"}, t))) : null,
+    h("p", {class: "lede", style: "margin-top:14px"}, (A && A.summary) || fallbackSummary(p)),
+    p.gate === 1 ? h("p", {class: "cnote"}, icon("alert", 15), "Can have innocent causes, such as a transfer or a data-entry error.")
+      : p.recommendation_check === "borderline" ? h("p", {class: "cnote"}, icon("alert", 15), "Mixed picture: decide whether a full audit is needed.") : null));
+  // 2. what to check
   const checks = A && A.what_to_check && A.what_to_check.length ? A.what_to_check : defaultChecks(p);
   const prog = h("span", {class: "prog"});
   const updProg = () => { prog.textContent = `${store.get("checks:" + id, []).filter(i => i < checks.length).length} of ${checks.length} done`; };
   updProg();
   const done = store.get("checks:" + id, []);
-  pgrid.append(h("section", {class: "card", "aria-labelledby": "chk-h"},
+  main.append(h("section", {class: "card", "aria-labelledby": "chk-h"},
     h("div", {class: "ch"}, h("div", {}, h("h2", {class: "ct", id: "chk-h"}, "What to check"), h("p", {class: "cs"}, "Ticks are saved in this browser only.")), prog),
     h("ul", {class: "list"}, checks.map((c, i) => h("li", {}, h("label", {class: "chk"},
       h("input", {type: "checkbox", checked: done.includes(i), onchange: e => {
-        const cur = new Set(store.get("checks:" + id, [])); e.target.checked ? cur.add(i) : cur.delete(i); store.set("checks:" + id, [...cur]); updProg(); }}),
+        const cur = new Set(store.get("checks:" + id, [])); e.target.checked ? cur.add(i) : cur.delete(i); store.set("checks:" + id, [...cur]);
+        markStarted(id); updProg(); }}),
       h("span", {class: "ai"}, icon("check", 18, 2.2)), h("span", {}, c)))))));
-  // patterns (reports list)
-  pgrid.append(h("section", {class: "card", "aria-labelledby": "pat-h"},
-    h("div", {class: "ch"}, h("div", {}, h("h2", {class: "ct", id: "pat-h"}, "Patterns it resembles"),
-      h("p", {class: "cs"}, "Known schemes whose warning signs match this provider. A match is a lead, not a finding."))),
-    p.patterns && p.patterns.length ? h("ul", {class: "list"}, p.patterns.map((t, i) => h("li", {}, h("details", {class: "pat", open: i === 0},
-      h("summary", {}, h("span", {class: "ai"}, icon("file", 18)), h("div", {}, h("b", {}, t.title), h("small", {}, `Playbook pattern ${t.id}`)), h("span", {class: "chev"}, icon("chevd", 18))),
-      h("p", {}, (A && A.patterns && A.patterns[t.id]) || t.text)))))
-      : h("p", {class: "empty"}, p.in_queue ? "No playbook pattern was matched for this provider." : "Pattern matching runs only for providers in the review queue.")));
-  // beyond size
-  pgrid.append(h("section", {class: "card full", "aria-labelledby": "bey-h"},
-    h("div", {class: "ch"}, h("div", {}, h("h2", {class: "ct", id: "bey-h"}, "What stands out beyond size"),
-      h("p", {class: "cs"}, `When size is set aside, these measures do most to keep this provider high (rank ${int(p.size_free_rank)} of ${int(N)}). They describe how it bills, not how much, and are the best leads for a review.`)),
-      p.beyond.length ? rangeLegend() : null),
-    p.beyond.length ? h("div", {class: "fts"}, p.beyond.map(b => {
-      const n = D.driver_names[b[0]], txt = A && A.beyond && A.beyond[b[0]];
-      return h("div", {class: "ftile"}, h("div", {class: "fh"}, h("i", {}, icon("sparkle", 15)), n.label),
-        h("div", {class: "fv"}, fmt(b[1], n.unit)), h("div", {class: "fc"}, compare(b[2], p.care)),
-        rangeBar(p, b[0], b[1]), h("p", {class: "fw"}, txt || fallbackReason(p, [b[0], 1, b[1], b[2]])));
-    })) : h("p", {class: "empty"}, "Nothing stands out once size is set aside: this provider ranks where it does because of its size.")));
-  // overall drivers
-  pgrid.append(h("section", {class: "card full", "aria-labelledby": "why-h"},
-    h("div", {class: "ch"}, h("div", {}, h("h2", {class: "ct", id: "why-h"}, "Why it ranks here overall"),
-      h("p", {class: "cs"}, `The five measures that moved this provider's overall rank most, including size, compared with ${peerWord(p.care)} (${int(O.peer_counts[p.care])} in the reference group).`)), rangeLegend()),
-    h("ul", {class: "frows"}, p.drivers.map(d => {
-      const n = D.driver_names[d[0]], txt = A && A.reasons && A.reasons[d[0]];
-      const bar = rangeBar(p, d[0], d[2]);
-      return h("li", {class: "frow"},
-        h("div", {}, h("div", {class: "nm"}, n.label), h("div", {class: "row"}, h("span", {class: "pl " + (d[1] ? "pl-pink" : "pl-green")}, d[1] ? "Pushes rank up" : "Pulls rank down"),
-          n.size ? h("span", {class: "pl pl-none"}, "Reflects size") : null)),
-        h("div", {}, h("div", {class: "vl"}, fmt(d[2], n.unit)), h("div", {class: "cp"}, compare(d[3], p.care)), bar || h("p", {class: "cp"}, "See all measures under Explore the data.")),
-        h("p", {class: "ex"}, txt || fallbackReason(p, d)));
-    }))));
-  // explore + next
-  pgrid.append(exploreSection(p));
-  pgrid.append(nextCard(p, next));
-  app.append(pgrid);
+  // 3. details, one click away
+  const more = h("div", {class: "cdet-b"},
+    h("section", {class: "card", "aria-label": "Provider facts"},
+      h("div", {class: "ch"}, h("h2", {class: "ct"}, "Provider facts")),
+      h("div", {class: "subs"},
+        h("div", {class: "subc"}, h("span", {}, "Total paid"), h("b", {}, money(pay.v)), h("em", {}, compare(pay.pct, p.care))),
+        h("div", {class: "subc"}, h("span", {}, "Claims"), h("b", {}, int(cl.v)), h("em", {}, compare(cl.pct, p.care))),
+        h("div", {class: "subc"}, h("span", {}, "Patients"), h("b", {}, int(metric(p, "n_bene").v))),
+        h("div", {class: "subc"}, h("span", {}, "Type of care"), h("b", {title: p.care}, p.care)),
+        h("div", {class: "subc"}, h("span", {}, "Payment per claim"), h("b", {}, money(metric(p, "reimb_per_claim").v))),
+        h("div", {class: "subc"}, h("span", {}, "Overall rank"), h("b", {}, `${p.rank} of ${int(N)}`)),
+        h("div", {class: "subc"}, h("span", {}, "Rank if size ignored"), h("b", {}, `${int(p.size_free_rank)} of ${int(N)}`)),
+        p.in_queue ? h("div", {class: "subc"}, h("span", {}, "Comparisons pointing to unusual billing"), h("b", {}, `${p.votes} of ${p.of_models}`)) : null,
+        h("div", {class: "subc"}, h("span", {}, "Claims period"), h("b", {}, `${nice(O.period.from)} to ${nice(O.period.to)}`))),
+      h("div", {class: "kim"}, h("b", {}, "Keep in mind"), h("ul", {}, cautions.map(t => h("li", {}, t))))),
+    h("section", {class: "card", "aria-labelledby": "pat-h"},
+      h("div", {class: "ch"}, h("div", {}, h("h2", {class: "ct", id: "pat-h"}, "Patterns it resembles"),
+        h("p", {class: "cs"}, "Known schemes whose warning signs match this provider. A match is a lead, not a finding."))),
+      p.patterns && p.patterns.length ? h("ul", {class: "list"}, p.patterns.map((t, i) => h("li", {}, h("details", {class: "pat", open: i === 0},
+        h("summary", {}, h("span", {class: "ai"}, icon("file", 18)), h("div", {}, h("b", {}, t.title), h("small", {}, `Playbook pattern ${t.id}`)), h("span", {class: "chev"}, icon("chevd", 18))),
+        h("p", {}, (A && A.patterns && A.patterns[t.id]) || t.text)))))
+        : h("p", {class: "empty"}, p.in_queue ? "No playbook pattern was matched for this provider." : "Pattern matching runs only for providers in the review queue.")),
+    h("section", {class: "card wide", "aria-labelledby": "bey-h"},
+      h("div", {class: "ch"}, h("div", {}, h("h2", {class: "ct", id: "bey-h"}, "What stands out beyond size"),
+        h("p", {class: "cs"}, "When size is set aside, these measures do most to keep this provider high. They describe how it bills, not how much, and are the best leads for a review.")),
+        p.beyond.length ? rangeLegend() : null),
+      p.beyond.length ? h("div", {class: "fts"}, p.beyond.map(b => {
+        const n = D.driver_names[b[0]];
+        return h("div", {class: "ftile"}, h("div", {class: "fh"}, h("i", {}, icon("sparkle", 15)), n.label),
+          h("div", {class: "fv"}, fmt(b[1], n.unit)), h("div", {class: "fc"}, compare(b[2], p.care)), rangeBar(p, b[0], b[1]));
+      })) : h("p", {class: "empty"}, "Nothing stands out once size is set aside: this provider ranks where it does because of its size.")),
+    h("section", {class: "card wide", "aria-labelledby": "why-h"},
+      h("div", {class: "ch"}, h("div", {}, h("h2", {class: "ct", id: "why-h"}, "Why it ranks here overall"),
+        h("p", {class: "cs"}, `The five measures that moved this provider's overall rank most, including size, compared with ${peerWord(p.care)} (${int(O.peer_counts[p.care])} in the reference group).`)), rangeLegend()),
+      h("ul", {class: "frows"}, p.drivers.map(d => {
+        const n = D.driver_names[d[0]];
+        const bar = rangeBar(p, d[0], d[2]);
+        return h("li", {class: "frow"},
+          h("div", {}, h("div", {class: "nm"}, n.label), h("div", {class: "row"}, h("span", {class: "pl " + (d[1] ? "pl-pink" : "pl-green")}, d[1] ? "Pushes rank up" : "Pulls rank down"),
+            n.size ? h("span", {class: "pl pl-none"}, "Reflects size") : null)),
+          h("div", {}, h("div", {class: "vl"}, fmt(d[2], n.unit)), h("div", {class: "cp"}, compare(d[3], p.care)), bar || h("p", {class: "cp"}, "See all measures under Explore the data.")));
+      }))),
+    exploreSection(p));
+  const det = h("details", {class: "cdet", open: store.get("details-open", false)},
+    h("summary", {}, h("div", {}, h("b", {}, "Details"), h("p", {class: "cs", style: "margin:2px 0 0"}, "Provider facts, patterns it resembles, comparisons and all measures")),
+      h("span", {class: "chev"}, icon("chevd", 18))), more);
+  det.addEventListener("toggle", () => store.set("details-open", det.open));
+  const side = h("div", {class: "cside"}, p.in_queue ? decisionPanel(p, next) : nextCard(p, null));
+  $("#app").append(h("div", {class: "cwrap rise"}, h("div", {class: "cg"}, main, side), det));
 }
-function tile(lab, num, small, ic, cls) {
-  return h("div", {class: "tile"}, h("span", {class: "lab"}, lab), h("span", {class: "num", title: `${num} ${small}`.trim()}, num, small ? h("small", {}, small) : null),
-    h("span", {class: "ic " + cls}, icon(ic, 17)));
-}
-function insightsPanel(p, A) {
-  const b = p.beyond[0];
-  const cards = [];
-  if (b) { const n = D.driver_names[b[0]];
-    cards.push(h("div", {class: "icard"}, h("div", {class: "ih"}, h("span", {class: "ii"}, icon("alert", 18)),
-      h("div", {}, h("h4", {}, `${n.label} is ${compare(b[2], p.care)}`), h("p", {class: "isub"}, `${fmt(b[1], n.unit)} · stands out most beyond size`))),
-      rangeBar(p, b[0], b[1], true))); }
-  cards.push(h("div", {class: "icard"}, h("div", {class: "ih"}, h("span", {class: "ii"}, icon("sparkle", 18)),
-    h("div", {}, h("h4", {}, p.in_queue ? (p.unusual_without_size ? "How it bills stands out, not only its size" : "Mainly in the queue because it is large") : "Outside this cycle's queue"),
-      h("p", {class: "ib2"}, A && A.size_note ? A.size_note : fallbackSizeNote(p))))));
-  cards.push(h("div", {class: "icard"}, h("div", {class: "ih"}, h("span", {class: "ii"}, icon("sparkle", 18)),
-    h("div", {}, h("h4", {}, "Keep in mind"), h("ul", {}, (A && A.cautions && A.cautions.length ? A.cautions : [
-      "A high rank means this provider's billing resembles providers flagged in the past. It is not evidence of fraud.",
-      "Comparisons are with providers giving the same type of care; a provider with an unusual specialty can look unusual for good reasons.",
-      "Data covers claims from 2008 to 2009 in a public benchmark dataset."]).map(t => h("li", {}, t)))))));
+function noteSection(p) {
   const noteBox = h("div", {});
   function drawNote(editing) {
     const n = store.get("note:" + p.id, null);
     if (editing) {
-      const ta = h("textarea", {"aria-label": "Your note", placeholder: "What did you find? Saved in this browser only."}, n ? n.text : "");
+      const ta = h("textarea", {"aria-label": "Case note", placeholder: "What did you find? Saved in this browser only."}, n ? n.text : "");
       const save = () => { const v = ta.value.trim();
-        if (v) { store.set("note:" + p.id, {text: v, t: Date.now()}); logEvent(p.id, "note"); toast("Note saved"); }
+        if (v) { store.set("note:" + p.id, {text: v, t: Date.now()}); logEvent(p.id, "note"); markStarted(p.id); toast("Note saved"); }
         else { try { localStorage.removeItem("prq:note:" + p.id); } catch (e) {} }
         drawNote(false); };
       noteBox.replaceChildren(h("div", {class: "note"}, ta, h("div", {class: "row", style: "margin-top:10px"},
@@ -1286,17 +1310,72 @@ function insightsPanel(p, A) {
         h("button", {class: "btn sm pill", onclick: () => drawNote(false)}, "Cancel"))));
       ta.focus();
     } else if (n) {
-      noteBox.replaceChildren(h("div", {class: "note"}, h("p", {}, n.text), h("div", {class: "nf"}, h("span", {}, "Your note · " + ago(n.t)),
+      noteBox.replaceChildren(h("div", {class: "note"}, h("p", {}, n.text), h("div", {class: "nf"}, h("span", {}, "Case note · " + cap(ago(n.t))),
         h("button", {class: "circ", "aria-label": "Edit note", onclick: () => drawNote(true)}, icon("pencil", 15)))),
         h("div", {class: "row", style: "margin-top:12px"}, h("button", {class: "btn pill sm", onclick: () => drawNote(true)}, icon("pencil", 15), "Edit note"),
           h("button", {class: "circ", "aria-label": "Delete note", onclick: () => { try { localStorage.removeItem("prq:note:" + p.id); } catch (e) {} toast("Note deleted"); drawNote(false); }}, icon("x", 16))));
-    } else noteBox.replaceChildren(h("div", {class: "row", style: "margin-top:12px"}, h("button", {class: "btn pill sm", onclick: () => drawNote(true)}, icon("plus", 15, 2.4), "Add note"),
-      h("span", {style: "font-size:12.5px;opacity:.8"}, "Notes stay in this browser and go into the copied summary.")));
+    } else noteBox.replaceChildren(h("div", {class: "row", style: "margin-top:12px"}, h("button", {class: "btn pill sm", onclick: () => drawNote(true)}, icon("plus", 15, 2.4), "Add case note"),
+      h("span", {style: "font-size:12.5px;opacity:.8"}, "Notes go into the case notes download.")));
   }
   drawNote(false);
-  return h("section", {class: "ins panel", "aria-labelledby": "pins-h"},
-    h("div", {class: "ch"}, h("h2", {class: "ct", id: "pins-h"}, A ? "AI insights" : "Insights"), h("span", {class: "badge"}, A ? "Written by AI, checked" : "Standard wording")),
-    cards, noteBox);
+  return h("div", {style: "margin-top:16px"}, h("h3", {class: "ct", style: "font-size:16px"}, "Case notes"), noteBox);
+}
+function nextLine(next) {
+  return next ? h("a", {class: "nextln", href: "#/p/" + next.id}, "Next: ", h("b", {}, `#${next.position} ${next.id}`),
+    ` · ${LANES[next.lane][0]} · ${next.reason_label}`) : h("span", {class: "nextln"}, "This is the last case in the queue.");
+}
+function decisionPanel(p, next) {
+  const rec = recOutcome(p);
+  const sec = h("section", {class: "ins dec", "aria-labelledby": "dec-h"});
+  function draw(editing) {
+    const d = store.get("dec:" + p.id, null);
+    const head = h("div", {class: "ch"}, h("h2", {class: "ct", id: "dec-h"}, "Decision", infoBtn("decide", "the decision options")));
+    decisionPanel.save = null; decisionPanel.pick = null;
+    if (d && !editing) {
+      sec.replaceChildren(head,
+        h("div", {class: "icard"}, h("h4", {}, STATUS[d.outcome]),
+          h("p", {class: "isub"}, `Decided ${ago(d.t)}` + (d.outcome !== rec ? ` · Differs from the recommendation (${OUTCOME[rec]})` : " · As recommended")),
+          d.reason ? h("p", {class: "ib2"}, d.reason) : null),
+        h("div", {class: "row", style: "margin-top:12px"},
+          next ? h("a", {class: "btn pill sm", href: "#/p/" + next.id}, "Next case", icon("right", 16)) : null,
+          h("button", {class: "btn ghost pill sm", onclick: () => draw(true)}, icon("pencil", 15), "Change")),
+        nextLine(next), noteSection(p));
+      return;
+    }
+    const prompt = p.recommendation_check === "borderline" ? "Borderline: upgrade to a full audit, or keep the desk review?"
+      : ACTION_NOTE[p.action];
+    const why = h("textarea", {"aria-label": "Reason for the decision", placeholder: "Reason for your decision", rows: 2,
+      class: d && d.reason ? "filled" : null, oninput: e => e.target.classList.toggle("filled", !!e.target.value)}, d ? d.reason || "" : "");
+    const hint = h("p", {class: "isub", style: "margin-top:6px"});
+    const chosen = () => { const r = sec.querySelector("input[name=dec]:checked"); return r ? +r.value : null; };
+    const upd = () => { const c = chosen(); hint.textContent = c && c !== rec ? "A reason is needed: this differs from the recommendation." : "Reason (optional when you follow the recommendation)."; };
+    const opts = [2, 3, 4].map(v => h("label", {class: "dopt"},
+      h("input", {type: "radio", name: "dec", value: v, checked: d ? d.outcome === v : false, onchange: upd}),
+      h("span", {}, OUTCOME[v], v === rec ? h("small", {}, " · Recommended") : null)));
+    function save(goNext) {
+      const c = chosen();
+      if (!c) { toast("Choose an outcome first"); return; }
+      const reason = why.value.trim();
+      if (c !== rec && !reason) { toast("Add a reason: this differs from the recommendation"); why.focus(); return; }
+      store.set("dec:" + p.id, {outcome: c, reason, t: Date.now()}); store.set("st:" + p.id, c); logEvent(p.id, "status", c);
+      toast(`Saved: ${STATUS[c].toLowerCase()}`);
+      if (goNext && next) go(next.id); else route();
+    }
+    decisionPanel.save = save;
+    decisionPanel.pick = k => { const r = sec.querySelectorAll("input[name=dec]")[k]; if (r) { r.checked = true; upd(); } };
+    sec.replaceChildren(head, h("p", {class: "ib2", style: "margin:0 0 12px"}, prompt),
+      h("div", {class: "dopts", role: "radiogroup", "aria-label": "Outcome"}, opts),
+      h("div", {class: "note", style: "margin-top:12px"}, why), hint,
+      h("div", {class: "row", style: "margin-top:12px"},
+        h("button", {class: "btn solid pill sm", title: "Keys: 1-3 choose · S save and next · J/K next and previous", onclick: () => save(true)},
+          next ? "Save & next case" : "Save", icon("right", 16)),
+        next ? h("button", {class: "btn ghost pill sm", onclick: () => save(false)}, "Save") : null,
+        d ? h("button", {class: "btn ghost pill sm", onclick: () => draw(false)}, "Cancel") : null),
+      nextLine(next), noteSection(p));
+    upd();
+  }
+  draw(false);
+  return sec;
 }
 function defaultChecks(p) {
   const out = [], ks = p.drivers.filter(d => d[1]).map(d => d[0]);
@@ -1335,7 +1414,7 @@ function exploreSection(p) {
         h("td", {class: "num", style: "font-weight:800;white-space:nowrap"}, fmt(mv.v, m.unit)),
         h("td", {}, rangeBar(p, m.key), h("div", {class: "cs", style: "margin:0"}, compare(mv.pct, p.care))),
         h("td", {class: "c-care cs", style: "white-space:nowrap"}, `${fmt(q[1], m.unit)} to ${fmt(q[3], m.unit)}`)); })));
-  sec.classList.add("tcard");
+  sec.classList.add("tcard", "wide");
   sec.append(h("details", {class: "all"}, h("summary", {}, "All measures in a table"), rangeLegend(), h("div", {class: "tw"}, tbl)));
   show(key);
   redraws.push(() => chart.replaceChildren(histogram(p, key)));
@@ -1347,25 +1426,28 @@ function nextCard(p, next) {
   if (!q) {
     c.append(h("div", {class: "img"}, h("b", {}, "✓"), h("small", {}, "")), h("h3", {id: "nx-h"}, "End of the queue"),
       h("p", {class: "ty"}, "This is the last provider in this cycle's queue."), h("div", {style: "height:14px"}),
-      h("button", {class: "btn solid wide", onclick: () => openProviders()}, "Back to the queue", icon("arrow", 16)));
+      h("a", {class: "btn solid wide", href: "#/"}, "Back to today's work", icon("arrow", 16)));
     return c;
   }
-  c.append(h("div", {class: "img"}, h("div", {style: "position:relative;z-index:1"}, h("small", {}, next ? "Next in queue" : "Next to review"), h("b", {}, "#" + q.rank)), avatar(q, 48)),
+  c.append(h("div", {class: "img"}, h("div", {style: "position:relative;z-index:1"}, h("small", {}, next ? "Next in queue" : "Next to review"), h("b", {}, "#" + (q.position || q.rank))), avatar(q, 48)),
     h("div", {class: "row", style: "justify-content:space-between;margin-top:14px"}, h("h3", {id: "nx-h", style: "margin:0"}, q.id), recPill(q)),
     h("p", {class: "ty"}, q.care),
     h("div", {class: "subs"}, h("div", {class: "subc"}, h("span", {}, "Total paid"), h("b", {}, money(metric(q, "total_reimb").v))),
-      h("div", {class: "subc"}, h("span", {}, "If size ignored"), h("b", {}, "Rank " + int(q.size_free_rank))),
-      h("div", {class: "subc full"}, h("span", {}, "Your status"), h("b", {}, STATUS[statusOf(q.id)]))),
+      h("div", {class: "subc"}, h("span", {}, "Reason"), h("b", {}, q.reason_label || "-")),
+      h("div", {class: "subc full"}, h("span", {}, "Status"), h("b", {}, STATUS[statusOf(q.id)]))),
     h("a", {class: "btn solid wide", href: "#/p/" + q.id}, next ? "Open next" : "Open", icon("arrow", 16)));
   return c;
 }
 function copySummary(p) {
   const A = ai(p.id), note = store.get("note:" + p.id, null);
-  const lines = [`${p.id} (${p.care}) - rank ${p.rank} of ${N}`,
+  const d = store.get("dec:" + p.id, null);
+  const lines = [`${p.id} (${p.care}) - ${p.in_queue ? `priority ${p.position} of ${QUEUE.length}` : `rank ${p.rank} of ${N}`}`,
     `Recommendation: ${p.action ? ACTION[p.action] : "Not in queue"}`,
-    `Rank if size is ignored: ${p.size_free_rank}`,
-    `Your status: ${STATUS[statusOf(p.id)]}`,
-    ...(p.recommendation_check ? ["Note: recommendation flagged to double-check against the size check."] : []),
+    ...(p.in_queue ? [`Reason: ${p.reason_label}`] : []),
+    `Decision: ${STATUS[statusOf(p.id)]}${d && d.reason ? " - " + d.reason : ""}`,
+    ...(p.in_queue ? [`Selected by: ${p.gate === 1 ? "rule check (" + p.rule_reason + ")" : "risk ranking"}`,
+      `Comparisons pointing to unusual billing: ${p.votes} of ${p.of_models}`] : []),
+    ...(p.recommendation_check ? ["Note: borderline case; decide whether a full audit is needed."] : []),
     "", (A && A.summary) || fallbackSummary(p), "", "Stands out beyond size:",
     ...p.beyond.map(b => `- ${label(b[0])}: ${fmt(b[1], D.driver_names[b[0]].unit)} (${compare(b[2], p.care)})`),
     "", "Main reasons overall:",
@@ -1378,55 +1460,116 @@ function copySummary(p) {
 }
 
 /* ---------- about ---------- */
-function aboutPage() {
-  hero(h("h1", {}, "How it works"), h("p", {class: "lead"}, "A short guide for reviewers. No technical background needed."));
+function helpSections() {
+  // body items: "text" = paragraph, {h} = subheading, {ul: [...]} = points; a point is "text" or ["bold term", "rest"]
   const o = O;
-  const items = [
-    ["list", "What the ranking is", `Each provider's claims are summarised into measures such as total payments, length of hospital stays and claims per patient. A model trained on providers flagged in the past puts all ${int(o.providers_scored)} providers in order, so the most similar to past flags come first.`],
-    ["alert", "What it is not", "It is not a fraud finding. Past flags were suspicions, and how they were assigned is not documented. Every case needs a person to review the records and decide."],
-    ["scale", "Why size matters", "Large hospitals bill more of everything, and past flags were more common among large providers. So the dashboard also shows each provider's rank with size set aside. A provider that stays near the top without size bills unusually for its size; one that drops out is in the queue mainly because it is big."],
-    ["trend", "How well it has done", `On providers held back for testing, ${o.track_record.top100_previously_flagged} of the top 100 had been flagged before, compared with ${o.track_record.top100_payments_alone} when providers were simply sorted by how much they were paid. ${o.track_record.flagged_in_test} of the ${int(o.providers_scored)} test providers had been flagged.`],
-    ["sparkle", "Where the words come from", "Numbers, ranks and charts are calculated directly from the claims. The plain-language explanations for queue providers are written by AI agents and checked automatically: every number they state must match the data, recommendations must not change, and technical terms are not allowed. Panels say whether their text was written by AI or is standard wording."],
-    ["pencil", "Your notes", "Status, checklist ticks and notes are kept in this browser only. They are not shared or sent anywhere."],
-    ["book", "Data", `Public Medicare benchmark data (Kaggle), claims from ${nice(o.period.from)} to ${nice(o.period.to)}. It appears to be synthetic, so this dashboard is a demonstration.`]];
-  $("#app").append(h("div", {class: "about rise"}, items.map(([ic, t, b]) => h("section", {class: "card"}, h("span", {class: "ai"}, icon(ic, 20)), h("div", {}, h("h3", {}, t), h("p", {}, b))))));
+  return [
+    ["reasons", "Reasons and lanes", ["Every case shows a reason. The reason sets the lane; the lane says what to do.",
+      {h: "Full audit lane"}, {ul: [["Rule check", "billing that is clearly wrong was found, such as a repeated claim or overlapping hospital stays."],
+        ["Unusual billing", "stands out even compared with providers of its size."]]},
+      {h: "Borderline lane"}, {ul: [["Possibly unusual billing", "a mixed picture. Decide between a full audit and a desk review."]]},
+      {h: "Desk review lane"}, {ul: [["Mainly provider size", "ranks high mostly because it is large. A short records check is enough."]]}]],
+    ["decide", "Making a decision", [{ul: [
+      ["Choose an outcome", "in the Decision panel: open a full audit, desk review, or no further action."],
+      ["The recommended outcome", "is marked."],
+      ["Choosing something else?", "Add a reason. It goes into the case notes."],
+      ["Save & next case", "saves and opens the next case."]]}]],
+    ["queue", "How the queue is built", [
+      {h: "Step 1: rule check"}, "Refers billing that is clearly wrong, whatever its rank:", {ul: [
+        ["Repeated claim", "same patient, date, amount and main diagnosis as an earlier claim."],
+        ["Overlapping stays", "two or more hospital stays that start before the same patient's previous stay ended."],
+        `${o.gate1_rule_check} providers this cycle.`]},
+      {h: "Step 2: risk ranking"}, {ul: [`Adds the ${o.gate2_risk_ranking} highest-ranked of the remaining providers.`,
+        ["Full audit", `when at least ${o.vote_audit} of ${o.vote_models} comparisons agree it bills unusually even for its size.`],
+        ["Desk review", "otherwise."]]},
+      {h: "Order"}, {ul: [`In order of risk, released in batches of ${o.batch_size}.`]}]],
+    ["ranking", "What the ranking is, and is not", [
+      {h: "What it is"}, {ul: ["Each provider's claims are summarised into measures such as total payments, hospital stay length and claims per patient.",
+        `All ${int(o.providers_scored)} providers are ordered by how closely they resemble providers flagged in the past.`]},
+      {h: "What it is not"}, {ul: [["Not a fraud finding.", "Past flags were suspicions, and how they were assigned is not documented."],
+        "Every case needs a person to review the records and decide."]}]],
+    ["size", "Why size matters", [{ul: ["Large providers bill more of everything.", "Past flags were more common among large providers.",
+      "So each case says whether it stands out for how it bills, or mainly for its size."]}]],
+    ["checked", "How the information is checked", [{ul: ["Numbers, ranks and charts come straight from the claims.",
+      "Every fact stated about a case is checked against that provider's evidence before it is shown.",
+      "Recommendations come from the queue rules.", "No technical terms are used."]}]],
+    ["notes", "Your notes and decisions", [{ul: ["Decisions, checklist ticks and notes stay in this browser; nothing is sent anywhere.",
+      ["Download case notes", "to hand them on."]]}]],
+    ["keys", "Keyboard shortcuts", [{ul: [["?", "open or close this help"], ["Esc", "close"], ["/", "find a provider"],
+      ["J / K", "next / previous case"], ["1, 2, 3", "choose an outcome"], ["S", "save and open the next case"]]}]],
+    ["data", "Data", [{ul: ["Public Medicare benchmark data (Kaggle).", `Claims from ${nice(o.period.from)} to ${nice(o.period.to)}.`,
+      "It appears to be synthetic, so this dashboard is a demonstration."]}]]];
 }
+let helpOpener = null;
+function openHelp(key) {
+  if ($("#help")) { closeHelp(); }
+  helpOpener = document.activeElement;
+  const scrim = h("div", {class: "hscrim", onclick: closeHelp});
+  const close = h("button", {class: "circ", "aria-label": "Close help", onclick: closeHelp}, icon("x", 16));
+  const panel = h("aside", {class: "help", id: "help", role: "dialog", "aria-modal": "true", "aria-labelledby": "help-h"},
+    h("div", {class: "hh"}, h("h2", {id: "help-h"}, "How it works"), close),
+    h("div", {class: "hb2"}, helpSections().map(([k, title, body]) => h("details", {class: "hsec", id: "help-" + k, open: k === (key || "reasons")},
+      h("summary", {}, title, h("span", {class: "chev"}, icon("chevd", 16))),
+      body.map(b => b.h ? h("h4", {}, b.h)
+        : b.ul ? h("ul", {}, b.ul.map(t => h("li", {}, Array.isArray(t) ? [h("b", {}, t[0].length > 1 && /[.?]$/.test(t[0]) ? t[0] : t[0] + ":"), " ", t[1]] : t)))
+        : h("p", {}, b))))));
+  panel.addEventListener("keydown", e => {
+    if (e.key === "Escape") { e.preventDefault(); closeHelp(); return; }
+    if (e.key !== "Tab") return;                                     // keep focus inside the panel
+    const f = [...panel.querySelectorAll("button,summary,a[href]")];
+    if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+    else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+  });
+  document.body.append(scrim, panel);
+  requestAnimationFrame(() => { scrim.classList.add("on"); panel.classList.add("on"); });
+  const target = key && $("#help-" + key);
+  if (target) { target.classList.add("flash"); later(() => target.classList.remove("flash"), 1600); target.scrollIntoView({block: "start"}); }
+  (target ? target.querySelector("summary") : close).focus({preventScroll: true});
+}
+function closeHelp() {
+  const p = $("#help"), sc = $(".hscrim");
+  if (p) p.remove(); if (sc) sc.remove();
+  if (helpOpener && helpOpener.focus) helpOpener.focus({preventScroll: true});
+  helpOpener = null;
+}
+const infoBtn = (key, what) => h("button", {class: "infob", type: "button", "aria-label": `What does ${what} mean?`, title: "What does this mean?",
+  onclick: e => { e.preventDefault(); e.stopPropagation(); openHelp(key); }}, icon("info", 13));
 
 /* ---------- shell and router ---------- */
 function buildShell() {
   $("#logo-ic").append(icon("shield", 18, 2.1));
-  const toCheck = () => QUEUE.filter(p => p.recommendation_check && statusOf(p.id) === 0).length;
-  const bell = h("button", {class: "ib", onclick: () => openProviders({focus: "check"})}, icon("bell", 18));
+  const toCheck = () => QUEUE.filter(p => p.recommendation_check && !isDone(p.id)).length;
+  const bell = h("button", {class: "ib", onclick: () => openProviders({mode: "queue", lane: "borderline"})}, icon("bell", 18));
   const searchBtn = h("button", {class: "ib", "aria-label": "Find a provider", title: "Find a provider (/)", onclick: focusSearch}, icon("search", 18));
-  const dl = h("button", {class: "ib", "aria-label": "Download the ranking as CSV", title: "Download the ranking (CSV)", onclick: exportCsv}, icon("download", 18));
-  $("#icons").append(searchBtn, bell, dl);
+  const dl = h("button", {class: "ib", "aria-label": "Download case notes as CSV", title: "Download case notes (CSV)", onclick: exportNotes}, icon("download", 18));
+  const help = h("button", {class: "ib q", "aria-label": "How it works", title: "How it works (?)", onclick: () => openHelp()}, "?");
+  $("#icons").append(searchBtn, help, bell, dl);
   buildShell.bell = () => { const n = toCheck(); bell.querySelector(".badge")?.remove(); if (n) bell.append(h("span", {class: "badge", "aria-hidden": "true"}, n));
-    bell.setAttribute("aria-label", `${n} recommendation${n === 1 ? "" : "s"} to double-check, not yet started`); bell.title = bell.getAttribute("aria-label"); };
+    bell.setAttribute("aria-label", `Borderline: ${n} waiting for a decision`); bell.title = bell.getAttribute("aria-label"); };
   const meta = D.meta || {};
-  $("#foot").append(h("span", {}, `Prepared ${meta.generated || ""}. ${meta.ai_note || "Plain-language explanations: not generated; showing standard wording."}`),
+  $("#foot").append(h("span", {}, `Prepared ${meta.generated || ""}.`),
     h("span", {}, "This dashboard ranks providers for review. It does not decide outcomes, and no payment is denied or delayed because of it."));
-  const notice = !AI ? "Plain-language explanations have not been generated for this build. Numbers and charts are complete; wording is standard system text."
-    : (meta.checks_failed && meta.checks_failed.length) ? `Some AI-written text failed automatic checks (${meta.checks_failed.join(", ")}); that text has been replaced with standard system wording.` : null;
-  if (notice) $("#notice").append(h("div", {class: "notice", role: "note"}, icon("info", 18), h("span", {}, notice)));
 }
 function focusSearch() {
   if (location.hash !== "#/providers") { view.t = Object.assign(DEFAULT_T(), {mode: "all"}); location.hash = "#/providers"; setTimeout(() => $("#q") && $("#q").focus(), 30); }
   else $("#q").focus();
 }
 function route() {
-  timers.forEach(clearTimeout); timers = []; redraws = [];
+  timers.forEach(clearTimeout); timers = []; redraws = []; decisionPanel.save = decisionPanel.pick = null; closeHelp();
   const app = $("#app"), hsh = location.hash || "#/";
   $("#tip").style.display = "none";
   app.replaceChildren();
   const m = hsh.match(/^#\/p\/([A-Za-z0-9]+)$/);
-  const page = m ? "prov" : hsh === "#/providers" ? "list" : hsh === "#/about" ? "about" : "home";
-  [["nav-home", "home"], ["nav-prov", "list"], ["nav-about", "about"]].forEach(([nid, pg]) => {
+  const page = m ? "prov" : hsh === "#/providers" ? "list" : hsh === "#/ranking" ? "ranking" : "home";
+  if (hsh === "#/about") { history.replaceState(null, "", "#/"); later(() => openHelp(), 0); }
+  $("#hero").classList.toggle("compact", page === "list" || page === "ranking");
+  [["nav-home", "home"], ["nav-prov", "list"], ["nav-rank", "ranking"]].forEach(([nid, pg]) => {
     const on = pg === page || (pg === "list" && page === "prov"); const a = $("#" + nid);
     if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
   if (page === "prov") { providerPage(m[1]); document.title = `${m[1]} · Provider review`; }
-  else if (page === "list") { providersPage(); document.title = "Providers · Provider review"; }
-  else if (page === "about") { aboutPage(); document.title = "How it works · Provider review"; }
-  else { overviewPage(); document.title = "Provider review queue"; }
+  else if (page === "list") { providersPage(); document.title = "All providers · Provider review"; }
+  else if (page === "ranking") { rankingPage(); document.title = "Ranking insights · Provider review"; }
+  else { overviewPage(); document.title = "Today's work · Provider review"; }
   buildShell.bell();
   window.scrollTo(0, 0);
   app.focus({preventScroll: true});
@@ -1436,10 +1579,15 @@ window.addEventListener("hashchange", route);
 document.addEventListener("keydown", e => {
   if (e.target.closest("input,select,textarea,[role=tablist]") || e.altKey || e.ctrlKey || e.metaKey) return;
   if (e.key === "/") { e.preventDefault(); focusSearch(); return; }
+  if (e.key === "?") { e.preventDefault(); $("#help") ? closeHelp() : openHelp(); return; }
+  if ($("#help")) return;
   const m = location.hash.match(/^#\/p\/([A-Za-z0-9]+)$/); if (!m) return;
   const i = QUEUE.findIndex(q => q.id === m[1]); if (i < 0) return;
-  if (e.key === "ArrowRight" && i < QUEUE.length - 1) go(QUEUE[i + 1].id);
-  if (e.key === "ArrowLeft" && i > 0) go(QUEUE[i - 1].id);
+  const k = e.key.toLowerCase();
+  if ((k === "j" || e.key === "ArrowRight") && i < QUEUE.length - 1) go(QUEUE[i + 1].id);
+  if ((k === "k" || e.key === "ArrowLeft") && i > 0) go(QUEUE[i - 1].id);
+  if (["1", "2", "3"].includes(k) && decisionPanel.pick) decisionPanel.pick(+k - 1);
+  if (k === "s" && decisionPanel.save) { e.preventDefault(); decisionPanel.save(true); }
 });
 route();
 </script>

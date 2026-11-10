@@ -67,22 +67,22 @@ def fig_data():
 
 # ---------------------------------------------------------------- Fig 2 models (CV)
 def fig_models():
-    rows = [("LightGBM, all features", "E1", "lightgbm"), ("LightGBM, no size features", "E2", "lgbm:no_size"),
-            ("Random forest", "E1", "random_forest"), ("Logistic regression", "E1", "logistic"),
-            ("LightGBM, size features only", "E2", "lgbm:size_only"),
-            ("Total reimbursement alone", "E0", "size_only:total_reimb"),
-            ("Inpatient claim count alone", "E0", "size_only:n_ip_claims"),
-            ("Expert rules", "E1", "expert_rules"), ("Claim count alone", "E0", "size_only:n_claims"),
-            ("Isolation forest (unsupervised)", "E1", "isolation_forest")]
+    rows = [("LightGBM, all features", "MODELS", "lightgbm"), ("LightGBM, no size features", "FAMILIES", "lgbm:no_size"),
+            ("Random forest", "MODELS", "random_forest"), ("Logistic regression", "MODELS", "logistic"),
+            ("LightGBM, size features only", "FAMILIES", "lgbm:size_only"),
+            ("Total reimbursement alone", "SIZE", "size_only:total_reimb"),
+            ("Inpatient claim count alone", "SIZE", "size_only:n_ip_claims"),
+            ("Expert rules", "MODELS", "expert_rules"), ("Claim count alone", "SIZE", "size_only:n_claims"),
+            ("Isolation forest (unsupervised)", "MODELS", "isolation_forest")]
     vals = [(lab, *cvrow(e, m), e) for lab, e, m in rows]
     vals.sort(key=lambda v: v[1])
     fig, ax = plt.subplots(figsize=(7.0, 2.9))
     y = np.arange(len(vals))
     for i, (lab, m, s, e) in enumerate(vals):
-        c = MUTED if e == "E0" else BLUE
+        c = MUTED if e == "SIZE" else BLUE
         ax.errorbar(m, i, xerr=s, fmt="o", color=c, ms=5, elinewidth=1.2, capsize=0)
         ax.text(m + s + 0.012, i, f"{m:.3f}", va="center", fontsize=7.5, color=INK)
-    ref = cvrow("E0", "size_only:total_reimb")[0]
+    ref = cvrow("SIZE", "size_only:total_reimb")[0]
     ax.axvline(ref, color=ORANGE, lw=1, ls="--")
     ax.text(ref - 0.006, len(vals) - 0.35, "size-alone bar", color=INK2, fontsize=7.5, ha="right", va="center")
     ax.axvline(df.y.mean(), color=MUTED, lw=0.8, ls=":")
@@ -99,12 +99,12 @@ def fig_models():
 
 # ---------------------------------------------------------------- Fig 3 ablation
 def fig_ablation():
-    base = cvrow("E2", "lgbm:no_size")[0]
+    base = cvrow("FAMILIES", "lgbm:no_size")[0]
     names = {"intensity": "Intensity (stay length, claims per patient)", "coding": "Coding (diagnoses, procedures)",
              "money": "Money per claim / patient", "service_mix": "Service mix (inpatient share)",
              "duplication": "Duplicate claims", "physicians": "Physician concentration",
              "patient_mix": "Patient mix (age, chronic conditions)"}
-    d = sorted([(names[f], cvrow("E2", f"lgbm:no_size-minus-{f}")[0] - base) for f in names], key=lambda t: t[1])
+    d = sorted([(names[f], cvrow("FAMILIES", f"lgbm:no_size-minus-{f}")[0] - base) for f in names], key=lambda t: t[1])
     fig, ax = plt.subplots(figsize=(7.0, 2.3))
     y = np.arange(len(d))
     ax.barh(y, [v for _, v in d], color=[BLUE if v < -0.01 else MUTED for _, v in d], height=0.55)
@@ -168,10 +168,10 @@ def fig_noise():
     rates = [0.0, 0.1, 0.2, 0.3, 0.5]
     fig, ax = plt.subplots(figsize=(3.4, 2.3))
     for fs, lab, c in [("all", "All features", BLUE), ("no_size", "No size features", ORANGE)]:
-        m = [cvrow("E7", f"lgbm:{fs}|noise={r}")[0] for r in rates]
+        m = [cvrow("NOISE", f"lgbm:{fs}|noise={r}")[0] for r in rates]
         ax.plot([r * 100 for r in rates], m, color=c, lw=2, marker="o", ms=4, label=lab)
-    ax.axhline(cvrow("E0", "size_only:total_reimb")[0], color=MUTED, lw=1, ls="--")
-    ax.text(1, cvrow("E0", "size_only:total_reimb")[0] + 0.002, "size alone", fontsize=7, color=INK2, va="bottom",
+    ax.axhline(cvrow("SIZE", "size_only:total_reimb")[0], color=MUTED, lw=1, ls="--")
+    ax.text(1, cvrow("SIZE", "size_only:total_reimb")[0] + 0.002, "size alone", fontsize=7, color=INK2, va="bottom",
             ha="left")
     ax.set_xlabel("Flagged training providers relabelled 0 (%)")
     ax.set_ylabel("PR-AUC (clean validation)")

@@ -1,4 +1,4 @@
-"""Hybrid retrieval over the typology playbook (lecture 06).
+"""Hybrid retrieval over the typology playbook.
 
 Two rankers are fused with reciprocal rank fusion, RRF(d) = sum 1 / (60 + rank):
 * lexical: BM25 on word tokens, good for exact terms such as 'duplicate';

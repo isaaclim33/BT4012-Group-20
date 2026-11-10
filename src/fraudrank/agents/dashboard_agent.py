@@ -1,6 +1,6 @@
 """Dashboard agent: evidence for each page, checks on what the agent writes, and assembly.
 
-Pipeline: Case-file briefs (E8) + code-computed dashboard data -> Dashboard agent
+Pipeline: Case-file briefs (BRIEFS) + code-computed dashboard data -> Dashboard agent
 (one overview call + one call per queued provider) -> checks -> template.
 Text that fails a check is dropped and the page falls back to standard system
 wording, so unchecked text never reaches a reviewer.
@@ -89,8 +89,17 @@ def overview_facts(data: dict) -> dict:
         "of_which_unusual_beyond_size": {ACTION_TEXT[a]: n for a, n in o["actions_unusual_beyond_size"].items()
                                          if o["actions"][a]},
         "queue_unusual_beyond_size": o["queue_unusual_without_size"],
-        "recommendations_to_double_check": o["recommendations_to_check"],
-        "double_check_meaning": "desk review suggested although billing looks unusual even when size is set aside",
+        "how_the_queue_is_built": {
+            "rule_check": o["gate1_rule_check"], "rule_check_reasons": o["gate1_reasons"],
+            "rule_check_meaning": "billing that is clearly wrong (a claim repeating an earlier one, or hospital stays "
+                                  "starting before the same patient's previous stay ended) is referred whatever its rank",
+            "risk_ranking": o["gate2_risk_ranking"],
+            "risk_ranking_meaning": f"the {o['risk_queue_size']} highest-ranked of the remaining providers; a full "
+                                    f"audit when at least {o['vote_audit']} of {o['vote_models']} models agree it is "
+                                    "unusual beyond its size, otherwise a desk review"},
+        "borderline_desk_reviews": o["recommendations_to_check"],
+        "borderline_meaning": f"desk review because only some of the {o['vote_models']} models rank the provider "
+                              "unusual beyond its size; a person decides whether a full audit is needed",
         "queue_types_of_care": o["queue_care"],
         "track_record": {"top_100_previously_flagged": o["track_record"]["top100_previously_flagged"],
                          "top_100_when_sorted_by_payments_alone": o["track_record"]["top100_payments_alone"],
@@ -120,10 +129,12 @@ def provider_evidence(p: dict, data: dict) -> dict:
         "recommendation": ACTION_TEXT.get(p.get("action"), "Not in queue"),
         "rank_if_size_ignored": f'{p["size_free_rank"]} of {N:,}',
         "unusual_beyond_size": bool(p.get("unusual_without_size")),
-        "recommendation_check": {"unusual_but_desk": "desk review suggested, but billing looks unusual even "
-                                                     "when size is set aside",
-                                 "size_but_audit": "full audit suggested, but the provider ranks high mainly "
-                                                   "because of its size"}.get(p.get("recommendation_check")),
+        "selected_by": f'rule check: {p["rule_reason"]}' if p.get("gate") == 1 else "risk ranking",
+        "model_agreement": f'{p["votes"]} of {p["of_models"]} models rank it unusual beyond its size'
+                           if p.get("in_queue") else None,
+        "recommendation_check": (f'borderline: only {p["votes"]} of {p["of_models"]} models rank it unusual beyond '
+                                 "its size, so a person decides whether a full audit is needed"
+                                 if p.get("recommendation_check") == "borderline" else None),
         "key_measures": key_measures,
         "beyond_size": [factor(b[0], b[1], b[2]) for b in p["beyond"]],
         "overall_factors": [factor(d[0], d[2], d[3], bool(d[1])) for d in p["drivers"]],
@@ -186,8 +197,8 @@ def check_page(out: dict, ev: dict) -> dict:
                                 + len({f["feature"] for f in out.get("reasons", [])} & overall_keys))
     res["factors_expected"] = len(beyond_keys) + len(overall_keys)
     res["mentions_double_check"] = bool(ev["recommendation_check"]) and any(
-        w in out.get("summary", "").lower() for w in ("double-check", "double check", "second look", "recheck",
-                                                      "check this recommendation", "reconsider"))
+        w in out.get("summary", "").lower() for w in ("borderline", "double-check", "double check", "second look",
+                                                      "recheck", "check this recommendation", "reconsider"))
     res["passed"] = (not res["numbers_unsupported"] and not res["jargon_terms"] and not res["says_proven_fraud"]
                      and not res["wrong_provider"] and not res["unknown_factors"] and not res["unknown_patterns"])
     return res

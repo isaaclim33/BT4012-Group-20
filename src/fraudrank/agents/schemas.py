@@ -1,7 +1,7 @@
 """Structured outputs for every agent. Agents choose; code executes.
 
 Every field an agent can set is a closed set or a bounded number, so an agent can
-only propose actions the executor knows how to run safely (lecture 05).
+only propose actions the executor knows how to run safely.
 """
 from __future__ import annotations
 
@@ -88,10 +88,8 @@ class ExperimentBatch(BaseModel):
 
 
 class CriticVerdict(BaseModel):
-    chosen_run: int = Field(description="run id of the configuration to carry forward")
-    confidence: float = Field(ge=0.0, le=1.0,
-        description="0-1 confidence in chosen_run; 1.0 means clear-cut winner, "
-                    "0.5 means top configs too close to call or something looks off")
+    """The choice of configuration is made in code (selection.py); the critic decides
+    whether to search further and flags concerns."""
     stop: bool = Field(description="true if no further experiment is justified")
     concerns: list[str]
     next_experiments: list[ExperimentProposal] = Field(default_factory=list, max_length=3)
