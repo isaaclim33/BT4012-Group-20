@@ -10,6 +10,7 @@ import pandas as pd
 from lightgbm import LGBMClassifier
 from sklearn.ensemble import IsolationForest, RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.neural_network import MLPClassifier, MLPRegressor
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import FunctionTransformer, StandardScaler
 
@@ -99,6 +100,41 @@ def isolation_forest():
     est = make_pipeline(FunctionTransformer(_log1p), StandardScaler(),
                         IsolationForest(n_estimators=500, random_state=SEED, n_jobs=-1))
     return SklearnScorer(est)
+
+
+def mlp(hidden=(64, 32), alpha: float = 1e-3, seed: int = SEED):
+    """Feedforward neural network (DEEP): ReLU hidden layers, sigmoid output, log loss,
+    mini-batch Adam. Regularised by an L2 penalty (alpha) and early stopping on a
+    held-out 15% of the training fold; scikit-learn has no dropout layer."""
+    est = make_pipeline(FunctionTransformer(_log1p), StandardScaler(),
+                        MLPClassifier(hidden_layer_sizes=hidden, activation="relu", solver="adam",
+                                      alpha=alpha, batch_size=64, learning_rate_init=1e-3,
+                                      max_iter=400, early_stopping=True, validation_fraction=0.15,
+                                      n_iter_no_change=20, random_state=seed))
+    return SklearnScorer(est)
+
+
+class Autoencoder:
+    """Autoencoder anomaly detector (DEEP): a bottleneck network trained to reconstruct
+    providers that were NOT flagged, so it learns normal billing only. The anomaly score
+    is the reconstruction error; labels are used only to choose the training rows."""
+
+    def __init__(self, hidden=(32, 8, 32), alpha: float = 1e-4, seed: int = SEED):
+        self.hidden, self.alpha, self.seed = hidden, alpha, seed
+
+    def fit(self, X, y):
+        normal = np.asarray(y) == 0
+        self.scaler_ = StandardScaler().fit(_log1p(X)[normal])
+        Z = self.scaler_.transform(_log1p(X)[normal])
+        self.net_ = MLPRegressor(hidden_layer_sizes=self.hidden, activation="relu", solver="adam",
+                                 alpha=self.alpha, batch_size=64, max_iter=400, early_stopping=True,
+                                 validation_fraction=0.15, n_iter_no_change=20,
+                                 random_state=self.seed).fit(Z, Z)
+        return self
+
+    def score(self, X):
+        Z = self.scaler_.transform(_log1p(X))
+        return ((self.net_.predict(Z) - Z) ** 2).mean(axis=1)
 
 
 def lgbm_contributions(model: SklearnScorer, X: pd.DataFrame) -> pd.DataFrame:

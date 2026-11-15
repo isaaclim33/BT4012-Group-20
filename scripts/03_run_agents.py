@@ -414,11 +414,21 @@ def BRIEFS():
             ev = build_evidence(prov, q.risk_rank, scores[prov], Xte, shap, df, SPLITS["dev"], retr if use_rag else None)
             ev["billing_checks"] = {"duplicate_claims": q.duplicate_claims, "overlapping_hospital_stays": q.overlapping_stays}
             t0 = (llm.input_tokens, llm.output_tokens)
+            trace = []
             try:
                 brief = A.case_file_agent(llm, ev, use_rag,
-                                          tool_ctx=tool_ctx if use_rag else None)
+                                          tool_ctx=tool_ctx if use_rag else None, trace_out=trace)
                 chk = check_brief(brief, ev)
                 chk.update(schema_valid=True, agrees_with_code=brief.recommended_action == q.action)
+                if use_rag:      # trajectory: which tools, on which provider, with what result
+                    with_id = [t for t in trace if "provider_id" in t["input"]]
+                    chk.update(tool_calls=len(trace),
+                               verified_case_provider=any(t["tool"] in ("lookup_provider", "get_peer_stats")
+                                                          and t["input"].get("provider_id") == prov for t in trace),
+                               searched_playbook=any(t["tool"] == "search_playbook" for t in trace),
+                               id_calls=len(with_id),
+                               id_calls_correct=sum(t["input"]["provider_id"] == prov for t in with_id),
+                               tool_errors=sum("error" in t["output"] for t in trace))
                 briefs.append({"condition": cond, "evidence": ev, "brief": brief.model_dump()})
             except LLMError as e:
                 chk = {"provider": prov, "schema_valid": False, "error": str(e)[:200]}
@@ -437,6 +447,16 @@ def BRIEFS():
         agrees_with_code=("agrees_with_code", "mean"),
         input_tokens=("input_tokens", "sum"), output_tokens=("output_tokens", "sum")).reset_index()
     save("briefs_summary.csv", agg)
+    tr = res[(res.condition == "with retrieval") & res.schema_valid]
+    if "tool_calls" in tr:   # trajectory metrics (lecture 12): tool recall and argument accuracy
+        traj = {"briefs": len(tr), "tool_calls": int(tr.tool_calls.sum()),
+                "tool_calls_per_brief_mean": float(tr.tool_calls.mean()),
+                "verified_case_provider": int(tr.verified_case_provider.sum()),
+                "searched_playbook": int(tr.searched_playbook.sum()),
+                "provider_id_calls": int(tr.id_calls.sum()), "provider_id_calls_correct": int(tr.id_calls_correct.sum()),
+                "tool_errors": int(tr.tool_errors.sum())}
+        save("briefs_trajectory.json", traj)
+        print("trajectory:", traj)
     save("briefs_action_agreement.csv", res.groupby(["condition", "code_action", "action"]).size()
          .rename("briefs").reset_index().rename(columns={"action": "agent_suggested_action"}))
     print(agg.to_string(index=False))
