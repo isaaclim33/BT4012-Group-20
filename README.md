@@ -2,7 +2,8 @@
 
 BT4012 Fraud Analytics, Group 20. We rank 5,410 Medicare providers for audit from their claims,
 build a review queue that people can work through, and use LLM agents to explain each case. The
-report is [`report/report20.docx`](report/report20.docx) (export it to `report20.pdf` for submission).
+report is [`report/report20.docx`](report/report20.docx) (exported as [`report/report20.pdf`](report/report20.pdf)) and
+the presentation is [`report/presentation20.pptx`](report/presentation20.pptx), with a speaker script in its notes.
 
 **Design rule throughout: LLMs propose and explain; code decides and checks.** No LLM decides who
 is reviewed, which action they get, or which model is used, and nothing an LLM writes is shown
@@ -53,13 +54,15 @@ flowchart TB
 
 Colours: grey = code that decides, purple = LLM agent, amber = check, blue = investigator, green = output.
 Alongside, **CLEAN**, **LEAK_AGENT** and **AGENT_MODEL** test the agents themselves and do not feed
-the queue; the model experiments (SIZE, MODELS, FAMILIES, NETWORK, IMBALANCE, NOISE, LEAKY_SPLIT,
-QUEUE_COST, TEST) evaluate the ranking.
+the queue; the model experiments (EDA_TESTS, SIZE, MODELS, FAMILIES, NETWORK, IMBALANCE, NOISE, LEAKY_SPLIT,
+QUEUE_COST, TEST, DEEP, EVASION, FAIRNESS) evaluate the ranking.
 
 | Stage | What happens | Who decides |
 |---|---|---|
 | **Clean + features** (`01`) | Recode flags, parse dates, drop constants, count (never impute) missing fields; aggregate claims into 63 provider features in 8 families; freeze a stratified 80/20 provider split and 5×5 CV folds | Code (`data.py`, `features.py`) |
-| **Models** (`02`) | Size-only baselines, expert rules, logistic regression, random forest, LightGBM, Isolation Forest, network features; tuning on CV repeat 1; the test set is scored once | Code |
+| **Statistics** (`02 EDA_TESTS`) | Chi-square, Mann-Whitney and Welch tests, skew and kurtosis, Benford's law, boxplot and z-score outlier rules | Code |
+| **Models** (`02`) | Size-only baselines, expert rules, logistic regression, random forest, LightGBM, feedforward network, autoencoder, Isolation Forest, network features; tuning on CV repeat 1; the test set is scored once | Code |
+| **Stress tests** (`02 EVASION, FAIRNESS`) | Black-box evasion (provider splitting, blend-in) with adversarial training; false-positive rates by provider group; calibration | Code |
 | **Review queue** (`03 QUEUE`) | Two-gate audit selection (below) | Code |
 | **Case briefs** (`03 BRIEFS`) | One brief per queued provider: drivers, playbook citations, uncertainty, using lookup tools | LLM writes; code checks every number and citation |
 | **Dashboard** (`03 DASHBOARD`) | Plain-language overview and provider pages for full-audit and borderline cases | LLM writes; code checks, then a final grounding gate |
@@ -287,6 +290,8 @@ vote (see above). Written to `audit_queue.csv` before any later agent runs; BRIE
   evidence; every cited playbook section was actually retrieved and lists one of the brief's drivers;
   the rank is right; and there is no claim that fraud is proven (negation-aware).
 * The agent's suggested action is recorded next to the code's decision, but decides nothing.
+* The trajectory is logged (`briefs_trajectory.json`): which tools were called, on which provider, with what result.
+  In practice the agent made no tool calls, because every number it needed was already in its prompt.
 * *Why:* tools let the agent verify before writing; code checks make faithfulness measurable; the
   no-retrieval condition shows what retrieval adds.
 
@@ -324,12 +329,23 @@ fraud. Test set: 1,082 providers, 101 flagged.
 | Random forest | 0.708 | 0.782 |
 | **LightGBM** | **0.732** | **0.805** [0.740, 0.867] |
 | LightGBM, no size features | 0.714 | 0.784 [0.716, 0.853] |
+| Feedforward neural network | 0.677 | 0.785 [0.722, 0.848] |
+| Autoencoder (trained on non-flagged) | 0.140 | 0.088 [0.080, 0.101] |
 
 * A model beats provider size alone, and still does without any size features.
 * Hospital-stay intensity is the strongest behaviour signal: dropping it from the size-free model costs 0.087 PR-AUC.
 * Network features add nothing (+0.001); the naive homophily test is confounded by degree.
 * With 30% of flags hidden, PR-AUC falls gracefully to 0.686; a leaky claim-level split inflates results.
 * LightGBM on test: 86% of the top 50 and 74% of the top 100 were previously flagged.
+* Deep models do not beat boosting: the feedforward network is level with size alone in CV (LightGBM is better on
+  25 of 25 folds), and the autoencoder's most anomalous providers have a median of one claim (unusual, not suspicious).
+* Statistics: flag and type of care are dependent (chi-square 607, Cramér's V 0.33); Benford's law gives no signal
+  (flagged and other providers deviate equally, MAD 0.0176 vs 0.0175).
+* Evasion (test PR-AUC): splitting each flagged provider into two IDs cuts size alone 0.743 → 0.522 and LightGBM
+  0.805 → 0.661, but not the size-free model (0.784); cutting stay lengths cuts the size-free model to 0.408.
+  Adversarial training on split copies fixes splitting (0.825) but not the unseen attack (0.448).
+* Fairness: in the cost-optimal queue, honest providers that bill inpatient care are queued by mistake at 22.8%
+  against 2.6% for outpatient-only ones; dropping patient-mix features narrows the patient-acuity gap at no cost.
 
 **Review queue** (test set)
 
@@ -348,7 +364,7 @@ On development data, the gate-1 rules refer 59 providers, 81% of them flagged (b
 | CLEAN | 6.3 of 7 reference decisions on average (6, 6, 7); 84 of 84 columns covered. The original one-call prompt caught 2 of 7 |
 | LEAK_AGENT | 5/5 planted leaks caught, 0 false alarms, in every run |
 | AGENT_MODEL vs fixed | CV 0.724 vs 0.730 (range 0.723–0.725); test 0.802 vs 0.805, difference −0.003 [−0.021, +0.014]. Agents match, but do not beat, the hand-tuned pipeline; the feature agent adds nothing |
-| BRIEFS | 130 briefs: 641/641 driver values exact, 163/163 citations real and on point, 0 claims of proven fraud. With retrieval, the agent's suggested action matches the code's decision in 77% of briefs, but it suggests a full audit for 11 of 12 desk-review cases |
+| BRIEFS | 130 briefs: 641/641 driver values exact, 163/163 citations real and on point, 0 claims of proven fraud. With retrieval, the agent's suggested action matches the code's decision in 77% of briefs, but it suggests a full audit for 11 of 12 desk-review cases. Trajectory: 0 tool calls in 65 briefs |
 | DASHBOARD | Overview passed in 3/3 runs; provider pages 56, 57, 56 of 57 (failures: wrong provider ID, caught) |
 | Grounding gate | 162/162 evidence items re-derived from case evidence; 13 of 506 displayed AI items removed (numbers written in words), none with an unsupported number |
 | Retrieval | Hybrid search recall@1 0.90 (BM25 0.85, dense 0.80) on 20 test queries |
@@ -374,7 +390,8 @@ python scripts/00_get_data.py
 
 ```bash
 python scripts/01_build_features.py
-python scripts/02_run_experiments.py          # TUNE, SIZE, MODELS, FAMILIES, NETWORK, IMBALANCE, NOISE, TEST, LEAKY_SPLIT, SUMMARY
+python scripts/02_run_experiments.py          # EDA_TESTS, TUNE, SIZE, MODELS, FAMILIES, NETWORK, IMBALANCE, NOISE,
+                                              # TEST, DEEP, EVASION, FAIRNESS, LEAKY_SPLIT, SUMMARY
 python scripts/04_make_figures.py
 ```
 
@@ -393,10 +410,15 @@ python scripts/03_run_agents.py --replay
 
 Notes:
 
-* About 470 LLM calls for a full run. Gemini's free tier allows roughly that per day; if the daily
+* About 450 LLM calls for a full run (447 in ours). Gemini's free tier allows roughly that per day; if the daily
   quota runs out, the step stops without writing partial results – run the same command after the
   reset and the cache carries on where it stopped.
 * Offline check of all agent code paths (fake LLM, nothing written): `python tests/test_agent_plumbing.py`.
+* Replay is exact on the platform that produced the cache (Linux, Python 3.13). On another platform, scripts
+  00–02 reproduce every table exactly except last-digit floating-point noise (for example 0.69559 vs 0.69564 in a
+  tuning grid). AGENT_MODEL embeds those scores in its prompts, so on Windows its cache keys can miss: with
+  `--replay` it then stops with an error instead of calling the API. RETRIEVAL, CLEAN, LEAK_AGENT, QUEUE, BRIEFS
+  and DASHBOARD replay identically.
 
 ## Repository layout
 
@@ -413,7 +435,7 @@ tests/test_agent_plumbing.py           offline checks with a fake LLM
 results/tables/                        every number above (agents/ for the agent layer)
 results/dashboard/                     the review dashboard
 results/cache/llm/                     cached LLM responses
-report/                                report20.docx (editable; export to report20.pdf)
+report/                                report20.docx (editable), report20.pdf, presentation20.pptx
 ```
 
 ## Limitations
@@ -422,5 +444,6 @@ report/                                report20.docx (editable; export to report
   assigned is undocumented: results describe this benchmark, not real providers.
 * The test set has 101 flagged providers, so close models are not separable at one queue size.
 * LLM outputs vary between runs; every agent experiment is run three times and the spread reported.
+* The evasion attacks edit provider features rather than re-simulating claims, and fairness covers two groupings.
 * The labels cannot reward the rule check: duplicate claims and overlapping stays are evidence of a
   different kind. Of the 4 rule referrals the model ranks outside its top 65, 1 was previously flagged.

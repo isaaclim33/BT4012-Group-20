@@ -86,7 +86,8 @@ def critic_agent(llm: LLMClient, context: dict, rounds_left: int, run_tag: str =
 
 
 def case_file_agent(llm: LLMClient, evidence: dict, with_playbook: bool,
-                    tool_ctx: dict | None = None) -> CaseBrief:
+                    tool_ctx: dict | None = None, trace_out: list | None = None) -> CaseBrief:
+    """trace_out, if given, receives the ReAct tool calls so the trajectory can be evaluated."""
     system = ("You are a fraud case analyst writing a brief for a Medicare investigator. " + TASK +
               " Use only the evidence provided: copy feature values, peer percentiles and SHAP values "
               "exactly as given. Choose 1-5 drivers from the evidence. 'billing_checks' counts claims that "
@@ -101,8 +102,10 @@ def case_file_agent(llm: LLMClient, evidence: dict, with_playbook: bool,
     if tool_ctx is not None:
         from .tools import CASE_FILE_TOOLS, execute_tool
         executor = lambda name, params: execute_tool(name, params, tool_ctx)
-        result, _ = llm.react(system, user, CASE_FILE_TOOLS, executor, CaseBrief,
-                              max_turns=6, effort="high")
+        result, trace = llm.react(system, user, CASE_FILE_TOOLS, executor, CaseBrief,
+                                  max_turns=6, effort="high")
+        if trace_out is not None:
+            trace_out.extend(trace)
         return result
     return llm.structured(system, user, CaseBrief, "case_brief", effort="high")
 

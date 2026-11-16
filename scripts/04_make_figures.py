@@ -69,6 +69,8 @@ def fig_data():
 def fig_models():
     rows = [("LightGBM, all features", "MODELS", "lightgbm"), ("LightGBM, no size features", "FAMILIES", "lgbm:no_size"),
             ("Random forest", "MODELS", "random_forest"), ("Logistic regression", "MODELS", "logistic"),
+            ("Feedforward neural network", "MODELS", "mlp"),
+            ("Autoencoder (trained on non-flagged)", "MODELS", "autoencoder"),
             ("LightGBM, size features only", "FAMILIES", "lgbm:size_only"),
             ("Total reimbursement alone", "SIZE", "size_only:total_reimb"),
             ("Inpatient claim count alone", "SIZE", "size_only:n_ip_claims"),
@@ -76,7 +78,7 @@ def fig_models():
             ("Isolation forest (unsupervised)", "MODELS", "isolation_forest")]
     vals = [(lab, *cvrow(e, m), e) for lab, e, m in rows]
     vals.sort(key=lambda v: v[1])
-    fig, ax = plt.subplots(figsize=(7.0, 2.9))
+    fig, ax = plt.subplots(figsize=(7.0, 3.3))
     y = np.arange(len(vals))
     for i, (lab, m, s, e) in enumerate(vals):
         c = MUTED if e == "SIZE" else BLUE

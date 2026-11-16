@@ -15,6 +15,8 @@ data/processed/
 
 # large model files; rebuilt by 02_run_experiments.py
 results/cache/*.pkl
+# on Windows, model names with ':' become extension-less files with alternate streams
+results/cache/oof_*
 
 # bundle made for sending results, not part of the repo
 agent_outputs_*.zip

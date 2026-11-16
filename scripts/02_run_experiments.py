@@ -5,6 +5,7 @@ Usage:  python scripts/02_run_experiments.py [SIZE MODELS ...]   (default: all)
 Order matters: TUNE writes the chosen hyperparameters that the model experiments use, and TEST
 opens the held-out test set once, after all choices are frozen.
 """
+import ast
 import itertools
 import json
 import sys
@@ -294,6 +295,230 @@ def LEAKY_SPLIT():
         {"attending_physicians": int(len(ph)), "share_billing_for_one_provider": float((ph == 1).mean())}, indent=2))
 
 
+def EDA_TESTS():
+    """Statistical EDA: robust descriptives, hypothesis tests, Benford's law, boxplot outliers."""
+    from scipy import stats
+    from fraudrank import data
+    out = {}
+    # skew: why the models log-transform and why the group tests are non-parametric
+    out["skew_kurtosis"] = {c: {"skew_raw": float(stats.skew(df[c])), "kurtosis_raw": float(stats.kurtosis(df[c])),
+                                "skew_log1p": float(stats.skew(np.log1p(df[c])))}
+                            for c in ["total_reimb", "n_claims", "claims_per_bene"]}
+    # chi-square: is the flag independent of the type of care billed?
+    kind = np.select([(df.has_ip == 1) & (df.has_op == 1), df.has_ip == 1], ["both", "ip_only"], "op_only")
+    tab = pd.crosstab(kind, df["y"])
+    chi2, p, dof, _ = stats.chi2_contingency(tab)
+    out["chi2_care_type_vs_flag"] = {"chi2": float(chi2), "dof": int(dof), "p": float(p),
+                                     "cramers_v": float(np.sqrt(chi2 / (len(df) * (min(tab.shape) - 1))))}
+    # Mann-Whitney U (robust to skew) and Welch t-test, flagged vs not, with medians and MAD
+    rows = []
+    for c in ["total_reimb", "n_claims", "reimb_per_claim", "claims_per_bene", "los_max", "diag_per_claim",
+              "n_chronic_mean", "age_mean"]:
+        a, b = df.loc[df.y == 1, c], df.loc[df.y == 0, c]
+        u, pu = stats.mannwhitneyu(a, b, alternative="two-sided")
+        _, pt = stats.ttest_ind(a, b, equal_var=False)
+        rows.append({"feature": c, "median_flagged": a.median(), "median_not": b.median(),
+                     "mad_flagged": stats.median_abs_deviation(a), "mad_not": stats.median_abs_deviation(b),
+                     "mw_p": pu, "welch_t_p": pt, "rank_biserial": 1 - 2 * u / (len(a) * len(b))})
+    pd.DataFrame(rows).to_csv(TABLES_DIR / "eda_group_tests.csv", index=False)
+    # Benford's law: first-digit test, with Nigrini's mean absolute deviation (MAD) as the size-free measure
+    claims = data.load_claims()
+    ben = np.log10(1 + 1 / np.arange(1, 10))
+
+    def benford(x):
+        x = np.asarray(x, float)
+        x = x[x >= 1]
+        d = np.array([int(str(int(v))[0]) for v in x])
+        obs = np.bincount(d, minlength=10)[1:]
+        chi2, p = stats.chisquare(obs, ben * obs.sum())
+        frac = obs / obs.sum()
+        return {"n": int(obs.sum()), "chi2": float(chi2), "p": float(p),
+                "mad": float(np.abs(frac - ben).mean()), "observed": [round(float(f), 4) for f in frac]}
+    lab = claims["Provider"].map(df["y"])
+    amt = claims["InscClaimAmtReimbursed"]
+    out["benford"] = {
+        "expected": [round(float(v), 4) for v in ben],
+        "inpatient_claims": benford(amt[claims.is_ip == 1]),
+        "outpatient_claims": benford(amt[claims.is_ip == 0]),
+        "outpatient_claims_flagged": benford(amt[(claims.is_ip == 0) & (lab == 1)]),
+        "outpatient_claims_not_flagged": benford(amt[(claims.is_ip == 0) & (lab == 0)]),
+        "provider_totals": benford(df["total_reimb"]),
+        "note": "Nigrini first-digit MAD: <0.006 close, 0.006-0.012 acceptable, 0.012-0.015 marginal, >0.015 nonconformity",
+    }
+    # boxplot rule (Q3 + 1.5 IQR) on log total reimbursement, as a univariate outlier screen
+    lt = np.log1p(df["total_reimb"])
+    out["outliers_total_reimb"] = {}
+    for scale, v in [("raw", df["total_reimb"]), ("log1p", lt)]:
+        q1, q3 = np.percentile(v, [25, 75])
+        box = v > q3 + 1.5 * (q3 - q1)                 # upper tail only: unusually large billing
+        z = (v - v.mean()) / v.std()
+        out["outliers_total_reimb"][scale] = {
+            "boxplot_n": int(box.sum()), "boxplot_share": float(box.mean()),
+            "boxplot_flag_rate": float(df.loc[box, "y"].mean()) if box.any() else None,
+            "boxplot_recall": float(df.loc[box, "y"].sum() / df["y"].sum()),
+            "z3_n": int((z > 3).sum()), "z3_flag_rate": float(df.loc[z > 3, "y"].mean()) if (z > 3).any() else None}
+    (TABLES_DIR / "eda_tests.json").write_text(json.dumps(out, indent=2))
+    print(json.dumps({k: v for k, v in out.items() if k != "benford"}, indent=1))
+    print({k: (v["mad"], v["p"]) for k, v in out["benford"].items() if isinstance(v, dict)})
+
+
+DEEP_PARAMS_FILE = TABLES_DIR / "tuned_params_deep.json"
+
+
+def DEEP():
+    """Lecture 4 models: a feedforward network (supervised) and an autoencoder trained on
+    non-flagged providers (anomaly score = reconstruction error). Tuned on CV repeat 1,
+    cross-validated on all 25 folds, then scored once on the test set."""
+    def score(make):
+        res, _ = runner.cv_evaluate(make, ALL, df, SPLITS, folds=REPEAT0)
+        return res.pr_auc.mean()
+    mlp_grid = {f"{h}|{a}": score(lambda h=h, a=a: M.mlp(h, a))
+                for h in [(32,), (64, 32)] for a in [1e-4, 1e-3, 1e-2, 1e-1]}
+    best_mlp = max(mlp_grid, key=mlp_grid.get)
+    ae_grid = {str(h): score(lambda h=h: M.Autoencoder(h)) for h in [(32, 8, 32), (16, 4, 16)]}
+    best_ae = max(ae_grid, key=ae_grid.get)
+    h_mlp, a_mlp = ast.literal_eval(best_mlp.split("|")[0]), float(best_mlp.split("|")[1])
+    h_ae = ast.literal_eval(best_ae)
+    DEEP_PARAMS_FILE.write_text(json.dumps({"mlp": {"hidden": h_mlp, "alpha": a_mlp, "grid": mlp_grid},
+                                            "autoencoder": {"hidden": h_ae, "grid": ae_grid}}, indent=2))
+    print("  tuned:", best_mlp, best_ae)
+    makes = {"mlp": lambda: M.mlp(h_mlp, a_mlp), "autoencoder": lambda: M.Autoencoder(h_ae)}
+    for name, make in makes.items():
+        run_cv(name, make, ALL, "MODELS")
+    # test set, scored once; appended to the TEST tables (LightGBM scores are not refit)
+    base = pd.read_pickle(CACHE_DIR / "test_scores.pkl")
+    y_test = base["y"].to_numpy()
+    rows, deep_scores = [], {}
+    for name, make in makes.items():
+        _, s, y_te, _ = runner.test_evaluate(make, ALL, df, SPLITS)
+        assert (s.index == base.index).all()
+        deep_scores[name] = s
+        m = evaluate(y_te, s.to_numpy())
+        lo, hi = bootstrap_ci(y_te, s.to_numpy(), "pr_auc")
+        lo100, hi100 = bootstrap_ci(y_te, s.to_numpy(), "prec_k100")
+        rows.append({"model": name, **m, "pr_auc_lo": lo, "pr_auc_hi": hi, "prec_k100_lo": lo100, "prec_k100_hi": hi100})
+        print(f"  TEST {name:24s} PR-AUC {m['pr_auc']:.3f} [{lo:.3f}, {hi:.3f}]  P@50 {m['prec_k50']:.2f} "
+              f"P@100 {m['prec_k100']:.2f}")
+    tr = pd.read_csv(TABLES_DIR / "test_results.csv")
+    tr = pd.concat([tr[~tr.model.isin(makes)], pd.DataFrame(rows)], ignore_index=True)
+    tr.to_csv(TABLES_DIR / "test_results.csv", index=False)
+    pd.DataFrame(deep_scores).assign(y=y_test).to_pickle(CACHE_DIR / "test_scores_deep.pkl")
+    pdiff = pd.read_csv(TABLES_DIR / "test_paired_diffs.csv")
+    new = []
+    for a, b, sa, sb in [("lightgbm", "mlp", base["lightgbm"], deep_scores["mlp"]),
+                         ("mlp", "size_only:total_reimb", deep_scores["mlp"], base["size_only:total_reimb"]),
+                         ("autoencoder", "isolation_forest", deep_scores["autoencoder"], base["isolation_forest"])]:
+        for metric in ["pr_auc", "prec_k100"]:
+            d, lo, hi = paired_bootstrap_diff(y_test, sa, sb, metric)
+            new.append({"a": a, "b": b, "metric": metric, "diff": d, "lo": lo, "hi": hi})
+    keys = {(r["a"], r["b"]) for r in new}
+    pdiff = pdiff[~pdiff.apply(lambda r: (r.a, r.b) in keys, axis=1)]
+    pd.concat([pdiff, pd.DataFrame(new)], ignore_index=True).to_csv(TABLES_DIR / "test_paired_diffs.csv", index=False)
+
+
+def _attack(X: pd.DataFrame, honest_median: pd.Series, split: bool, blend: bool) -> pd.DataFrame:
+    """EVASION attacks on a provider's feature row (applied to flagged providers only).
+    split: the provider bills through two IDs, so every size count and total halves; every ratio
+           (per claim, per patient, per physician) is unchanged. The attacked provider is a
+           scaled-down copy of itself and carries no other fingerprint.
+    blend: the provider cuts 75% of its care intensity above the typical honest provider (median).
+           Shrinking toward the median, not capping at it, leaves no identical values that a model
+           could learn as an attack signature."""
+    X = X.copy()
+    if split:
+        halve = FAM["size"]
+        X[halve] = np.where(X[halve] > 0, np.maximum(1, X[halve] / 2), 0)
+    if blend:
+        for c in ["los_mean", "los_max", "los_long_share", "ip_claim_days_mean", "claims_per_bene"]:
+            m = honest_median[c]
+            X[c] = np.where(X[c] > m, m + 0.25 * (X[c] - m), X[c])
+    return X
+
+
+def EVASION():
+    """Lecture 7 adversarial robustness on tabular data. Black-box evasion: flagged test
+    providers change their observable billing to slip out of the queue; honest providers do not
+    change. Proactive defence: adversarial training on attacked copies of flagged dev providers."""
+    p = params()
+    dev, test = SPLITS["dev"], SPLITS["test"]
+    honest_median = df.loc[[i for i in dev if df.loc[i, "y"] == 0]].median()
+    y_te = df.loc[test, "y"].to_numpy()
+    flagged = df.loc[test, "y"] == 1
+    attacks = {"none": (False, False), "split": (True, False), "blend": (False, True), "split+blend": (True, True)}
+    X_dev = df.loc[dev, ALL]
+    y_dev = df.loc[dev, "y"].to_numpy()
+    # adversarial training: add split copies of every flagged dev provider, label 1. Only the split
+    # attack is seen in training, so blend-in tests an attack the defence has not seen (training on
+    # every attack makes attacked rows trivially separable, which says nothing about new attacks).
+    pos = X_dev[y_dev == 1]
+    aug = pd.concat([X_dev, _attack(pos, honest_median, True, False)])
+    y_aug = np.concatenate([y_dev, np.ones(len(pos), int)])
+    models = {
+        "size_only:total_reimb": (M.SingleSignal("total_reimb").fit(X_dev, y_dev), ALL),
+        "lightgbm": (M.lightgbm(p["lightgbm"]["params"]).fit(X_dev, y_dev), ALL),
+        "lgbm:no_size": (M.lightgbm(p["lightgbm"]["params"]).fit(df.loc[dev, NO_SIZE], y_dev), NO_SIZE),
+        "lightgbm:adversarial_training": (M.lightgbm(p["lightgbm"]["params"]).fit(aug, y_aug), ALL),
+    }
+    rows = []
+    for aname, (s_, b_) in attacks.items():
+        X_te = df.loc[test, ALL].copy()
+        X_te.loc[flagged] = _attack(X_te.loc[flagged], honest_median, s_, b_)
+        for mname, (model, cols) in models.items():
+            s = model.score(X_te[cols])
+            m = evaluate(y_te, s)
+            rows.append({"attack": aname, "model": mname, "pr_auc": m["pr_auc"], "prec_k50": m["prec_k50"],
+                         "rec_k100": m["rec_k100"], "prec_k100": m["prec_k100"]})
+    res = pd.DataFrame(rows)
+    res.to_csv(TABLES_DIR / "evasion.csv", index=False)
+    print(res.pivot(index="model", columns="attack", values="pr_auc").round(3))
+    print(res.pivot(index="model", columns="attack", values="prec_k50").round(2))
+
+
+def FAIRNESS():
+    """Lecture 12: false-positive rates by provider group at a fixed queue, and calibration
+    (is the risk score a probability?)."""
+    p = params()
+    dev, test = SPLITS["dev"], SPLITS["test"]
+    scores = pd.read_pickle(CACHE_DIR / "test_scores.pkl")
+    no_pm = [c for c in ALL if c not in FAM["patient_mix"]]
+    _, s_nopm, _, _ = runner.test_evaluate(lambda: M.lightgbm(p["lightgbm"]["params"]), no_pm, df, SPLITS)
+    scores = scores.assign(**{"lgbm:no_patient_mix": s_nopm})
+    te = df.loc[test]
+    acuity_cuts = np.quantile(df.loc[dev, "n_chronic_mean"], [1 / 3, 2 / 3])
+    groups = {
+        "care": np.where(te.has_ip == 1, "bills inpatient", "outpatient only"),
+        "patient_acuity": np.select([te.n_chronic_mean <= acuity_cuts[0], te.n_chronic_mean <= acuity_cuts[1]],
+                                    ["low", "middle"], "high"),
+    }
+    rows = []
+    for model in ["lightgbm", "lgbm:no_size", "lgbm:no_patient_mix"]:
+        for k in [100, 184]:          # k=100 and the 5:1 cost-optimal queue (Table 7)
+            top = scores[model].rank(ascending=False, method="first") <= k
+            for gname, g in groups.items():
+                for level in np.unique(g):
+                    mask = g == level
+                    yy, tt = te["y"].to_numpy()[mask], top.to_numpy()[mask]
+                    neg = (yy == 0).sum()
+                    rows.append({"model": model, "k": k, "group": gname, "level": level, "providers": int(mask.sum()),
+                                 "flag_rate": yy.mean(), "queued": int(tt.sum()),
+                                 "fp": int(((yy == 0) & tt).sum()), "fpr": ((yy == 0) & tt).sum() / max(1, neg),
+                                 "recall": ((yy == 1) & tt).sum() / max(1, yy.sum())})
+    fr = pd.DataFrame(rows)
+    fr.to_csv(TABLES_DIR / "fairness.csv", index=False)
+    print(fr.round(3).to_string())
+    # calibration: expected calibration error over 10 equal-count bins of out-of-fold scores
+    cal = []
+    for name in ["lgbm:none", "lgbm:class_weight", "logistic:none", "logistic:class_weight"]:
+        oof = pd.read_pickle(CACHE_DIR / f"oof_IMBALANCE_{name}.pkl")
+        y = df.loc[oof.index, "y"].to_numpy()
+        bins = pd.qcut(oof.rank(method="first"), 10, labels=False)
+        g = pd.DataFrame({"p": oof.to_numpy(), "y": y, "b": bins.to_numpy()}).groupby("b").mean()
+        cal.append({"model": name, "ece": float((g.p - g.y).abs().mean()),
+                    "top_decile_pred": float(g.p.iloc[-1]), "top_decile_rate": float(g.y.iloc[-1])})
+    pd.DataFrame(cal).to_csv(TABLES_DIR / "calibration.csv", index=False)
+    print(pd.DataFrame(cal).round(3))
+
+
 def SUMMARY():
     cv = pd.read_csv(CV_FILE)
     summ = (cv.drop(columns="fold").groupby(["experiment", "model"])
@@ -304,7 +529,8 @@ def SUMMARY():
     piv = cv.pivot_table(index="fold", columns="model", values="pr_auc")
     pairs = [("lightgbm", "size_only:total_reimb"), ("lgbm:no_size", "size_only:total_reimb"),
              ("lgbm:all+network", "lgbm:all"), ("lgbm:no_size+network", "lgbm:no_size"),
-             ("lightgbm", "logistic"), ("lightgbm", "random_forest"), ("lightgbm", "expert_rules")]
+             ("lightgbm", "logistic"), ("lightgbm", "random_forest"), ("lightgbm", "expert_rules"),
+             ("lightgbm", "mlp"), ("mlp", "size_only:total_reimb"), ("autoencoder", "isolation_forest")]
     rows = []
     for a, b in pairs:
         if a in piv and b in piv:
@@ -315,8 +541,9 @@ def SUMMARY():
     print(pd.DataFrame(rows).round(4).to_string())
 
 
-STEPS = {"TUNE": TUNE, "SIZE": SIZE, "MODELS": MODELS, "FAMILIES": FAMILIES, "NETWORK": NETWORK, "IMBALANCE": IMBALANCE, "NOISE": NOISE, "TEST": TEST,
-         "LEAKY_SPLIT": LEAKY_SPLIT, "SUMMARY": SUMMARY}
+STEPS = {"EDA_TESTS": EDA_TESTS, "TUNE": TUNE, "SIZE": SIZE, "MODELS": MODELS, "FAMILIES": FAMILIES,
+         "NETWORK": NETWORK, "IMBALANCE": IMBALANCE, "NOISE": NOISE, "TEST": TEST, "DEEP": DEEP,
+         "EVASION": EVASION, "FAIRNESS": FAIRNESS, "LEAKY_SPLIT": LEAKY_SPLIT, "SUMMARY": SUMMARY}
 
 if __name__ == "__main__":
     todo = sys.argv[1:] or list(STEPS)
