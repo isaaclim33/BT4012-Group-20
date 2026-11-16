@@ -1,0 +1,10 @@
+{
+  "briefs": 65,
+  "tool_calls": 0,
+  "tool_calls_per_brief_mean": 0.0,
+  "verified_case_provider": 0,
+  "searched_playbook": 0,
+  "provider_id_calls": 0,
+  "provider_id_calls_correct": 0,
+  "tool_errors": 0
+}
