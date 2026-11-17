@@ -312,6 +312,53 @@
         }
       ]
     },
+    "gate": "report",
+    "duplicate_gate": {
+      "agent_los_max_ip": "duplicates los_max (rank correlation 1.000)",
+      "agent_chronic_mean_all": "duplicates n_chronic_mean (rank correlation 1.000)",
+      "agent_renal_share_all": "duplicates renal_share (rank correlation 1.000)",
+      "agent_dead_share_all": "duplicates dead_share (rank correlation 1.000)",
+      "agent_att_is_op_share": "duplicates att_is_op_share (rank correlation 1.000)",
+      "agent_bene_per_claim": "duplicates claims_per_bene (rank correlation 1.000)",
+      "agent_ip_claim_ratio": "duplicates ip_claim_share (rank correlation 1.000)",
+      "agent_op_claim_ratio": "duplicates has_ip (rank correlation 0.962)",
+      "agent_ip_reimb_ratio": "duplicates ip_claim_share (rank correlation 0.956)",
+      "agent_attending_per_claim": "duplicates claims_per_attending (rank correlation 1.000)",
+      "agent_states_per_bene": "duplicates states_per_bene (rank correlation 1.000)",
+      "agent_dgc_per_claim": "duplicates ip_claim_share (rank correlation 0.998)"
+    },
+    "after_gate": [
+      "agent_claim_days_std",
+      "agent_ndiag_mean_op",
+      "agent_nproc_max_ip",
+      "agent_reimb_std_all",
+      "agent_deductible_share_op",
+      "agent_age_median_all",
+      "agent_dup_any_share",
+      "agent_operating_per_claim"
+    ],
+    "candidates": [
+      "agent_los_max_ip",
+      "agent_claim_days_std",
+      "agent_ndiag_mean_op",
+      "agent_nproc_max_ip",
+      "agent_reimb_std_all",
+      "agent_deductible_share_op",
+      "agent_age_median_all",
+      "agent_chronic_mean_all",
+      "agent_renal_share_all",
+      "agent_dead_share_all",
+      "agent_dup_any_share",
+      "agent_att_is_op_share",
+      "agent_bene_per_claim",
+      "agent_ip_claim_ratio",
+      "agent_op_claim_ratio",
+      "agent_ip_reimb_ratio",
+      "agent_attending_per_claim",
+      "agent_operating_per_claim",
+      "agent_states_per_bene",
+      "agent_dgc_per_claim"
+    ],
     "review": {
       "verdicts": [
         {
@@ -538,6 +585,9 @@
       ]
     }
   ],
+  "experiment_rounds": 2,
+  "design": "three_agents",
+  "definitions": false,
   "runs": {
     "1": {
       "model": "lightgbm",

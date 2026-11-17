@@ -1,0 +1,34 @@
+{
+  "rule": "Keep the separate Feature agent and Critic only if the one-agent design is worse on paired folds: the 95% CI of the per-fold PR-AUC difference (one agent minus three agents, both with definitions; each fold first averaged over runs) lies entirely below 0. Otherwise fold them into one agent.",
+  "a": "one agent, with definitions",
+  "b": "three agents, with definitions",
+  "folds": 20,
+  "runs_a": 3,
+  "runs_b": 3,
+  "diff_mean": -0.006904911916504314,
+  "ci_lo": -0.011315988558360484,
+  "ci_hi": -0.0024938352746481443,
+  "folds_a_better": 5,
+  "decision": "keep separate agents",
+  "caveat": "Folds from repeated CV are correlated, so this CI is too narrow; that makes 'worse' easier to declare. A decision to keep separate agents is therefore weaker than the CI suggests.",
+  "test_set_secondary": [
+    {
+      "run": 1,
+      "diff": -0.010329016775721178,
+      "lo": -0.04255482351366872,
+      "hi": 0.023223466746191686
+    },
+    {
+      "run": 2,
+      "diff": -0.0024547754957398027,
+      "lo": -0.019310753084096383,
+      "hi": 0.01573232307629194
+    },
+    {
+      "run": 3,
+      "diff": -0.010232030831301087,
+      "lo": -0.027678929094043757,
+      "hi": 0.006769441996890262
+    }
+  ]
+}

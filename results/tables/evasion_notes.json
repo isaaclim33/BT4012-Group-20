@@ -1,0 +1,15 @@
+{
+  "split_payment_lost": 0.0,
+  "within_drg_spearman_stay_vs_payment": {
+    "drgs": 341,
+    "median": 0.30544806550333553
+  },
+  "attending_physician_overlap": {
+    "real_pairs_sharing_any": 4690,
+    "real_pairs_identical_sets": 72,
+    "real_pairs_median": 0.02857142857142857,
+    "split_halves_median": 0.4318181818181818,
+    "threshold_catching_80pct_of_splits": 0.242152466367713,
+    "real_pairs_at_or_above_that_threshold": 512
+  }
+}

@@ -87,6 +87,18 @@ class ExperimentBatch(BaseModel):
     proposals: list[ExperimentProposal] = Field(min_length=3, max_length=4)
 
 
+class CombinedProposal(BaseModel):
+    """One modelling agent, first round: new features and the first configurations to test."""
+    claim_aggregates: list[ClaimAggFeature] = Field(max_length=12)
+    ratios: list[RatioFeature] = Field(max_length=8)
+    proposals: list[ExperimentProposal] = Field(min_length=3, max_length=4)
+
+
+class FollowUpBatch(BaseModel):
+    """One modelling agent, later rounds. Code decides when to stop, so there is always a proposal."""
+    proposals: list[ExperimentProposal] = Field(min_length=1, max_length=3)
+
+
 class CriticVerdict(BaseModel):
     """The choice of configuration is made in code (selection.py); the critic decides
     whether to search further and flags concerns."""
@@ -115,6 +127,7 @@ class CaseBrief(BaseModel):
     drivers: list[Driver] = Field(min_length=1, max_length=5)
     typologies: list[TypologyCitation] = Field(max_length=3)
     recommended_action: Literal["priority_audit", "desk_review", "monitor"]
+    action_reason: str = Field(description="one plain sentence on why this action, using only the evidence")
     uncertainty: str
 
 

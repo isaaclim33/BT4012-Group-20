@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "pipeline": "three agents, with definitions",
+    "run": 2,
+    "completed": true,
+    "error": "tool budget reached 1 time(s); answered from the tool results gathered"
+  },
+  {
+    "pipeline": "one agent, with definitions",
+    "run": 2,
+    "completed": true,
+    "error": "tool budget reached 1 time(s); answered from the tool results gathered"
+  },
+  {
+    "pipeline": "one agent, with definitions",
+    "run": 3,
+    "completed": true,
+    "error": "tool budget reached 1 time(s); answered from the tool results gathered"
+  }
+]

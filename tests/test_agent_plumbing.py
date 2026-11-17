@@ -41,11 +41,14 @@ FIX = {
         {"model": "lightgbm", "feature_set": "no_size+agent", "imbalance": "none", "params": {}, "rationale": "c"}]},
     "critic_verdict": {"stop": True, "concerns": ["none"], "next_experiments": []},
 }
+FIX["combined_proposal"] = {**FIX["feature_proposal"], **FIX["experiment_batch"]}
+FIX["followup_batch"] = {"proposals": FIX["experiment_batch"]["proposals"][:1]}
 
 
 TITLES = {"CleaningPlan": "cleaning_plan", "FeatureProposal": "feature_proposal", "LeakageReview": "leakage_review",
           "ExperimentBatch": "experiment_batch", "CriticVerdict": "critic_verdict", "CaseBrief": "case_brief",
-          "DashboardOverview": "dashboard_overview", "ProviderPage": "provider_page"}
+          "DashboardOverview": "dashboard_overview", "ProviderPage": "provider_page",
+          "CombinedProposal": "combined_proposal", "FollowUpBatch": "followup_batch"}
 CAVEATS = [{"caveat_id": c, "text": f"Rehearsal caution about {c.replace('_', ' ')}."}
            for c in ("suspicion_not_proof", "size_effect", "label_origin", "benchmark_data", "human_decision")]
 
@@ -94,7 +97,8 @@ def fake_raw(self, system, messages, schema, effort=None):
         cites = [{"chunk_id": ev["playbook"][0]["chunk_id"], "why": "x"}] if ev.get("playbook") else []
         return {"provider": ev["provider"], "risk_rank": ev["risk_rank"], "summary": "Flagged as suspicious.",
                 "drivers": [{k: d[k] for k in ("feature", "value", "peer_percentile", "shap")}],
-                "typologies": cites, "recommended_action": "priority_audit", "uncertainty": "label is suspicion"}
+                "typologies": cites, "recommended_action": "priority_audit",
+                "action_reason": "Payments stand out.", "uncertainty": "label is suspicion"}
     return FIX[tool_name]
 
 
@@ -107,6 +111,31 @@ assert plan.steps[0].action == "recode_binary"
 prop = A.feature_agent(llm, FAM)
 feats = X.compute_agent_features(prop, df)
 assert list(feats.columns) == ["agent_los_std", "agent_ip_reimb_per_bene"] and feats.notna().all().all()
+ALL_COLS = [c for cols in FAM.values() for c in cols]
+probe = feats.assign(copy_of_los_max=df["los_max"], copy_again=df["los_max"] * 2, constant=1.0)
+kept, dup = X.duplicate_gate(probe, df, ALL_COLS, SPLITS["dev"])
+assert set(dup) == {"copy_of_los_max", "copy_again", "constant"} and "agent_ip_reimb_per_bene" in kept, dup
+print(f"duplicate gate: ok (kept {kept}, rejected {sorted(dup)})")
+
+# the Feature agent's prompt without definitions is unchanged, so the cached runs replay; with
+# definitions it states the rule and sees every existing feature's definition
+from fraudrank.agents.feature_brief import feature_brief  # noqa: E402
+
+seen = []
+LLMClient._raw = lambda self, system, messages, schema, effort=None: (seen.append((system, messages)),
+                                                                      fake_raw(self, system, messages, schema, effort))[1]
+A.feature_agent(llm, FAM, "(Independent run 1.)")
+A.feature_agent(llm, feature_brief(FAM), "(Independent run 1.)", definitions=True)
+LLMClient._raw = fake_raw
+assert seen[0][0] == ("You are a fraud analytics feature engineer. " + A.TASK + " Existing provider features are grouped "
+                      "into families below. Propose new provider-level features that describe HOW a provider bills rather "
+                      "than HOW MUCH, because claim volume already explains most of the label. Use only the claim columns "
+                      "and provider bases the schema allows. Never use the label. (Independent run 1.)")
+assert A.DEFINITIONS_RULE in seen[1][0] and "n_claims / n_bene" in seen[1][1][0]["content"]
+cp = A.combined_agent(llm, feature_brief(FAM), {"models_available": ["lightgbm"]})
+assert len(cp.proposals) == 3 and len(cp.claim_aggregates + cp.ratios) == 2
+assert len(A.combined_followup(llm, {}).proposals) == 1
+print("feature definitions and one-agent design: ok (old prompt unchanged)")
 batch = A.experiment_agent(llm, {})
 for cfg in batch.proposals:
     cols = X.feature_set(cfg, FAM, list(feats.columns))
@@ -140,6 +169,19 @@ folds[2] = [0.69, 0.70, 0.71, 0.70, 0.69]             # now lightgbm wins every 
 assert choose_config(hist, folds)["chosen"] == 3
 assert choose_config(hist[:1], {1: folds[1]})["chosen"] == 1
 print("selection rule: ok")
+
+from fraudrank.agents.selection import fold_test  # noqa: E402
+
+base_f = [0.70, 0.72, 0.74, 0.71, 0.73, 0.69, 0.75, 0.72]
+fr = pd.DataFrame([{"pipeline": p, "run": r, "fold": i, "pr_auc": v - shift + 0.001 * r}
+                   for p, shift in (("one", 0.0), ("three", 0.0)) for r in (1, 2, 3) for i, v in enumerate(base_f)])
+fr.loc[(fr.pipeline == "one") & (fr.fold % 2 == 0), "pr_auc"] -= 0.002     # noise: small, mixed in sign
+fr.loc[(fr.pipeline == "one") & (fr.fold % 2 == 1), "pr_auc"] += 0.001
+assert fold_test(fr, "one", "three")["decision"] == "fold into one agent"
+fr.loc[fr.pipeline == "one", "pr_auc"] -= 0.02                              # clearly worse on every fold
+ft = fold_test(fr, "one", "three")
+assert ft["decision"] == "keep separate agents" and ft["folds"] == len(base_f), ft
+print("fold test rule: ok")
 
 # ------------------------------------------------------------------ two-gate audit selection
 from fraudrank import audit_selection as AS  # noqa: E402
@@ -182,6 +224,23 @@ if (cache / "shap_test_lightgbm.pkl").exists():
     chk = check_brief(A.case_file_agent(llm, ev, True), ev)
     assert chk["drivers_faithful"] == 1 and chk["citations_exist"] == 1, chk
     print("case-file check:", chk)
+    # completeness: the top 3 drivers, and for a rule-check referral the billing finding in the summary
+    from fraudrank.agents.case_file import completeness, fill_gaps
+    ev1 = dict(ev, queued_because="rule check: 1 duplicate claim",
+               billing_exhibits={"duplicates": ["$12,000 billed twice for BENE1 on 2009-01-17 (CLM1 and CLM2)"],
+                                 "overlaps": []})
+    b1 = A.case_file_agent(llm, ev1, True)                    # fake: one driver, summary without the finding
+    miss = completeness(b1, ev1)
+    assert sum(m.startswith("driver") for m in miss) == 2 and any("duplicate finding" in m for m in miss), miss
+    filled = fill_gaps(b1, ev1)
+    assert completeness(filled, ev1) == [] and [d.feature for d in filled.drivers][:3] != [] and \
+        {d["feature"] for d in ev1["drivers"][:3]} <= {d.feature for d in filled.drivers}
+    assert check_brief(filled, ev1)["drivers_faithful"] == len(filled.drivers)   # copied drivers are exact
+    cites_id = b1.model_copy(update={"summary": "Claim CLM1 repeats CLM2 for the same patient."})
+    assert not any("finding" in m for m in completeness(cites_id, ev1))          # a claim ID counts as the finding
+    ev2 = dict(ev, drivers=ev["drivers"][:2])                                    # fewer than 3 drivers: all required
+    assert [m for m in completeness(b1, ev2) if m.startswith("driver")] == [f"driver {ev['drivers'][1]['feature']}"]
+    print("completeness gate: ok (missing drivers and finding caught; code fills them faithfully)")
 if (ROOT / "results/tables/agents/briefs.json").exists() and (cache / "shap_test_lgbm_no_size.pkl").exists():
     import copy
     from fraudrank.agents import dashboard_agent as G
@@ -243,6 +302,7 @@ if (ROOT / "results/tables/agents/briefs.json").exists() and (cache / "shap_test
     print("grounding: evidence lines", sum(r["part"] == "evidence line" for r in grows), "checked; invented number and jargon removed")
     html = render(data, ai, {"generated": "2026-10-18", "checks_failed": failed})
     assert "</script><script" not in html.split('id="dashboard-data"')[1].split("</script>")[0]
+    assert "agent_view" not in html          # the agent's suggested action is recorded, never shown
     print("dashboard checks: overview", oc["passed"], "| pages passed", sum(c["passed"] for c in checks.values()),
           "of", len(checks), "| failures caught:", len(bad) + 1, "| over-long slots fall back: yes")
 print("all plumbing checks passed")

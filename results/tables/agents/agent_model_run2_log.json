@@ -198,6 +198,23 @@
         }
       ]
     },
+    "gate": "report",
+    "duplicate_gate": {
+      "agent_claims_per_attending_ratio": "duplicates claims_per_attending (rank correlation 1.000)",
+      "agent_ip_to_total_reimb": "duplicates ip_claim_share (rank correlation 0.956)"
+    },
+    "after_gate": [
+      "agent_los_std_ip",
+      "agent_diag_max_all",
+      "agent_claim_days_median_op"
+    ],
+    "candidates": [
+      "agent_los_std_ip",
+      "agent_diag_max_all",
+      "agent_claim_days_median_op",
+      "agent_claims_per_attending_ratio",
+      "agent_ip_to_total_reimb"
+    ],
     "review": {
       "verdicts": [
         {
@@ -304,6 +321,9 @@
       ]
     }
   ],
+  "experiment_rounds": 2,
+  "design": "three_agents",
+  "definitions": false,
   "runs": {
     "1": {
       "model": "lightgbm",

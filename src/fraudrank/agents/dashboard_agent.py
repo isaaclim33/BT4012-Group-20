@@ -181,9 +181,16 @@ def check_overview(out: dict, facts: dict) -> dict:
     return res
 
 
-def check_page(out: dict, ev: dict) -> dict:
+def exhibit_lines(p: dict) -> list[str]:
+    """The billing exhibits a rule-check page shows (code-written), so text may quote their amounts and dates."""
+    return [x["summary"] for kind in ("duplicates", "overlaps") for x in p.get("billing_exhibits", {}).get(kind, [])]
+
+
+def check_page(out: dict, ev: dict, exhibits: list[str] | None = None) -> dict:
     # case-analyst notes are background, not a source the page may quote numbers from
     source = {k: v for k, v in ev.items() if k != "case_analyst_notes"}
+    if exhibits:
+        source["billing_exhibits"] = exhibits
     res = check_text(out, source)
     beyond_keys = {f["feature"] for f in ev["beyond_size"]}
     overall_keys = {f["feature"] for f in ev["overall_factors"]}

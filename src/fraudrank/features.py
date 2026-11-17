@@ -143,5 +143,21 @@ def build_provider_features(claims: pd.DataFrame, bene: pd.DataFrame, labels: pd
     return f
 
 
+def volume_adjusted_maxima(claims: pd.DataFrame, index: pd.Index, reference_providers) -> pd.DataFrame:
+    """Each maximum as P(largest of n claims drawn at random from reference claims <= the provider's
+    largest), ties split. Raw maxima grow with claim count n; these do not. Reference: development claims."""
+    ref = claims[claims.Provider.isin(set(reference_providers))]
+    out = pd.DataFrame(index=index)
+    for name, is_ip, col in [("los_max_adj", 1, "los"), ("ip_reimb_max_adj", 1, "InscClaimAmtReimbursed"),
+                             ("op_reimb_max_adj", 0, "InscClaimAmtReimbursed")]:
+        pool = np.sort(ref.loc[ref.is_ip == is_ip, col].to_numpy(float))
+        g = claims[claims.is_ip == is_ip].groupby("Provider")[col]
+        mx, n = g.max(), g.size().to_numpy()
+        le = np.searchsorted(pool, mx.to_numpy(float), side="right") / len(pool)
+        lt = np.searchsorted(pool, mx.to_numpy(float), side="left") / len(pool)
+        out[name] = pd.Series((le ** n + lt ** n) / 2, index=mx.index)
+    return out.fillna(0)
+
+
 def feature_columns(exclude: tuple[str, ...] = ()) -> list[str]:
     return [c for fam, cols in FAMILIES.items() if fam not in exclude for c in cols]

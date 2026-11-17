@@ -85,6 +85,42 @@ def asserts_fraud(summary: str) -> bool:
     return False
 
 
+TOP_DRIVERS = 3
+
+
+def completeness(brief: CaseBrief, evidence: dict) -> list[str]:
+    """What the brief leaves out that it must contain. Grounding checks that what a brief says is
+    supported; this checks that it says what matters: the top drivers by SHAP (all of them when the
+    evidence has fewer), and for a rule-check referral, each billing finding in the summary."""
+    missing = []
+    named = {d.feature for d in brief.drivers}
+    missing += [f"driver {d['feature']}" for d in evidence["drivers"][:TOP_DRIVERS] if d["feature"] not in named]
+    summary = brief.summary.lower()
+    for kind, word in (("duplicates", "duplicate"), ("overlaps", "overlap")):
+        lines = evidence.get("billing_exhibits", {}).get(kind, [])
+        ids = {t.lower() for line in lines for t in re.findall(r"\b(?:CLM|BENE)\d+\b", line)}
+        if lines and word not in summary and not any(i in summary for i in ids):
+            missing.append(f"the {word} finding from billing_exhibits in the summary")
+    return missing
+
+
+def fill_gaps(brief: CaseBrief, evidence: dict) -> CaseBrief:
+    """Fallback after a failed retry: missing drivers are copied from the evidence, and a summary that
+    omits the billing finding is replaced by standard wording built from the evidence."""
+    from .schemas import Driver
+    named = {x.feature for x in brief.drivers}
+    order = {d["feature"]: i for i, d in enumerate(evidence["drivers"])}
+    drivers = sorted([Driver(**{k: d[k] for k in ("feature", "value", "peer_percentile", "shap")})
+                      for d in evidence["drivers"][:TOP_DRIVERS] if d["feature"] not in named] + list(brief.drivers),
+                     key=lambda d: order.get(d.feature, len(order)))
+    summary = brief.summary
+    if any("finding" in m for m in completeness(brief, evidence)):
+        top = ", ".join(d["description"] for d in evidence["drivers"][:TOP_DRIVERS])
+        summary = (f"Queued by the {evidence['queued_because']}. Its billing also stands out for {top}. "
+                   "A flag means suspicion, not proven fraud.")
+    return brief.model_copy(update={"drivers": drivers[:5], "summary": summary})
+
+
 def check_brief(brief: CaseBrief, evidence: dict) -> dict:
     tool = {d["feature"]: d for d in evidence["drivers"]}
     num_ok = num_total = 0

@@ -32,6 +32,67 @@ def billing_checks(index: pd.Index) -> pd.DataFrame:
     return pd.DataFrame({"duplicate_claims": dup, "overlapping_stays": overlap}).reindex(index).fillna(0).astype(int)
 
 
+EXHIBIT_COLS = ["ClaimID", "BeneID", "ClaimStartDt", "ClaimEndDt", "InscClaimAmtReimbursed",
+                "ClmDiagnosisCode_1", "AdmissionDt", "DischargeDt"]
+
+
+def billing_exhibits(providers: list[str]) -> dict[str, dict]:
+    """Return one-line summaries and backing claim rows for each gate-1 finding."""
+    claims = D.load_claims()
+    hit = claims[claims.Provider.isin(set(providers))]
+    out: dict[str, dict] = {}
+    for p in providers:
+        pc = hit[hit.Provider == p]
+        entry: dict[str, list] = {"duplicates": [], "overlaps": []}
+
+        marked = pc[pc.duplicated(DUP_KEY, keep=False)]
+        for _, grp in marked.groupby(DUP_KEY[1:]):
+            rows = grp[EXHIBIT_COLS].sort_values("ClaimID")
+            amt = int(rows.iloc[0].InscClaimAmtReimbursed)
+            bene = str(rows.iloc[0].BeneID)
+            date = str(rows.iloc[0].ClaimStartDt)[:10]
+            ends = pd.to_datetime(rows["ClaimEndDt"])
+            gap = int((ends.max() - ends.min()).days)
+            ids = " and ".join(str(r.ClaimID) for _, r in rows.iterrows())
+            summary = f"${amt:,} billed twice for {bene} on {date} ({ids})"
+            if gap:
+                summary += f" — end dates differ by {gap} day{'s' if gap != 1 else ''}"
+            entry["duplicates"].append({
+                "summary": summary,
+                "claims": [{c: _fmt(rows.iloc[i][c]) for c in EXHIBIT_COLS} for i in range(len(rows))],
+                "end_date_gap_days": gap,
+            })
+
+        ip = pc[pc.AdmissionDt.notna()].sort_values(["BeneID", "AdmissionDt"])
+        prev_dis = ip.groupby("BeneID").DischargeDt.shift()
+        overlapping = ip[ip.AdmissionDt < prev_dis]
+        for _, row in overlapping.iterrows():
+            prev = ip[(ip.BeneID == row.BeneID) & (ip.index < row.name)].iloc[-1]
+            overlap_days = (prev.DischargeDt - row.AdmissionDt).days
+            summary = (f"{row.BeneID} admitted {str(row.AdmissionDt)[:10]}, "
+                       f"{overlap_days} day{'s' if overlap_days != 1 else ''} before previous discharge "
+                       f"({str(prev.DischargeDt)[:10]}) — "
+                       f"${int(row.InscClaimAmtReimbursed):,} overlapping ${int(prev.InscClaimAmtReimbursed):,}")
+            entry["overlaps"].append({
+                "summary": summary,
+                "patient": str(row.BeneID),
+                "earlier_stay": {c: _fmt(prev[c]) for c in EXHIBIT_COLS},
+                "later_stay": {c: _fmt(row[c]) for c in EXHIBIT_COLS},
+            })
+        out[p] = entry
+    return out
+
+
+def _fmt(v) -> str | float | int | None:
+    if pd.isna(v):
+        return None
+    if hasattr(v, "isoformat"):
+        return v.isoformat()[:10]
+    if hasattr(v, "item"):
+        return v.item()
+    return v
+
+
 def rule_check(checks: pd.DataFrame) -> pd.Series:
     """Gate 1 reason per provider ('' when no rule fires)."""
     def reason(row):

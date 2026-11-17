@@ -37,6 +37,32 @@ def compute_agent_features(proposal: FeatureProposal, base: pd.DataFrame) -> pd.
     return out.fillna(0).astype(float)
 
 
+def duplicate_gate(feats: pd.DataFrame, base: pd.DataFrame, existing: list[str], providers: list[str],
+                   max_corr: float = 0.95, max_dominant: float = 0.995) -> tuple[list[str], dict[str, str]]:
+    """Keep a proposed column only if it adds information: no single value on more than max_dominant
+    of providers, and |rank correlation| <= max_corr with every existing or already-kept column.
+    Correlations skip providers where both columns are 0: outpatient-only providers are 0 on every
+    inpatient feature, and that shared block would make unrelated features look identical."""
+    ref = base.loc[providers, existing]
+    kept, rejected = [], {}
+    with np.errstate(all="ignore"):
+        for f in feats.columns:
+            s = feats.loc[providers, f]
+            if s.value_counts(normalize=True).iloc[0] > max_dominant:
+                rejected[f] = "near-constant"
+                continue
+            for c in list(ref.columns):
+                m = (s != 0) | (ref[c] != 0)
+                r = abs(s[m].rank().corr(ref.loc[m, c].rank())) if m.sum() >= 50 else 0.0
+                if r > max_corr:
+                    rejected[f] = f"duplicates {c} (rank correlation {r:.3f})"
+                    break
+            else:
+                kept.append(f)
+                ref = ref.assign(**{f: s})
+    return kept, rejected
+
+
 def describe_feature(f: ClaimAggFeature | RatioFeature) -> str:
     if isinstance(f, ClaimAggFeature):
         return f"{f.name}: {f.agg} of claim column {f.column} over {f.scope} claims, per provider"

@@ -1,0 +1,23 @@
+{
+  "r2_size_from_size_free_features": 0.9862424064618883,
+  "volume_correlation": {
+    "los_max": {
+      "raw": 0.7137651798432433,
+      "adjusted": -0.0032141842451183246
+    },
+    "ip_reimb_max": {
+      "raw": 0.7040636890041576,
+      "adjusted": -0.008359778628190578
+    },
+    "op_reimb_max": {
+      "raw": 0.7626330240200531,
+      "adjusted": 0.00014902457464658196
+    }
+  },
+  "queue_actions_changed": {
+    "queued": 65,
+    "changed": 9,
+    "full_audit_to_desk": 7,
+    "desk_to_full_audit": 2
+  }
+}

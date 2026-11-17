@@ -34,12 +34,18 @@ def cleaning_agent(llm: LLMClient, profile: str, columns: list[str], run_tag: st
     return llm.structured(system, user, CleaningPlan, "cleaning_plan", effort="high")
 
 
-def feature_agent(llm: LLMClient, existing: dict, run_tag: str = "") -> FeatureProposal:
+FEATURE_TASK = ("Propose new provider-level features that describe HOW a provider bills rather than HOW MUCH, "
+                "because claim volume already explains most of the label. Use only the claim columns and provider "
+                "bases the schema allows. Never use the label.")
+DEFINITIONS_RULE = ("Each existing feature is listed with its definition in the same operations you can use; "
+                    "do not propose an existing feature again, under any name or as an inverse.")
+
+
+def feature_agent(llm: LLMClient, existing: dict, run_tag: str = "", definitions: bool = False) -> FeatureProposal:
+    """existing: family -> column names, or (definitions=True) feature_brief() output."""
     system = ("You are a fraud analytics feature engineer. " + TASK +
-              " Existing provider features are grouped into families below. Propose new provider-level "
-              "features that describe HOW a provider bills rather than HOW MUCH, because claim volume "
-              "already explains most of the label. Use only the claim columns and provider bases the "
-              f"schema allows. Never use the label. {run_tag}")
+              " Existing provider features are grouped into families below. " + FEATURE_TASK + " " +
+              (DEFINITIONS_RULE + " " if definitions else "") + run_tag)
     return llm.structured(system, f"<data>\n{json.dumps(existing, indent=1)}\n</data>",
                           FeatureProposal, "feature_proposal")
 
@@ -85,20 +91,63 @@ def critic_agent(llm: LLMClient, context: dict, rounds_left: int, run_tag: str =
     return llm.structured(system, user, CriticVerdict, "critic_verdict", effort="high")
 
 
+MODELLER = ("You are the modelling agent for a fraud ranking model: you design features and the experiments "
+            "that test them. " + TASK)
+
+
+def combined_agent(llm: LLMClient, brief: dict, context: dict, run_tag: str = ""):
+    """First round of the one-agent design: features (as feature_agent) and configurations (as
+    experiment_agent) in one call. '+agent' feature sets use the features proposed here."""
+    from .schemas import CombinedProposal
+    system = (MODELLER + " " + FEATURE_TASK + " " + DEFINITIONS_RULE + " Then propose 3 or 4 distinct "
+              "configurations to test with 5-fold cross-validation; each must differ meaningfully (model family, "
+              "feature set, imbalance handling or capacity). Feature sets ending in '+agent' add the features you "
+              "propose here, after code removes duplicates and a leakage reviewer removes leaks. You only see "
+              "cross-validation results; the test set is hidden from you. " + run_tag)
+    user = f"<data>\n{json.dumps({**brief, **context}, indent=1)}\n</data>"
+    return llm.structured(system, user, CombinedProposal, "combined_proposal")
+
+
+def combined_followup(llm: LLMClient, context: dict, run_tag: str = "", tool_ctx: dict | None = None):
+    """Later rounds of the one-agent design. Code chose the configuration under 'selection' and stops the
+    search when a round does not change that choice."""
+    from .schemas import FollowUpBatch
+    system = (MODELLER + " Code has chosen the configuration to carry forward with a paired fold rule; the "
+              "choice and the comparisons behind it are under 'selection'. Propose 1 to 3 configurations that "
+              "could plausibly beat it on paired folds. Code stops the search when a round does not change "
+              "the choice. " + ("You can inspect the per-fold PR-AUC breakdown of any completed run. "
+                                if tool_ctx is not None else "") + run_tag)
+    user = f"<data>\n{json.dumps(context, indent=1)}\n</data>"
+    if tool_ctx is not None:
+        from .tools import CRITIC_TOOLS, execute_tool
+        executor = lambda name, params: execute_tool(name, params, tool_ctx)
+        result, _ = llm.react(system, user, CRITIC_TOOLS, executor, FollowUpBatch, max_turns=3, effort="high")
+        return result
+    return llm.structured(system, user, FollowUpBatch, "followup_batch", effort="high")
+
+
 def case_file_agent(llm: LLMClient, evidence: dict, with_playbook: bool,
-                    tool_ctx: dict | None = None, trace_out: list | None = None) -> CaseBrief:
-    """trace_out, if given, receives the ReAct tool calls so the trajectory can be evaluated."""
+                    tool_ctx: dict | None = None, trace_out: list | None = None,
+                    missing: list[str] | None = None) -> CaseBrief:
+    """trace_out, if given, receives the ReAct tool calls so the trajectory can be evaluated.
+    missing: items a code check found absent from a first draft; the retry names them."""
     system = ("You are a fraud case analyst writing a brief for a Medicare investigator. " + TASK +
               " Use only the evidence provided: copy feature values, peer percentiles and SHAP values "
-              "exactly as given. Choose 1-5 drivers from the evidence. 'billing_checks' counts claims that "
-              "repeat an earlier claim and hospital stays that start before the same patient's previous stay "
-              "ended; mention any non-zero count in the summary. " +
+              "exactly as given. Choose 3-5 drivers from the evidence, always including the three listed first "
+              "(they have the largest SHAP values). 'queued_because' says why the provider is in the review queue. "
+              "'billing_checks' counts claims that repeat an earlier claim and hospital stays that start before "
+              "the same patient's previous stay ended; mention any non-zero count in the summary. When "
+              "'queued_because' names a billing check, the summary must state that finding using a line from "
+              "'billing_exhibits'. Recommend an action from the evidence and give the reason in one plain "
+              "sentence. " +
               ("Cite playbook sections only by the chunk_id shown, and only when the section's signals "
                "match the provider's drivers. " if with_playbook else
                "No playbook is available; leave typologies empty. ") +
               "The label means suspicion, not confirmed fraud: never state that fraud occurred. "
               f"{DATA_RULE}")
     user = f"<data>\n{json.dumps(evidence, indent=1)}\n</data>"
+    if missing:
+        user += "\nA first draft of this brief left out: " + "; ".join(missing) + ". Include them."
     if tool_ctx is not None:
         from .tools import CASE_FILE_TOOLS, execute_tool
         executor = lambda name, params: execute_tool(name, params, tool_ctx)

@@ -6,8 +6,11 @@ What it does:
  1. checks Python packages, the 8 Kaggle CSVs in data/raw/ and the API key in .env;
  2. rebuilds what the agents depend on if it is missing (feature table, tuned models,
     the held-out test scores and SHAP values): about 10 minutes;
- 3. runs scripts/03_run_agents.py (RETRIEVAL, CLEAN, LEAK_AGENT, AGENT_MODEL, QUEUE, BRIEFS, DASHBOARD): about 15-30 minutes,
-    roughly 70 API calls;
+ 3. runs scripts/03_run_agents.py (RETRIEVAL, CLEAN, LEAK_AGENT, AGENT_MODEL, QUEUE, BRIEFS, DASHBOARD): about 520
+    API calls, more than the free tier's 500 requests a day, so a full run spans two days and can take several
+    hours when Gemini is busy. Most calls come from the evaluation design (three runs of each experiment, briefs
+    with and without retrieval); one production cycle with the chosen design is about 125 calls. Finished calls
+    are cached, so re-running after a quota stop or a failed call carries on where it stopped;
  4. writes agent_outputs_group20.zip in the repo root: the agent result tables, the
     cached LLM responses (prompts and answers, no key), the run log and package
     versions. Every file is scanned for the key before the zip is written.

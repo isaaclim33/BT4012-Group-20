@@ -320,6 +320,53 @@
         }
       ]
     },
+    "gate": "report",
+    "duplicate_gate": {
+      "agent_n_proc_mean_ip": "duplicates ip_proc_per_claim (rank correlation 1.000)",
+      "agent_n_chronic_mean_all": "duplicates n_chronic_mean (rank correlation 1.000)",
+      "agent_renaldisease_share_all": "duplicates renal_share (rank correlation 1.000)",
+      "agent_bene_dead_share_all": "duplicates dead_share (rank correlation 1.000)",
+      "agent_att_is_op_share_all": "duplicates att_is_op_share (rank correlation 1.000)",
+      "agent_ratio_claims_bene": "duplicates claims_per_bene (rank correlation 1.000)",
+      "agent_ratio_claims_attending": "duplicates claims_per_attending (rank correlation 1.000)",
+      "agent_ratio_states_bene": "duplicates states_per_bene (rank correlation 1.000)",
+      "agent_ratio_dgc_claims": "duplicates ip_claim_share (rank correlation 0.998)",
+      "agent_ratio_admit_claims": "duplicates admit_diag_per_claim (rank correlation 1.000)"
+    },
+    "after_gate": [
+      "agent_los_std_ip",
+      "agent_claim_days_max_all",
+      "agent_n_diag_max_ip",
+      "agent_op_deductible_std_op",
+      "agent_age_median_all",
+      "agent_dup_any_share_all",
+      "agent_dup_same_share_all",
+      "agent_ratio_ip_op_claims",
+      "agent_ratio_ip_op_reimb",
+      "agent_ratio_claims_operating"
+    ],
+    "candidates": [
+      "agent_los_std_ip",
+      "agent_claim_days_max_all",
+      "agent_n_diag_max_ip",
+      "agent_n_proc_mean_ip",
+      "agent_op_deductible_std_op",
+      "agent_age_median_all",
+      "agent_n_chronic_mean_all",
+      "agent_renaldisease_share_all",
+      "agent_bene_dead_share_all",
+      "agent_dup_any_share_all",
+      "agent_dup_same_share_all",
+      "agent_att_is_op_share_all",
+      "agent_ratio_claims_bene",
+      "agent_ratio_ip_op_claims",
+      "agent_ratio_ip_op_reimb",
+      "agent_ratio_claims_attending",
+      "agent_ratio_claims_operating",
+      "agent_ratio_states_bene",
+      "agent_ratio_dgc_claims",
+      "agent_ratio_admit_claims"
+    ],
     "review": {
       "verdicts": [
         {
@@ -551,6 +598,9 @@
       ]
     }
   ],
+  "experiment_rounds": 3,
+  "design": "three_agents",
+  "definitions": false,
   "runs": {
     "1": {
       "model": "random_forest",

@@ -1,0 +1,513 @@
+{
+  "history": [
+    {
+      "run_id": 1,
+      "model": "lightgbm",
+      "feature_set": "all",
+      "imbalance": "class_weight",
+      "params": {
+        "C": null,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": 31,
+        "learning_rate": 0.05,
+        "n_estimators": 500,
+        "min_child_samples": 20,
+        "colsample_bytree": 0.8
+      },
+      "n_features": 63,
+      "pr_auc_mean": 0.7344,
+      "pr_auc_sd": 0.0611,
+      "prec_k50_mean": 0.784,
+      "roc_auc_mean": 0.9411
+    },
+    {
+      "run_id": 2,
+      "model": "random_forest",
+      "feature_set": "no_size",
+      "imbalance": "smote",
+      "params": {
+        "C": null,
+        "min_samples_leaf": 5,
+        "max_features": 0.3,
+        "num_leaves": null,
+        "learning_rate": null,
+        "n_estimators": 500,
+        "min_child_samples": null,
+        "colsample_bytree": null
+      },
+      "n_features": 50,
+      "pr_auc_mean": 0.6577,
+      "pr_auc_sd": 0.084,
+      "prec_k50_mean": 0.716,
+      "roc_auc_mean": 0.9406
+    },
+    {
+      "run_id": 3,
+      "model": "lightgbm",
+      "feature_set": "no_size",
+      "imbalance": "class_weight",
+      "params": {
+        "C": null,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": 31,
+        "learning_rate": 0.05,
+        "n_estimators": 500,
+        "min_child_samples": 20,
+        "colsample_bytree": 0.8
+      },
+      "n_features": 50,
+      "pr_auc_mean": 0.7135,
+      "pr_auc_sd": 0.0732,
+      "prec_k50_mean": 0.76,
+      "roc_auc_mean": 0.9403
+    },
+    {
+      "run_id": 4,
+      "model": "lightgbm",
+      "feature_set": "all+agent",
+      "imbalance": "class_weight",
+      "params": {
+        "C": null,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": 31,
+        "learning_rate": 0.05,
+        "n_estimators": 500,
+        "min_child_samples": 20,
+        "colsample_bytree": 0.8
+      },
+      "n_features": 71,
+      "pr_auc_mean": 0.7288,
+      "pr_auc_sd": 0.0688,
+      "prec_k50_mean": 0.788,
+      "roc_auc_mean": 0.943
+    }
+  ],
+  "verdicts": [
+    {
+      "stop": false,
+      "concerns": [
+        "High ROC-AUC (0.9411) and PR-AUC (0.7344) using all features suggest potential data leakage or size-based proxy effects from provider volume variables.",
+        "The origin of the PotentialFraud label is undocumented, raising the risk that simple provider size or claim volume metrics are driving the classifier's decisions rather than anomalous billing patterns."
+      ],
+      "next_experiments": [
+        {
+          "model": "lightgbm",
+          "feature_set": "no_size",
+          "imbalance": "class_weight",
+          "params": {
+            "C": null,
+            "min_samples_leaf": null,
+            "max_features": null,
+            "num_leaves": 31,
+            "learning_rate": 0.05,
+            "n_estimators": 500,
+            "min_child_samples": 20,
+            "colsample_bytree": 0.8
+          },
+          "rationale": "Evaluate LightGBM without size features to check whether performance drops significantly, which would indicate that size features act as data leakage or simple volume proxies for the fraud label."
+        },
+        {
+          "model": "logistic",
+          "feature_set": "all",
+          "imbalance": "class_weight",
+          "params": {
+            "C": 1.0,
+            "min_samples_leaf": null,
+            "max_features": null,
+            "num_leaves": null,
+            "learning_rate": null,
+            "n_estimators": null,
+            "min_child_samples": null,
+            "colsample_bytree": null
+          },
+          "rationale": "Provide a simple linear baseline with all features to test if complex tree interactions are overfitting or if linear separability is present."
+        }
+      ]
+    },
+    {
+      "stop": false,
+      "concerns": [
+        "Inclusion of size features in the 'all' feature set improves PR-AUC by ~0.02 over 'no_size', raising potential concerns that provider size is acting as a confounding proxy or leakage source for the PotentialFraud label.",
+        "High precision at k=50 (78.4%) could reflect a bias toward ranking the largest volume providers rather than detecting subtle fraudulent behaviors."
+      ],
+      "next_experiments": [
+        {
+          "model": "lightgbm",
+          "feature_set": "all+agent",
+          "imbalance": "class_weight",
+          "params": {
+            "C": null,
+            "min_samples_leaf": null,
+            "max_features": null,
+            "num_leaves": 31,
+            "learning_rate": 0.05,
+            "n_estimators": 500,
+            "min_child_samples": 20,
+            "colsample_bytree": 0.8
+          },
+          "rationale": "Test whether incorporating agent features alongside all base features provides additional orthogonal predictive power over run 1."
+        }
+      ]
+    },
+    {
+      "stop": true,
+      "concerns": [
+        "The origin of the PotentialFraud label is undocumented, raising risks of target leakage or circular feature definitions.",
+        "The chosen configuration (Run 1) includes provider size features, which significantly increase PR-AUC and suggest the model may be ranking providers primarily by volume or scale rather than true behavioral anomalies.",
+        "The performance gain of Run 1 over Run 4 (adding agent features) is statistically unreliable (mean gain 0.0056, paired SE 0.0062), indicating that additional agent features provide marginal, noisy improvements."
+      ],
+      "next_experiments": []
+    }
+  ],
+  "chosen": 1,
+  "selection": {
+    "chosen": 1,
+    "best_mean_run": 1,
+    "kept_simpler": false,
+    "comparisons": [
+      {
+        "best_run": 1,
+        "vs_run": 2,
+        "mean_gain": 0.0767,
+        "paired_se": 0.011,
+        "wins": 5,
+        "n_folds": 5,
+        "reliably_better": true
+      },
+      {
+        "best_run": 1,
+        "vs_run": 3,
+        "mean_gain": 0.0209,
+        "paired_se": 0.0074,
+        "wins": 4,
+        "n_folds": 5,
+        "reliably_better": true
+      },
+      {
+        "best_run": 1,
+        "vs_run": 4,
+        "mean_gain": 0.0056,
+        "paired_se": 0.0062,
+        "wins": 4,
+        "n_folds": 5,
+        "reliably_better": false
+      }
+    ]
+  },
+  "first_round_best": 1,
+  "features": {
+    "proposal": {
+      "claim_aggregates": [
+        {
+          "name": "agent_los_std",
+          "column": "los",
+          "agg": "std",
+          "scope": "ip",
+          "rationale": "captures variability in inpatient length of stay"
+        },
+        {
+          "name": "agent_claim_days_std",
+          "column": "claim_days",
+          "agg": "std",
+          "scope": "all",
+          "rationale": "measures consistency in the duration of claims"
+        },
+        {
+          "name": "agent_n_diag_max",
+          "column": "n_diag",
+          "agg": "max",
+          "scope": "all",
+          "rationale": "captures maximum diagnostic complexity on a single claim"
+        },
+        {
+          "name": "agent_n_diag_std",
+          "column": "n_diag",
+          "agg": "std",
+          "scope": "all",
+          "rationale": "measures dispersion of diagnostic code counts per claim"
+        },
+        {
+          "name": "agent_n_proc_std",
+          "column": "n_proc",
+          "agg": "std",
+          "scope": "ip",
+          "rationale": "captures variability in procedure counts across inpatient claims"
+        },
+        {
+          "name": "agent_op_deductible_max",
+          "column": "OPDeductible",
+          "agg": "max",
+          "scope": "op",
+          "rationale": "maximum outpatient deductible charged on any claim"
+        }
+      ],
+      "ratios": [
+        {
+          "name": "agent_ratio_ip_op_claims",
+          "numerator": "n_ip_claims",
+          "denominator": "n_op_claims",
+          "rationale": "ratio of inpatient to outpatient claims volume"
+        },
+        {
+          "name": "agent_ratio_ip_op_reimb",
+          "numerator": "ip_total_reimb",
+          "denominator": "op_total_reimb",
+          "rationale": "ratio of inpatient to outpatient reimbursement totals"
+        },
+        {
+          "name": "agent_ratio_claims_states",
+          "numerator": "n_claims",
+          "denominator": "n_states",
+          "rationale": "claim concentration per distinct patient state"
+        },
+        {
+          "name": "agent_ratio_attending_bene",
+          "numerator": "n_attending",
+          "denominator": "n_bene",
+          "rationale": "ratio of distinct attending physicians to patients"
+        }
+      ]
+    },
+    "gate": "enforce",
+    "duplicate_gate": {
+      "agent_ratio_claims_states": "duplicates states_per_bene (rank correlation 0.975)",
+      "agent_ratio_attending_bene": "duplicates claims_per_attending (rank correlation 0.968)"
+    },
+    "after_gate": [
+      "agent_los_std",
+      "agent_claim_days_std",
+      "agent_n_diag_max",
+      "agent_n_diag_std",
+      "agent_n_proc_std",
+      "agent_op_deductible_max",
+      "agent_ratio_ip_op_claims",
+      "agent_ratio_ip_op_reimb"
+    ],
+    "candidates": [
+      "agent_los_std",
+      "agent_claim_days_std",
+      "agent_n_diag_max",
+      "agent_n_diag_std",
+      "agent_n_proc_std",
+      "agent_op_deductible_max",
+      "agent_ratio_ip_op_claims",
+      "agent_ratio_ip_op_reimb"
+    ],
+    "review": {
+      "verdicts": [
+        {
+          "feature": "agent_los_std",
+          "verdict": "ok",
+          "reason": "Computed solely from inpatient claims data per provider."
+        },
+        {
+          "feature": "agent_claim_days_std",
+          "verdict": "ok",
+          "reason": "Computed solely from claim days across all claims per provider."
+        },
+        {
+          "feature": "agent_n_diag_max",
+          "verdict": "ok",
+          "reason": "Derived from the number of diagnoses per claim per provider."
+        },
+        {
+          "feature": "agent_n_diag_std",
+          "verdict": "ok",
+          "reason": "Standard deviation of diagnoses count per claim per provider."
+        },
+        {
+          "feature": "agent_n_proc_std",
+          "verdict": "ok",
+          "reason": "Computed solely from inpatient procedure counts per provider."
+        },
+        {
+          "feature": "agent_op_deductible_max",
+          "verdict": "ok",
+          "reason": "Maximum outpatient deductible per provider."
+        },
+        {
+          "feature": "agent_ratio_ip_op_claims",
+          "verdict": "ok",
+          "reason": "Ratio of inpatient to outpatient claim counts per provider."
+        },
+        {
+          "feature": "agent_ratio_ip_op_reimb",
+          "verdict": "ok",
+          "reason": "Ratio of inpatient to outpatient reimbursements per provider."
+        }
+      ],
+      "split_ok": true,
+      "split_comment": "Stratified provider-level split with 5-fold CV using only claim-derived features avoids target and future leakage."
+    },
+    "accepted": [
+      "agent_los_std",
+      "agent_claim_days_std",
+      "agent_n_diag_max",
+      "agent_n_diag_std",
+      "agent_n_proc_std",
+      "agent_op_deductible_max",
+      "agent_ratio_ip_op_claims",
+      "agent_ratio_ip_op_reimb"
+    ],
+    "rejected": [],
+    "all_proposed": [
+      "agent_los_std",
+      "agent_claim_days_std",
+      "agent_n_diag_max",
+      "agent_n_diag_std",
+      "agent_n_proc_std",
+      "agent_op_deductible_max",
+      "agent_ratio_ip_op_claims",
+      "agent_ratio_ip_op_reimb",
+      "agent_ratio_claims_states",
+      "agent_ratio_attending_bene"
+    ]
+  },
+  "agent_cols": [
+    "agent_los_std",
+    "agent_claim_days_std",
+    "agent_n_diag_max",
+    "agent_n_diag_std",
+    "agent_n_proc_std",
+    "agent_op_deductible_max",
+    "agent_ratio_ip_op_claims",
+    "agent_ratio_ip_op_reimb"
+  ],
+  "preview_log": [
+    {
+      "floor": 0.7133,
+      "previews": [
+        {
+          "model": "lightgbm",
+          "feature_set": "all",
+          "imbalance": "class_weight",
+          "mean": 0.7133,
+          "sd": 0.0722,
+          "kept": true
+        },
+        {
+          "model": "random_forest",
+          "feature_set": "no_size",
+          "imbalance": "smote",
+          "mean": 0.6266,
+          "sd": 0.0918,
+          "kept": true
+        },
+        {
+          "model": "logistic",
+          "feature_set": "all+agent",
+          "imbalance": "class_weight",
+          "mean": 0.6522,
+          "sd": 0.0491,
+          "kept": false
+        }
+      ]
+    },
+    {
+      "floor": 0.7133,
+      "previews": [
+        {
+          "model": "lightgbm",
+          "feature_set": "no_size",
+          "imbalance": "class_weight",
+          "mean": 0.6911,
+          "sd": 0.0882,
+          "kept": true
+        },
+        {
+          "model": "logistic",
+          "feature_set": "all",
+          "imbalance": "class_weight",
+          "mean": 0.6601,
+          "sd": 0.0296,
+          "kept": false
+        }
+      ]
+    },
+    {
+      "floor": 0.7133,
+      "previews": [
+        {
+          "model": "lightgbm",
+          "feature_set": "all+agent",
+          "imbalance": "class_weight",
+          "mean": 0.701,
+          "sd": 0.0746,
+          "kept": true
+        }
+      ]
+    }
+  ],
+  "experiment_rounds": 3,
+  "design": "three_agents",
+  "definitions": true,
+  "runs": {
+    "1": {
+      "model": "lightgbm",
+      "feature_set": "all",
+      "imbalance": "class_weight",
+      "params": {
+        "C": null,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": 31,
+        "learning_rate": 0.05,
+        "n_estimators": 500,
+        "min_child_samples": 20,
+        "colsample_bytree": 0.8
+      },
+      "rationale": "Baseline LightGBM model utilizing all features and class weighting to handle the ~9 percent positive class imbalance."
+    },
+    "2": {
+      "model": "random_forest",
+      "feature_set": "no_size",
+      "imbalance": "smote",
+      "params": {
+        "C": null,
+        "min_samples_leaf": 5,
+        "max_features": 0.3,
+        "num_leaves": null,
+        "learning_rate": null,
+        "n_estimators": 500,
+        "min_child_samples": null,
+        "colsample_bytree": null
+      },
+      "rationale": "Random Forest model omitting size features to prevent provider scale bias, paired with SMOTE oversampling."
+    },
+    "3": {
+      "model": "lightgbm",
+      "feature_set": "no_size",
+      "imbalance": "class_weight",
+      "params": {
+        "C": null,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": 31,
+        "learning_rate": 0.05,
+        "n_estimators": 500,
+        "min_child_samples": 20,
+        "colsample_bytree": 0.8
+      },
+      "rationale": "Evaluate LightGBM without size features to check whether performance drops significantly, which would indicate that size features act as data leakage or simple volume proxies for the fraud label."
+    },
+    "4": {
+      "model": "lightgbm",
+      "feature_set": "all+agent",
+      "imbalance": "class_weight",
+      "params": {
+        "C": null,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": 31,
+        "learning_rate": 0.05,
+        "n_estimators": 500,
+        "min_child_samples": 20,
+        "colsample_bytree": 0.8
+      },
+      "rationale": "Test whether incorporating agent features alongside all base features provides additional orthogonal predictive power over run 1."
+    }
+  }
+}
