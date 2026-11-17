@@ -1,10 +1,11 @@
 {
   "briefs": 65,
-  "tool_calls": 0,
-  "tool_calls_per_brief_mean": 0.0,
-  "verified_case_provider": 0,
-  "searched_playbook": 0,
-  "provider_id_calls": 0,
-  "provider_id_calls_correct": 0,
-  "tool_errors": 0
+  "tool_calls": 6,
+  "tool_calls_per_brief_mean": 0.09230769230769231,
+  "verified_case_provider": 2,
+  "searched_playbook": 2,
+  "provider_id_calls": 3,
+  "provider_id_calls_correct": 3,
+  "tool_errors": 0,
+  "tool_budget_reached": 0
 }

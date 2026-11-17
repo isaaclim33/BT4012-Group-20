@@ -17,7 +17,7 @@ they are read from the same data as the evidence.
 """
 from __future__ import annotations
 
-from .dashboard_agent import overview_facts, provider_evidence
+from .dashboard_agent import exhibit_lines, overview_facts, provider_evidence
 from .text_checks import allowed_numbers, check_text, numbers_in
 
 
@@ -25,6 +25,8 @@ def case_evidence(p: dict, data: dict) -> dict:
     ev = provider_evidence(p, data)
     ev["billing_checks"] = {"duplicate_claims": p.get("duplicate_claims", 0),
                             "overlapping_hospital_stays": p.get("overlapping_stays", 0)}
+    if exhibit_lines(p):
+        ev["billing_exhibits"] = exhibit_lines(p)
     return ev
 
 

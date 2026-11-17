@@ -18,6 +18,7 @@ import json
 import numpy as np
 import pandas as pd
 
+from ..audit_selection import billing_exhibits
 from ..config import BATCH_SIZE, CACHE_DIR, RISK_QUEUE_SIZE, TABLES_DIR, VOTE_AUDIT
 from .rag import HybridRetriever
 
@@ -146,6 +147,9 @@ def build(df: pd.DataFrame, splits: dict) -> dict:
                 "q": [round(float(x), 4) for x in np.quantile(v, [0.1, 0.25, 0.5, 0.75, 0.9])],
                 "hist": _hist(v, log)}
 
+    gate1_providers = [p for p in aq.index if aq.loc[p, "gate"].startswith("1")]
+    exhibits = billing_exhibits(gate1_providers) if gate1_providers else {}
+
     briefs = {}
     bpath = TABLES_DIR / "agents" / "briefs.json"
     if bpath.exists():
@@ -193,6 +197,8 @@ def build(df: pd.DataFrame, splits: dict) -> dict:
                                 "Unusual billing" if q.votes >= VOTE_AUDIT else "Mainly provider size"))
             # why the case is here, in the investigator's words: the rule finding, or what drives the rank
             entry["reason_label"] = entry["rule_reason"] if entry["gate"] == 1 else entry["group"]
+            if p in exhibits:
+                entry["billing_exhibits"] = exhibits[p]
         if p in briefs:
             br = briefs[p]["brief"]
             entry["agent_suggested_action"] = br["recommended_action"]

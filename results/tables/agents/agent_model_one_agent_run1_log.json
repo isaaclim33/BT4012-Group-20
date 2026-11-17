@@ -1,0 +1,465 @@
+{
+  "history": [
+    {
+      "run_id": 1,
+      "model": "lightgbm",
+      "feature_set": "all+agent",
+      "imbalance": "none",
+      "params": {
+        "C": null,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": 31,
+        "learning_rate": 0.05,
+        "n_estimators": 100,
+        "min_child_samples": 20,
+        "colsample_bytree": 0.8
+      },
+      "n_features": 68,
+      "pr_auc_mean": 0.7293,
+      "pr_auc_sd": 0.066,
+      "prec_k50_mean": 0.78,
+      "roc_auc_mean": 0.9428
+    },
+    {
+      "run_id": 2,
+      "model": "random_forest",
+      "feature_set": "no_size+agent",
+      "imbalance": "class_weight",
+      "params": {
+        "C": null,
+        "min_samples_leaf": 5,
+        "max_features": 0.5,
+        "num_leaves": null,
+        "learning_rate": null,
+        "n_estimators": 200,
+        "min_child_samples": null,
+        "colsample_bytree": null
+      },
+      "n_features": 55,
+      "pr_auc_mean": 0.6955,
+      "pr_auc_sd": 0.0801,
+      "prec_k50_mean": 0.768,
+      "roc_auc_mean": 0.9409
+    },
+    {
+      "run_id": 3,
+      "model": "lightgbm",
+      "feature_set": "no_size+agent",
+      "imbalance": "class_weight",
+      "params": {
+        "C": null,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": 15,
+        "learning_rate": 0.03,
+        "n_estimators": 150,
+        "min_child_samples": 10,
+        "colsample_bytree": 0.7
+      },
+      "n_features": 55,
+      "pr_auc_mean": 0.7217,
+      "pr_auc_sd": 0.0709,
+      "prec_k50_mean": 0.784,
+      "roc_auc_mean": 0.9437
+    },
+    {
+      "run_id": 4,
+      "model": "lightgbm",
+      "feature_set": "all+agent",
+      "imbalance": "none",
+      "params": {
+        "C": null,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": 31,
+        "learning_rate": 0.04,
+        "n_estimators": 200,
+        "min_child_samples": 20,
+        "colsample_bytree": 0.8
+      },
+      "n_features": 68,
+      "pr_auc_mean": 0.7288,
+      "pr_auc_sd": 0.0718,
+      "prec_k50_mean": 0.768,
+      "roc_auc_mean": 0.9428
+    },
+    {
+      "run_id": 5,
+      "model": "lightgbm",
+      "feature_set": "no_size+agent",
+      "imbalance": "class_weight",
+      "params": {
+        "C": null,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": 23,
+        "learning_rate": 0.04,
+        "n_estimators": 200,
+        "min_child_samples": 15,
+        "colsample_bytree": 0.8
+      },
+      "n_features": 55,
+      "pr_auc_mean": 0.7198,
+      "pr_auc_sd": 0.0795,
+      "prec_k50_mean": 0.784,
+      "roc_auc_mean": 0.9444
+    }
+  ],
+  "verdicts": [
+    {
+      "proposals": [
+        {
+          "model": "lightgbm",
+          "feature_set": "all+agent",
+          "imbalance": "none",
+          "params": {
+            "C": null,
+            "min_samples_leaf": null,
+            "max_features": null,
+            "num_leaves": 31,
+            "learning_rate": 0.04,
+            "n_estimators": 200,
+            "min_child_samples": 20,
+            "colsample_bytree": 0.8
+          },
+          "rationale": "Return to the higher-performing all+agent feature set from Run 1, but increase n_estimators to 200 and slightly lower learning_rate to 0.04 to stabilize predictions and reliably beat Run 3's lower-capacity model."
+        },
+        {
+          "model": "lightgbm",
+          "feature_set": "no_size+agent",
+          "imbalance": "class_weight",
+          "params": {
+            "C": null,
+            "min_samples_leaf": null,
+            "max_features": null,
+            "num_leaves": 23,
+            "learning_rate": 0.04,
+            "n_estimators": 200,
+            "min_child_samples": 15,
+            "colsample_bytree": 0.8
+          },
+          "rationale": "Bridge the complexity gap between Run 1 and Run 3 by keeping the simpler no_size+agent feature set with class_weight, but using intermediate num_leaves (23) and more estimators (200) to capture better performance without overfitting."
+        }
+      ]
+    }
+  ],
+  "chosen": 3,
+  "selection": {
+    "chosen": 3,
+    "best_mean_run": 1,
+    "kept_simpler": true,
+    "comparisons": [
+      {
+        "best_run": 1,
+        "vs_run": 2,
+        "mean_gain": 0.0338,
+        "paired_se": 0.0101,
+        "wins": 5,
+        "n_folds": 5,
+        "reliably_better": true
+      },
+      {
+        "best_run": 1,
+        "vs_run": 3,
+        "mean_gain": 0.0076,
+        "paired_se": 0.0112,
+        "wins": 3,
+        "n_folds": 5,
+        "reliably_better": false
+      },
+      {
+        "best_run": 1,
+        "vs_run": 4,
+        "mean_gain": 0.0005,
+        "paired_se": 0.0052,
+        "wins": 2,
+        "n_folds": 5,
+        "reliably_better": false
+      },
+      {
+        "best_run": 1,
+        "vs_run": 5,
+        "mean_gain": 0.0095,
+        "paired_se": 0.0089,
+        "wins": 3,
+        "n_folds": 5,
+        "reliably_better": true
+      }
+    ]
+  },
+  "first_round_best": 3,
+  "features": {
+    "proposal": {
+      "claim_aggregates": [
+        {
+          "name": "agent_claim_days_std_all",
+          "column": "claim_days",
+          "agg": "std",
+          "scope": "all",
+          "rationale": "Measures variability in claim duration which indicates billing pattern irregularity."
+        },
+        {
+          "name": "agent_n_diag_max_all",
+          "column": "n_diag",
+          "agg": "max",
+          "scope": "all",
+          "rationale": "Captures maximum complexity or coding inflation per claim."
+        },
+        {
+          "name": "agent_n_proc_mean_ip",
+          "column": "n_proc",
+          "agg": "mean",
+          "scope": "ip",
+          "rationale": "Average procedures per inpatient claim reflects intensity of services."
+        },
+        {
+          "name": "agent_los_median_ip",
+          "column": "los",
+          "agg": "median",
+          "scope": "ip",
+          "rationale": "Median length of stay for inpatient claims robust to outliers."
+        }
+      ],
+      "ratios": [
+        {
+          "name": "agent_ip_claims_per_bene",
+          "numerator": "n_ip_claims",
+          "denominator": "n_bene",
+          "rationale": "Inpatient claims per distinct beneficiary measures hospitalization frequency per patient."
+        },
+        {
+          "name": "agent_op_claims_per_bene",
+          "numerator": "n_op_claims",
+          "denominator": "n_bene",
+          "rationale": "Outpatient claims per distinct beneficiary measures service utilization frequency per patient."
+        },
+        {
+          "name": "agent_states_per_attending",
+          "numerator": "n_states",
+          "denominator": "n_attending",
+          "rationale": "Geographic spread relative to the number of attending physicians."
+        }
+      ]
+    },
+    "gate": "enforce",
+    "duplicate_gate": {
+      "agent_n_proc_mean_ip": "duplicates ip_proc_per_claim (rank correlation 1.000)",
+      "agent_ip_claims_per_bene": "duplicates ip_claim_share (rank correlation 0.983)"
+    },
+    "after_gate": [
+      "agent_claim_days_std_all",
+      "agent_n_diag_max_all",
+      "agent_los_median_ip",
+      "agent_op_claims_per_bene",
+      "agent_states_per_attending"
+    ],
+    "candidates": [
+      "agent_claim_days_std_all",
+      "agent_n_diag_max_all",
+      "agent_los_median_ip",
+      "agent_op_claims_per_bene",
+      "agent_states_per_attending"
+    ],
+    "review": {
+      "verdicts": [
+        {
+          "feature": "agent_claim_days_std_all",
+          "verdict": "ok",
+          "reason": "Computed solely from claim dates without using target or future information."
+        },
+        {
+          "feature": "agent_n_diag_max_all",
+          "verdict": "ok",
+          "reason": "Derived from the number of diagnoses per claim within the allowed timeframe."
+        },
+        {
+          "feature": "agent_los_median_ip",
+          "verdict": "ok",
+          "reason": "Uses length of stay from inpatient claims only, standard historical aggregation."
+        },
+        {
+          "feature": "agent_op_claims_per_bene",
+          "verdict": "ok",
+          "reason": "Ratio of outpatient claims to beneficiaries per provider, derived entirely from claims data."
+        },
+        {
+          "feature": "agent_states_per_attending",
+          "verdict": "ok",
+          "reason": "Provider-level aggregation of states and attending physicians from claims."
+        }
+      ],
+      "split_ok": true,
+      "split_comment": "Stratified provider-level 5-fold cross-validation prevents data leakage across folds and appropriately handles the provider-level prediction task."
+    },
+    "accepted": [
+      "agent_claim_days_std_all",
+      "agent_n_diag_max_all",
+      "agent_los_median_ip",
+      "agent_op_claims_per_bene",
+      "agent_states_per_attending"
+    ],
+    "rejected": [],
+    "all_proposed": [
+      "agent_claim_days_std_all",
+      "agent_n_diag_max_all",
+      "agent_n_proc_mean_ip",
+      "agent_los_median_ip",
+      "agent_ip_claims_per_bene",
+      "agent_op_claims_per_bene",
+      "agent_states_per_attending"
+    ]
+  },
+  "agent_cols": [
+    "agent_claim_days_std_all",
+    "agent_n_diag_max_all",
+    "agent_los_median_ip",
+    "agent_op_claims_per_bene",
+    "agent_states_per_attending"
+  ],
+  "preview_log": [
+    {
+      "floor": 0.7053,
+      "previews": [
+        {
+          "model": "lightgbm",
+          "feature_set": "all+agent",
+          "imbalance": "none",
+          "mean": 0.7006,
+          "sd": 0.0731,
+          "kept": true
+        },
+        {
+          "model": "random_forest",
+          "feature_set": "no_size+agent",
+          "imbalance": "class_weight",
+          "mean": 0.6651,
+          "sd": 0.0854,
+          "kept": true
+        },
+        {
+          "model": "logistic",
+          "feature_set": "no_size+agent",
+          "imbalance": "smote",
+          "mean": 0.6419,
+          "sd": 0.0507,
+          "kept": false
+        },
+        {
+          "model": "lightgbm",
+          "feature_set": "no_size+agent",
+          "imbalance": "class_weight",
+          "mean": 0.7053,
+          "sd": 0.0876,
+          "kept": true
+        }
+      ]
+    },
+    {
+      "floor": 0.7053,
+      "previews": [
+        {
+          "model": "lightgbm",
+          "feature_set": "all+agent",
+          "imbalance": "none",
+          "mean": 0.7028,
+          "sd": 0.0849,
+          "kept": true
+        },
+        {
+          "model": "lightgbm",
+          "feature_set": "no_size+agent",
+          "imbalance": "class_weight",
+          "mean": 0.694,
+          "sd": 0.0951,
+          "kept": true
+        }
+      ]
+    }
+  ],
+  "experiment_rounds": 2,
+  "design": "one_agent",
+  "definitions": true,
+  "runs": {
+    "1": {
+      "model": "lightgbm",
+      "feature_set": "all+agent",
+      "imbalance": "none",
+      "params": {
+        "C": null,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": 31,
+        "learning_rate": 0.05,
+        "n_estimators": 100,
+        "min_child_samples": 20,
+        "colsample_bytree": 0.8
+      },
+      "rationale": "LightGBM with full feature set including agent features, good for capturing non-linear interactions."
+    },
+    "2": {
+      "model": "random_forest",
+      "feature_set": "no_size+agent",
+      "imbalance": "class_weight",
+      "params": {
+        "C": null,
+        "min_samples_leaf": 5,
+        "max_features": 0.5,
+        "num_leaves": null,
+        "learning_rate": null,
+        "n_estimators": 200,
+        "min_child_samples": null,
+        "colsample_bytree": null
+      },
+      "rationale": "Random forest on size-agnostic features with class weighting to handle class imbalance."
+    },
+    "3": {
+      "model": "lightgbm",
+      "feature_set": "no_size+agent",
+      "imbalance": "class_weight",
+      "params": {
+        "C": null,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": 15,
+        "learning_rate": 0.03,
+        "n_estimators": 150,
+        "min_child_samples": 10,
+        "colsample_bytree": 0.7
+      },
+      "rationale": "Shallow LightGBM on size-agnostic features focusing strictly on billing patterns."
+    },
+    "4": {
+      "model": "lightgbm",
+      "feature_set": "all+agent",
+      "imbalance": "none",
+      "params": {
+        "C": null,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": 31,
+        "learning_rate": 0.04,
+        "n_estimators": 200,
+        "min_child_samples": 20,
+        "colsample_bytree": 0.8
+      },
+      "rationale": "Return to the higher-performing all+agent feature set from Run 1, but increase n_estimators to 200 and slightly lower learning_rate to 0.04 to stabilize predictions and reliably beat Run 3's lower-capacity model."
+    },
+    "5": {
+      "model": "lightgbm",
+      "feature_set": "no_size+agent",
+      "imbalance": "class_weight",
+      "params": {
+        "C": null,
+        "min_samples_leaf": null,
+        "max_features": null,
+        "num_leaves": 23,
+        "learning_rate": 0.04,
+        "n_estimators": 200,
+        "min_child_samples": 15,
+        "colsample_bytree": 0.8
+      },
+      "rationale": "Bridge the complexity gap between Run 1 and Run 3 by keeping the simpler no_size+agent feature set with class_weight, but using intermediate num_leaves (23) and more estimators (200) to capture better performance without overfitting."
+    }
+  }
+}

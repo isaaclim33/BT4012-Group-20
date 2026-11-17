@@ -366,7 +366,7 @@ DEEP_PARAMS_FILE = TABLES_DIR / "tuned_params_deep.json"
 
 
 def DEEP():
-    """Lecture 4 models: a feedforward network (supervised) and an autoencoder trained on
+    """Deep models: a feedforward network (supervised) and an autoencoder trained on
     non-flagged providers (anomaly score = reconstruction error). Tuned on CV repeat 1,
     cross-validated on all 25 folds, then scored once on the test set."""
     def score(make):
@@ -419,8 +419,8 @@ def DEEP():
 def _attack(X: pd.DataFrame, honest_median: pd.Series, split: bool, blend: bool) -> pd.DataFrame:
     """EVASION attacks on a provider's feature row (applied to flagged providers only).
     split: the provider bills through two IDs, so every size count and total halves; every ratio
-           (per claim, per patient, per physician) is unchanged. The attacked provider is a
-           scaled-down copy of itself and carries no other fingerprint.
+           (per claim, per patient, per physician) is unchanged. This is the feature-level
+           approximation; _claim_split simulates the same attack on claims.
     blend: the provider cuts 75% of its care intensity above the typical honest provider (median).
            Shrinking toward the median, not capping at it, leaves no identical values that a model
            could learn as an attack signature."""
@@ -435,8 +435,30 @@ def _attack(X: pd.DataFrame, honest_median: pd.Series, split: bool, blend: bool)
     return X
 
 
+def _claim_split(claims: pd.DataFrame, bene: pd.DataFrame, flagged: list[str], seed: int):
+    """The split attack on claims: each flagged provider's patients are divided at random between
+    two IDs (P_A, P_B) and the provider table is rebuilt, so maxima and ratios change as they would
+    in practice. Returns the rebuilt table and each row's original provider ID."""
+    from fraudrank import features as F
+    rng = np.random.default_rng(seed)
+    hit = claims.Provider.isin(set(flagged)).to_numpy()
+    pb = claims.loc[hit, ["Provider", "BeneID"]].drop_duplicates()
+    pb["half"] = np.where(rng.integers(0, 2, len(pb)) == 0, "_A", "_B")
+    cl = claims.copy()
+    m = cl.loc[hit, ["Provider", "BeneID"]].merge(pb, on=["Provider", "BeneID"], how="left")
+    cl.loc[hit, "Provider"] = (m.Provider + m.half).to_numpy()
+    feat = F.build_provider_features(cl, bene, pd.DataFrame({"Provider": sorted(cl.Provider.unique()), "y": 0}))
+    return feat, feat.index.to_series().str.replace(r"_[AB]$", "", regex=True), cl
+
+
+def _physician_overlap(claims: pd.DataFrame, a: str, b: str) -> float:
+    sa = set(claims.loc[claims.Provider == a, "AttendingPhysician"].dropna())
+    sb = set(claims.loc[claims.Provider == b, "AttendingPhysician"].dropna())
+    return len(sa & sb) / len(sa | sb) if sa | sb else 0.0
+
+
 def EVASION():
-    """Lecture 7 adversarial robustness on tabular data. Black-box evasion: flagged test
+    """Adversarial robustness on tabular data. Black-box evasion: flagged test
     providers change their observable billing to slip out of the queue; honest providers do not
     change. Proactive defence: adversarial training on attacked copies of flagged dev providers."""
     p = params()
@@ -468,6 +490,48 @@ def EVASION():
             m = evaluate(y_te, s)
             rows.append({"attack": aname, "model": mname, "pr_auc": m["pr_auc"], "prec_k50": m["prec_k50"],
                          "rec_k100": m["rec_k100"], "prec_k100": m["prec_k100"]})
+    # split on claims: a provider counts by its higher-scoring ID; three random divisions averaged
+    from fraudrank import data
+    claims, bene = data.load_claims(), data.load_beneficiaries()
+    flagged_ids = [p_ for p_ in test if df.loc[p_, "y"] == 1]
+    unsplit = [p_ for p_ in test if p_ not in flagged_ids]
+    per_seed = {(a, mname): [] for a in ("split (claims)", "split (claims)+blend") for mname in models}
+    halves_overlap = []
+    for seed in (SEED, 1, 2):
+        feat, parent, cl = _claim_split(claims, bene, flagged_ids, seed)
+        assert np.allclose(feat.loc[unsplit, ALL], df.loc[unsplit, ALL]), "rebuild must leave other providers unchanged"
+        keep = parent.isin(set(test))
+        halves = feat.index[parent.isin(set(flagged_ids))]
+        blended = feat.copy()
+        blended.loc[halves, ALL] = _attack(blended.loc[halves, ALL], honest_median, False, True)
+        for aname, table in [("split (claims)", feat), ("split (claims)+blend", blended)]:
+            for mname, (model, cols) in models.items():
+                s = pd.Series(model.score(table.loc[keep, cols]), index=table.index[keep]).groupby(parent[keep]).max()
+                per_seed[(aname, mname)].append(evaluate(y_te, s.reindex(test).to_numpy()))
+        if seed == SEED:
+            halves_overlap = [_physician_overlap(cl, f"{p_}_A", f"{p_}_B") for p_ in flagged_ids]
+    metrics_ = ["pr_auc", "prec_k50", "rec_k100", "prec_k100"]
+    for (aname, mname), ms in per_seed.items():
+        rows.append({"attack": aname, "model": mname, **{k: float(np.mean([m_[k] for m_ in ms])) for k in metrics_}})
+    # what each attack costs, and whether shared attending physicians would expose a split
+    ip = claims[claims.is_ip == 1]
+    drg = ip.groupby("DiagnosisGroupCode").filter(lambda g: len(g) >= 50).groupby("DiagnosisGroupCode")
+    stay_pay = drg.apply(lambda g: g.los.corr(g.InscClaimAmtReimbursed, method="spearman"), include_groups=False)
+    pp = claims[["Provider", "AttendingPhysician"]].dropna().drop_duplicates()
+    sets_ = pp.groupby("Provider").AttendingPhysician.apply(set)
+    pairs = pp.merge(pp, on="AttendingPhysician")
+    pairs = pairs[pairs.Provider_x < pairs.Provider_y][["Provider_x", "Provider_y"]].drop_duplicates()
+    real = np.array([len(sets_[a] & sets_[b]) / len(sets_[a] | sets_[b]) for a, b in zip(pairs.Provider_x, pairs.Provider_y)])
+    notes = {"split_payment_lost": 0.0,
+             "within_drg_spearman_stay_vs_payment": {"drgs": int(len(stay_pay)), "median": float(stay_pay.median())},
+             "attending_physician_overlap": {
+                 "real_pairs_sharing_any": int(len(real)), "real_pairs_identical_sets": int((real == 1).sum()),
+                 "real_pairs_median": float(np.median(real)),
+                 "split_halves_median": float(np.median(halves_overlap)),
+                 "threshold_catching_80pct_of_splits": float(np.quantile(halves_overlap, 0.2)),
+                 "real_pairs_at_or_above_that_threshold": int((real >= np.quantile(halves_overlap, 0.2)).sum())}}
+    (TABLES_DIR / "evasion_notes.json").write_text(json.dumps(notes, indent=2))
+    print(json.dumps(notes, indent=1))
     res = pd.DataFrame(rows)
     res.to_csv(TABLES_DIR / "evasion.csv", index=False)
     print(res.pivot(index="model", columns="attack", values="pr_auc").round(3))
@@ -475,7 +539,7 @@ def EVASION():
 
 
 def FAIRNESS():
-    """Lecture 12: false-positive rates by provider group at a fixed queue, and calibration
+    """Fairness: false-positive rates by provider group at a fixed queue, and calibration
     (is the risk score a probability?)."""
     p = params()
     dev, test = SPLITS["dev"], SPLITS["test"]
@@ -519,6 +583,80 @@ def FAIRNESS():
     print(pd.DataFrame(cal).round(3))
 
 
+MAXIMA = ["los_max", "ip_reimb_max", "op_reimb_max"]
+
+
+def SIZE_BANDS():
+    """Is there signal beyond size? Dropping the size family is not enough, because the remaining
+    features reconstruct size. So: (1) measure that reconstruction; (2) compare models within size
+    quintiles; (3) separate the maxima, which grow with claim count, from volume-adjusted versions;
+    (4) count queue actions that change when the size-free vote uses the adjusted maxima.
+    Reported only: the pipeline's features are unchanged."""
+    from lightgbm import LGBMRegressor
+    from scipy.stats import spearmanr
+    from sklearn.metrics import average_precision_score, r2_score
+    from fraudrank import audit_selection as AS, data, features as F
+    from fraudrank.config import VOTE_SEEDS
+    p = params()["lightgbm"]["params"]
+    dev = SPLITS["dev"]
+    adj = F.volume_adjusted_maxima(data.load_claims(), df.index, dev)
+    d = df.join(adj)
+    adjusted = [c for c in NO_SIZE if c not in MAXIMA] + list(adj.columns)
+
+    size = np.log1p(d["total_reimb"])
+    pred = pd.Series(index=dev, dtype=float)
+    for fold in REPEAT0:
+        reg = LGBMRegressor(n_estimators=300, random_state=SEED, verbose=-1)
+        reg.fit(d.loc[fold["train"], NO_SIZE], size[fold["train"]])
+        pred[fold["val"]] = reg.predict(d.loc[fold["val"], NO_SIZE])
+    out = {"r2_size_from_size_free_features": float(r2_score(size[dev], pred[dev])),
+           "volume_correlation": {}}
+    for c, n in [("los_max", "n_ip_claims"), ("ip_reimb_max", "n_ip_claims"), ("op_reimb_max", "n_op_claims")]:
+        has = d.loc[dev, n] > 0
+        out["volume_correlation"][c] = {
+            "raw": float(spearmanr(d.loc[dev][has][c], d.loc[dev][has][n])[0]),
+            "adjusted": float(spearmanr(d.loc[dev][has][c + "_adj"], d.loc[dev][has][n])[0])}
+
+    sets = {"lgbm:no_size": NO_SIZE, "lgbm:no_size-maxima": [c for c in NO_SIZE if c not in MAXIMA],
+            "lgbm:no_size+adjusted_maxima": adjusted, "lgbm:all": ALL, "lgbm:all+adjusted_maxima": ALL + list(adj.columns)}
+    oof = {}
+    for name, cols in sets.items():
+        res, oof[name] = runner.cv_evaluate(lambda: M.lightgbm(p), cols, d, SPLITS)
+        save_cv(res, name, "SIZE_BANDS")
+        print(f"  SIZE_BANDS {name:30s} PR-AUC {res.pr_auc.mean():.3f} ± {res.pr_auc.std():.3f}")
+
+    y = d.loc[dev, "y"]
+    band = pd.qcut(d.loc[dev, "total_reimb"].rank(method="first"), 5, labels=False)
+    groups = [(f"quintile {b + 1}", band.index[band == b]) for b in range(5)] + [("quintiles 4-5", band.index[band >= 3])]
+    rows = []
+    for name, idx in groups:
+        row = {"band": name, "providers": len(idx), "flagged": int(y[idx].sum()), "base_rate": float(y[idx].mean()),
+               "size_only:total_reimb": average_precision_score(y[idx], d.loc[idx, "total_reimb"])}
+        rows.append(row | {m: average_precision_score(y[idx], oof[m][idx]) for m in sets})
+    bands = pd.DataFrame(rows)
+    bands.to_csv(TABLES_DIR / "size_bands.csv", index=False)
+
+    # the queue's gate 2 keeps the full model; only the size-free vote (the action) changes
+    checks = AS.billing_checks(df.index)
+    score = pd.read_pickle(CACHE_DIR / "test_scores.pkl")["lightgbm"]
+    queues = {}
+    for label, cols in [("current", NO_SIZE), ("adjusted", adjusted)]:
+        votes = AS.seed_votes({s: runner.test_evaluate(lambda s=s: M.lightgbm(p, seed=s), cols, d, SPLITS)[1]
+                               for s in VOTE_SEEDS})
+        queues[label] = AS.two_gate_selection(score, checks, votes).set_index("provider")
+    q = queues["current"][["gate", "action", "votes"]].join(
+        queues["adjusted"][["action", "votes"]], rsuffix="_adjusted")
+    q = q.assign(previously_flagged=d.loc[q.index, "y"].astype(int), total_reimb=d.loc[q.index, "total_reimb"])
+    q.reset_index().to_csv(TABLES_DIR / "queue_sensitivity.csv", index=False)
+    changed = q[q.action != q.action_adjusted]
+    out["queue_actions_changed"] = {"queued": len(q), "changed": len(changed),
+                                    "full_audit_to_desk": int((changed.action == "priority_audit").sum()),
+                                    "desk_to_full_audit": int((changed.action == "desk_review").sum())}
+    (TABLES_DIR / "size_bands.json").write_text(json.dumps(out, indent=2))
+    print(json.dumps(out, indent=1))
+    print(bands.round(3).to_string(index=False))
+
+
 def SUMMARY():
     cv = pd.read_csv(CV_FILE)
     summ = (cv.drop(columns="fold").groupby(["experiment", "model"])
@@ -530,7 +668,9 @@ def SUMMARY():
     pairs = [("lightgbm", "size_only:total_reimb"), ("lgbm:no_size", "size_only:total_reimb"),
              ("lgbm:all+network", "lgbm:all"), ("lgbm:no_size+network", "lgbm:no_size"),
              ("lightgbm", "logistic"), ("lightgbm", "random_forest"), ("lightgbm", "expert_rules"),
-             ("lightgbm", "mlp"), ("mlp", "size_only:total_reimb"), ("autoencoder", "isolation_forest")]
+             ("lightgbm", "mlp"), ("mlp", "size_only:total_reimb"), ("autoencoder", "isolation_forest"),
+             ("lgbm:no_size-maxima", "lgbm:no_size"), ("lgbm:no_size+adjusted_maxima", "lgbm:no_size"),
+             ("lgbm:no_size+adjusted_maxima", "size_only:total_reimb"), ("lgbm:all+adjusted_maxima", "lgbm:all")]
     rows = []
     for a, b in pairs:
         if a in piv and b in piv:
@@ -543,7 +683,8 @@ def SUMMARY():
 
 STEPS = {"EDA_TESTS": EDA_TESTS, "TUNE": TUNE, "SIZE": SIZE, "MODELS": MODELS, "FAMILIES": FAMILIES,
          "NETWORK": NETWORK, "IMBALANCE": IMBALANCE, "NOISE": NOISE, "TEST": TEST, "DEEP": DEEP,
-         "EVASION": EVASION, "FAIRNESS": FAIRNESS, "LEAKY_SPLIT": LEAKY_SPLIT, "SUMMARY": SUMMARY}
+         "EVASION": EVASION, "FAIRNESS": FAIRNESS, "SIZE_BANDS": SIZE_BANDS, "LEAKY_SPLIT": LEAKY_SPLIT,
+         "SUMMARY": SUMMARY}
 
 if __name__ == "__main__":
     todo = sys.argv[1:] or list(STEPS)

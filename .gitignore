@@ -20,6 +20,9 @@ results/cache/oof_*
 
 # bundle made for sending results, not part of the repo
 agent_outputs_*.zip
+# per-machine run log and environment, rewritten by run_agents_local.py and packed into the bundle
+results/agent_run_log.txt
+results/agent_environment.json
 
 # editor and OS files
 .vscode/

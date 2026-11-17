@@ -2,8 +2,7 @@
 
 BT4012 Fraud Analytics, Group 20. We rank 5,410 Medicare providers for audit from their claims,
 build a review queue that people can work through, and use LLM agents to explain each case. The
-report is [`report/report20.docx`](report/report20.docx) (exported as [`report/report20.pdf`](report/report20.pdf)) and
-the presentation is [`report/presentation20.pptx`](report/presentation20.pptx), with a speaker script in its notes.
+report is [`report/report20.docx`](report/report20.docx) (exported as [`report/report20.pdf`](report/report20.pdf)).
 
 **Design rule throughout: LLMs propose and explain; code decides and checks.** No LLM decides who
 is reviewed, which action they get, or which model is used, and nothing an LLM writes is shown
@@ -55,7 +54,7 @@ flowchart TB
 Colours: grey = code that decides, purple = LLM agent, amber = check, blue = investigator, green = output.
 Alongside, **CLEAN**, **LEAK_AGENT** and **AGENT_MODEL** test the agents themselves and do not feed
 the queue; the model experiments (EDA_TESTS, SIZE, MODELS, FAMILIES, NETWORK, IMBALANCE, NOISE, LEAKY_SPLIT,
-QUEUE_COST, TEST, DEEP, EVASION, FAIRNESS) evaluate the ranking.
+QUEUE_COST, TEST, DEEP, EVASION, FAIRNESS, SIZE_BANDS) evaluate the ranking.
 
 | Stage | What happens | Who decides |
 |---|---|---|
@@ -64,7 +63,7 @@ QUEUE_COST, TEST, DEEP, EVASION, FAIRNESS) evaluate the ranking.
 | **Models** (`02`) | Size-only baselines, expert rules, logistic regression, random forest, LightGBM, feedforward network, autoencoder, Isolation Forest, network features; tuning on CV repeat 1; the test set is scored once | Code |
 | **Stress tests** (`02 EVASION, FAIRNESS`) | Black-box evasion (provider splitting, blend-in) with adversarial training; false-positive rates by provider group; calibration | Code |
 | **Review queue** (`03 QUEUE`) | Two-gate audit selection (below) | Code |
-| **Case briefs** (`03 BRIEFS`) | One brief per queued provider: drivers, playbook citations, uncertainty, using lookup tools | LLM writes; code checks every number and citation |
+| **Case briefs** (`03 BRIEFS`) | One brief per queued provider: drivers, billing findings, playbook citations, uncertainty, using lookup tools | LLM writes; code checks every number and citation, and that the strongest drivers and any billing finding are named |
 | **Dashboard** (`03 DASHBOARD`) | Plain-language overview and provider pages for full-audit and borderline cases | LLM writes; code checks, then a final grounding gate |
 
 ### Two-gate audit selection
@@ -88,8 +87,9 @@ All thresholds are in `src/fraudrank/config.py` and were set on development prov
   borderline, desk review), grouping (reason, pattern, type of care, batch) and **batches of 12**.
   Each row shows one line of evidence, facts only, e.g. `1 duplicate claim · 2 overlapping hospital stays · $3.21M paid`.
 * **Case page**, in working order: why it's here (reason and evidence), what to check (a checklist),
-  then details on request (comparisons, matching fraud patterns, all measures). Desk reviews get a
-  lighter page in standard wording.
+  then details on request (comparisons, matching fraud patterns, all measures). Rule-check pages list
+  the claims behind the referral as one-line summaries written by code (e.g. `$14,030 billed twice for
+  BENE25655 on 2009-08-18 … end dates differ by 2 days`). Desk reviews get a lighter page in standard wording.
 * **Decision panel:** open full audit, desk review or no further action; a reason is required when
   differing from the recommendation; *Save & next case* moves on. Keys: 1-3 choose, S save, J/K move.
 * **Download case notes:** each case's decision, reason, checklist progress and note as CSV. Decisions
@@ -99,8 +99,9 @@ All thresholds are in `src/fraudrank/config.py` and were set on development prov
   the records, and the size-or-behaviour map.
 * **How it works:** a help panel from the **?** icon or key, with ⓘ links next to key terms.
 * **Grounding gate:** every evidence item is re-derived from the case evidence, and every number in
-  the AI text must appear in it, written as digits (a number spelled out in words cannot be checked,
-  so it fails); anything that fails is not shown, item by item (`agents/dashboard_grounding.csv`).
+  the AI text must appear in it or in the page's billing exhibits, written as digits (a number spelled
+  out in words cannot be checked, so it fails); anything that fails is not shown, item by item
+  (`agents/dashboard_grounding.csv`).
 
 ## Agent harness: design and architecture
 
@@ -111,7 +112,7 @@ The agent layer (`src/fraudrank/agents/`, run by `scripts/03_run_agents.py`) is 
 
 | Principle | How it is enforced | Why |
 |---|---|---|
-| Code makes every decision | Who is reviewed, each action, and the model chosen in AGENT_MODEL are set by code (`audit_selection.py`, `selection.py`). Agents only propose, critique and explain | LLM outputs vary between runs, and a decision that affects a provider must be repeatable and explainable. BRIEFS shows why: with retrieval, the agent's own suggested action matches the rules in 77% of briefs, but it suggests a full audit for 11 of 12 desk-review cases |
+| Code makes every decision | Who is reviewed, each action, and the model chosen in AGENT_MODEL are set by code (`audit_selection.py`, `selection.py`). Agents only propose, critique and explain | LLM outputs vary between runs, and a decision that affects a provider must be repeatable and explainable. BRIEFS shows why: with retrieval, the agent's own suggested action matches the rules in 78% of briefs, but it escalates 9 of 12 desk-review cases by re-arguing size, which the queue has already discounted. Its suggestion is recorded for evaluation and never shown to investigators |
 | Closed outputs | Every agent returns JSON that matches a schema (`schemas.py`): closed sets of options and bounded numbers, validated with pydantic | An agent can only ask for actions the code knows how to run safely. No free text is executed |
 | Agents never see raw data or labels | Agents receive summaries and specifications; the executor (`executor.py`) computes features and runs models | No label leakage, no patient-level data in prompts, and results that do not depend on the model reading data correctly |
 | Read-only tools, least privilege | Tools look things up and return facts; no tool writes or changes anything (`tools.py`) | A tool call cannot alter the data, the queue or another agent's output |
@@ -222,11 +223,11 @@ flowchart LR
 
 | Feature | What it does | Why |
 |---|---|---|
-| Structured output | Output is constrained to a JSON schema (Gemini `response_json_schema`), then validated with pydantic. On a validation error the call is retried once with the error appended; a second failure raises an error | Malformed output is never silently dropped or half-used |
+| Structured output | Output is constrained to a JSON schema (Gemini `response_json_schema`), then validated with pydantic. On a validation error the call is retried once with the error appended; a second failure raises an error. If Gemini cannot serve every bound of a schema at once ("too many states"), the call is sent with the bounds removed and pydantic enforces them | Malformed output is never silently dropped or half-used |
 | Response cache | Every response is stored, keyed by a SHA-256 hash of the full request (model, system prompt, messages, schema or tools, effort). `--replay` runs every step from the cache with no API key | Exact reproduction of agent results, and free re-runs of steps whose inputs did not change |
 | Resilience | 3-minute timeout per request; up to 7 attempts with back-off (10 to 120 s) on rate limits, server errors and dropped connections. A used-up **daily** quota stops the step at once, before it writes anything | Free-tier overload is common; a step that runs out of quota must not overwrite good results with partial ones |
 | Effort | Low by default; high for judgement tasks (cleaning plan, critic, case briefs) | Spend thinking where the task needs judgement, not on formatting |
-| ReAct loop | The model calls tools until it is done (at most 3 turns for the critic, 6 for case briefs), then one final structured call turns the investigation trace into schema-checked output. Every turn is cached | Tools let an agent verify facts before it writes, and the final output still goes through the same schema and checks |
+| ReAct loop | The model calls tools until it is done (at most 3 turns for the critic, 6 for case briefs), then one final structured call turns the investigation trace into schema-checked output. If the turn budget runs out, it answers from the tool results gathered so far; this is counted (`tool_budget_reached`), and in AGENT_MODEL also listed in `agent_model_failures.json` as a completed run. Every turn is cached | Tools let an agent verify facts before it writes, and the final output still goes through the same schema and checks |
 | Provenance | The exact model version that answered is stored with each response and in `llm_usage.json`, with call and token counts | Model aliases move over time; the log shows what produced each result |
 
 ### Steps: what each does and why
@@ -257,7 +258,9 @@ false alarms.
 **AGENT_MODEL: can agents build a model as good as the hand-tuned pipeline?** One loop, repeated 3 times:
 1. **Feature agent** proposes new features from a closed grammar (a claim column × an aggregate ×
    inpatient/outpatient/all, or a ratio of provider totals). The executor computes them from the
-   claims; the agent never sees the data.
+   claims; the agent never sees the data. In the "with definitions" rows it is also given every
+   existing feature's definition in the same grammar (`feature_brief.py`), and a **duplicate gate**
+   (code) drops proposals that only re-express an existing feature.
 2. **Leakage agent** screens them; rejected features are removed.
 3. **Experiment agent** proposes 3–4 configurations (model, feature set, imbalance handling, bounded
    settings), from a trimmed context: feature-set sizes, model options and past results only.
@@ -269,7 +272,13 @@ false alarms.
 6. **Critic** (ReAct, with a tool that returns per-fold scores) sees the code's choice and decides
    whether to stop, which experiments to run next (up to 3 rounds), and what looks wrong.
 7. **Evaluation** on CV repeats 2–5, which the loop never saw, and once on the test set; ablations
-   (no critic, no feature agent, no leakage review) are repeated for every run.
+   (round 1 only without the critic, no feature agent, no leakage review) are repeated for every run.
+
+Three designs are compared, 3 runs each: three agents without definitions (the original loop), three
+agents with definitions, and **one agent with definitions**, a single modelling agent that proposes
+features and configurations together. A **fold test** fixed in advance (`selection.py`) decides whether
+the separate roles earn their place: keep them only if the 95% CI of the per-fold difference (one agent
+minus three, each fold averaged over runs) lies entirely below 0 (`agent_model_fold_test.json`).
 
 *Why this design:*
 * In the first version, the critic chose the model using a "beat it by one standard deviation" rule
@@ -283,15 +292,19 @@ vote (see above). Written to `audit_queue.csv` before any later agent runs; BRIE
 *Why:* who gets audited, and how, must not depend on an LLM.
 
 **BRIEFS: case briefs.** One brief per queued provider, with and without playbook retrieval (130 briefs).
-* Evidence comes from code: the five strongest model drivers with values and peer percentiles, and
-  the billing-check counts.
+* Evidence comes from code: the five strongest model drivers with values and peer percentiles, the
+  billing-check counts, why the provider is queued, and for rule-check referrals the one-line billing
+  exhibits. The seed votes and the code's action are not shown, so the agent's suggested action is its own reading.
 * The case-file agent can call `lookup_provider`, `get_peer_stats` and `search_playbook` before it writes.
+* A **completeness check** (code) requires the three strongest drivers and, for rule-check referrals,
+  the billing finding in the summary; a brief that misses them gets one revision, then code fills the gaps.
 * `check_brief` (code) checks every brief: driver values, percentiles and model contributions match the
   evidence; every cited playbook section was actually retrieved and lists one of the brief's drivers;
   the rank is right; and there is no claim that fraud is proven (negation-aware).
-* The agent's suggested action is recorded next to the code's decision, but decides nothing.
+* The agent's suggested action is recorded next to the code's decision, but decides nothing and is not
+  shown on the dashboard.
 * The trajectory is logged (`briefs_trajectory.json`): which tools were called, on which provider, with what result.
-  In practice the agent made no tool calls, because every number it needed was already in its prompt.
+  In practice the agent used tools in only 2 of 65 briefs, because nearly every number it needed was already in its prompt.
 * *Why:* tools let the agent verify before writing; code checks make faithfulness measurable; the
   no-retrieval condition shows what retrieval adds.
 
@@ -341,9 +354,12 @@ fraud. Test set: 1,082 providers, 101 flagged.
   25 of 25 folds), and the autoencoder's most anomalous providers have a median of one claim (unusual, not suspicious).
 * Statistics: flag and type of care are dependent (chi-square 607, Cramér's V 0.33); Benford's law gives no signal
   (flagged and other providers deviate equally, MAD 0.0176 vs 0.0175).
-* Evasion (test PR-AUC): splitting each flagged provider into two IDs cuts size alone 0.743 → 0.522 and LightGBM
-  0.805 → 0.661, but not the size-free model (0.784); cutting stay lengths cuts the size-free model to 0.408.
-  Adversarial training on split copies fixes splitting (0.825) but not the unseen attack (0.448).
+* Evasion (test PR-AUC): splitting each flagged provider into two IDs, simulated on its claims, cuts size alone
+  0.743 → 0.573, LightGBM 0.805 → 0.682 and the size-free model 0.784 → 0.679; cutting stay lengths cuts the
+  size-free model to 0.408. Adversarial training on copies with halved size counts defends against that shortcut
+  attack (0.825) but not the split rebuilt from claims (0.664) or blend-in (0.448).
+* Within size bands (the two largest fifths by payment, out-of-fold CV), the size-free model reaches 0.734 against
+  0.687 for size alone, so a margin remains once size is roughly held fixed.
 * Fairness: in the cost-optimal queue, honest providers that bill inpatient care are queued by mistake at 22.8%
   against 2.6% for outpatient-only ones; dropping patient-mix features narrows the patient-acuity gap at no cost.
 
@@ -351,11 +367,13 @@ fraud. Test set: 1,082 providers, 101 flagged.
 
 | | Providers | Previously flagged |
 |---|---|---|
-| Gate 1 rule check | 15 (7 duplicate claims, 10 overlapping stays) | 12 |
+| Gate 1 rule check | 15 (7 duplicate claims, 10 overlapping stays; 2 trigger both) | 12 |
 | Gate 2 risk ranking | 50 → 38 full audit, 4 borderline, 8 desk review | 41 |
 | **Queue** | **65** | **53** |
 
-On development data, the gate-1 rules refer 59 providers, 81% of them flagged (base rate 9%).
+On development data, the gate-1 rules refer 59 providers, 81% of them flagged (base rate 9%). In 30 of the 33
+duplicate pairs, only the end dates differ (by 1–3 days), so the duplicate rule's precision may partly reflect
+how the claims were generated.
 
 **Agents** (Gemini 3.5 Flash-Lite, 3 runs each)
 
@@ -364,14 +382,16 @@ On development data, the gate-1 rules refer 59 providers, 81% of them flagged (b
 | CLEAN | 6.3 of 7 reference decisions on average (6, 6, 7); 84 of 84 columns covered. The original one-call prompt caught 2 of 7 |
 | LEAK_AGENT | 5/5 planted leaks caught, 0 false alarms, in every run |
 | AGENT_MODEL vs fixed | CV 0.724 vs 0.730 (range 0.723–0.725); test 0.802 vs 0.805, difference −0.003 [−0.021, +0.014]. Agents match, but do not beat, the hand-tuned pipeline; the feature agent adds nothing |
-| BRIEFS | 130 briefs: 641/641 driver values exact, 163/163 citations real and on point, 0 claims of proven fraud. With retrieval, the agent's suggested action matches the code's decision in 77% of briefs, but it suggests a full audit for 11 of 12 desk-review cases. Trajectory: 0 tool calls in 65 briefs |
-| DASHBOARD | Overview passed in 3/3 runs; provider pages 56, 57, 56 of 57 (failures: wrong provider ID, caught) |
-| Grounding gate | 162/162 evidence items re-derived from case evidence; 13 of 506 displayed AI items removed (numbers written in words), none with an unsupported number |
+| Feature definitions | Redundant proposals fall from 53% (24 of 45) to 19% (6 of 31); CV 0.728, but only one run of three used agent features, and no run beats the fixed pipeline significantly on test |
+| One agent vs three | One agent with definitions: CV 0.721. Fold test: one minus three −0.007 [−0.011, −0.002], so separate agents are kept; weak evidence (correlated folds, one poor run, no difference on test). One agent used 27 calls against 37 |
+| BRIEFS | 130 briefs: 597/597 driver values exact, 164/164 citations real and on point, 0 claims of proven fraud, every brief complete on its first attempt. With retrieval, the suggested action matches the code's decision in 78% of briefs (74% without); of 14 disagreements, 9 escalate desk reviews on size and 5 question single-duplicate referrals. Trajectory: 6 tool calls in 2 of 65 briefs |
+| DASHBOARD | Overview passed in 3/3 runs; provider pages 55, 57, 55 of 57 (failures: an exact figure quoted from outside the page's evidence, or an unstated stay length, caught) |
+| Grounding gate | 162/162 evidence items re-derived from case evidence; 31 of 983 displayed AI items removed (numbers written in words), none with an unsupported number |
 | Retrieval | Hybrid search recall@1 0.90 (BM25 0.85, dense 0.80) on 20 test queries |
 
 ## Reproducing the results
 
-**1. Environment** (Python 3.12+; tested on 3.13)
+**1. Environment** (Python 3.12+; tested on 3.12 and 3.13)
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\activate
@@ -391,7 +411,7 @@ python scripts/00_get_data.py
 ```bash
 python scripts/01_build_features.py
 python scripts/02_run_experiments.py          # EDA_TESTS, TUNE, SIZE, MODELS, FAMILIES, NETWORK, IMBALANCE, NOISE,
-                                              # TEST, DEEP, EVASION, FAIRNESS, LEAKY_SPLIT, SUMMARY
+                                              # TEST, DEEP, EVASION, FAIRNESS, SIZE_BANDS, LEAKY_SPLIT, SUMMARY
 python scripts/04_make_figures.py
 ```
 
@@ -410,11 +430,14 @@ python scripts/03_run_agents.py --replay
 
 Notes:
 
-* About 450 LLM calls for a full run (447 in ours). Gemini's free tier allows roughly that per day; if the daily
-  quota runs out, the step stops without writing partial results – run the same command after the
-  reset and the cache carries on where it stopped.
+* About 520 LLM calls for a full run (517 in ours), more than the free tier's 500 requests a day, so a full run
+  spans two days. If the daily quota runs out, the step stops without writing partial results – run the same
+  command after the reset and the cache carries on where it stopped. Gemini also returns "high demand" (503)
+  errors at busy times; each call retries up to 7 times, and a run that still fails is recorded, so re-running
+  the same command later completes it.
 * Offline check of all agent code paths (fake LLM, nothing written): `python tests/test_agent_plumbing.py`.
-* Replay is exact on the platform that produced the cache (Linux, Python 3.13). On another platform, scripts
+* Replay is exact on the platform that produced the cache: the current agent results were produced and
+  replay-verified on macOS with Python 3.12 (0 API calls, every table and the dashboard identical). On another platform, scripts
   00–02 reproduce every table exactly except last-digit floating-point noise (for example 0.69559 vs 0.69564 in a
   tuning grid). AGENT_MODEL embeds those scores in its prompts, so on Windows its cache keys can miss: with
   `--replay` it then stops with an error instead of calling the API. RETRIEVAL, CLEAN, LEAK_AGENT, QUEUE, BRIEFS
@@ -435,7 +458,7 @@ tests/test_agent_plumbing.py           offline checks with a fake LLM
 results/tables/                        every number above (agents/ for the agent layer)
 results/dashboard/                     the review dashboard
 results/cache/llm/                     cached LLM responses
-report/                                report20.docx (editable), report20.pdf, presentation20.pptx
+report/                                report20.docx (editable), report20.pdf
 ```
 
 ## Limitations
@@ -444,6 +467,9 @@ report/                                report20.docx (editable), report20.pdf, p
   assigned is undocumented: results describe this benchmark, not real providers.
 * The test set has 101 flagged providers, so close models are not separable at one queue size.
 * LLM outputs vary between runs; every agent experiment is run three times and the spread reported.
-* The evasion attacks edit provider features rather than re-simulating claims, and fairness covers two groupings.
+* The split attack is rebuilt from claims, but blend-in edits provider features rather than re-simulating
+  claims; fairness covers two groupings.
+* Most duplicate-claim pairs differ only in their end dates, so the duplicate rule's precision may partly
+  reflect how the claims were generated.
 * The labels cannot reward the rule check: duplicate claims and overlapping stays are evidence of a
   different kind. Of the 4 rule referrals the model ranks outside its top 65, 1 was previously flagged.

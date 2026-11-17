@@ -1,0 +1,5 @@
+condition,gate,briefs,complete_first_attempt,complete_after_retry,missing_driver_first,missing_finding_first
+with retrieval,1_rule_check,15,15,15,0,0
+with retrieval,2_risk_ranking,50,50,50,0,0
+without retrieval,1_rule_check,15,15,15,0,0
+without retrieval,2_risk_ranking,50,50,50,0,0

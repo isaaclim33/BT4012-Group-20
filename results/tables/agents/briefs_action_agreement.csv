@@ -1,10 +1,8 @@
 condition,code_action,agent_suggested_action,briefs
-with retrieval,desk_review,desk_review,1
-with retrieval,desk_review,priority_audit,11
-with retrieval,priority_audit,desk_review,3
-with retrieval,priority_audit,monitor,1
-with retrieval,priority_audit,priority_audit,49
+with retrieval,desk_review,desk_review,3
+with retrieval,desk_review,priority_audit,9
+with retrieval,priority_audit,desk_review,5
+with retrieval,priority_audit,priority_audit,48
 without retrieval,desk_review,priority_audit,12
-without retrieval,priority_audit,desk_review,1
-without retrieval,priority_audit,monitor,3
-without retrieval,priority_audit,priority_audit,49
+without retrieval,priority_audit,desk_review,5
+without retrieval,priority_audit,priority_audit,48

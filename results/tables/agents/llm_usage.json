@@ -62,10 +62,10 @@
     "model_versions": [
       "gemini-3.5-flash-lite"
     ],
-    "api_calls": 152,
-    "cache_hits": 217,
-    "input_tokens": 573320,
-    "output_tokens": 711497
+    "api_calls": 4,
+    "cache_hits": 371,
+    "input_tokens": 628747,
+    "output_tokens": 804893
   },
   "QUEUE": {
     "model": "gemini-3.5-flash-lite",
@@ -74,5 +74,15 @@
     "cache_hits": 0,
     "input_tokens": 0,
     "output_tokens": 0
+  },
+  "AGENT_MODEL BRIEFS DASHBOARD": {
+    "model": "gemini-3.5-flash-lite",
+    "model_versions": [
+      "gemini-3.5-flash-lite"
+    ],
+    "api_calls": 164,
+    "cache_hits": 340,
+    "input_tokens": 822347,
+    "output_tokens": 962270
   }
 }

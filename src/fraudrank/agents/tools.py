@@ -18,7 +18,7 @@ def lookup_provider(params: dict, ctx: dict) -> dict:
     row = df.loc[pid]
     ptype = {(1, 1): "inpatient and outpatient", (1, 0): "inpatient only",
              (0, 1): "outpatient only"}.get((int(row.get("has_ip", 0)), int(row.get("has_op", 0))), "unknown")
-    cols = [c for c in df.columns if c != "PotentialFraud"]
+    cols = [c for c in df.columns if c not in ("y", "PotentialFraud")]
     values = {c: round(float(row[c]), 4) for c in cols[:30] if not str(row[c]) == "nan"}
     return {"provider": pid, "type": ptype, "n_features": len(cols), "values": values}
 

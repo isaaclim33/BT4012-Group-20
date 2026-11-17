@@ -73,6 +73,7 @@ class LLMClient:
                  effort: str = DEFAULT_EFFORT):
         self.model, self.mode, self.max_tokens, self.effort = model, mode, max_tokens, effort
         self.calls = self.cache_hits = 0
+        self.budget_hits = 0                 # react loops that used every turn and answered from what they had
         self.input_tokens = self.output_tokens = 0
         self.model_versions: set[str] = set()
         self._client = None
@@ -167,8 +168,18 @@ class LLMClient:
                 time.sleep(wait)
 
     def _gemini_json(self, system, messages, schema, eff):
-        resp = self._gemini_call(_to_gemini(messages), self._gemini_config(
-            system, eff, response_mime_type="application/json", response_json_schema=schema))
+        contents = _to_gemini(messages)
+        try:
+            resp = self._gemini_call(contents, self._gemini_config(
+                system, eff, response_mime_type="application/json", response_json_schema=schema))
+        except LLMError as err:
+            if "too many states" not in str(err):
+                raise
+            # Gemini cannot serve every nested bound (list lengths, numeric ranges, name patterns) at once.
+            # The relaxed schema keeps the fields and closed sets; pydantic still enforces the bounds after
+            # the call, and structured() asks for one correction when they fail. The cache key keeps the full schema.
+            resp = self._gemini_call(contents, self._gemini_config(
+                system, eff, response_mime_type="application/json", response_json_schema=_relax(schema)))
         cand = _candidate(resp)
         text = "".join(p.text for p in (cand.content.parts or []) if p.text and not p.thought)
         return _parse_json(text), "end_turn", _gemini_usage(resp), resp.model_version
@@ -234,8 +245,10 @@ class LLMClient:
                 tool_results.append({"type": "tool_result", "tool_use_id": tc["id"], "name": tc["name"],
                                      "content": json.dumps(result)})   # Gemini matches results by function name
             messages.append({"role": "user", "content": tool_results})
-        else:
-            raise LLMError(f"react loop hit {max_turns} turns without finishing")
+        else:   # turn budget spent: answer from the evidence gathered so far rather than discard it
+            self.budget_hits += 1
+            print(f"    react loop used all {max_turns} turns; writing the final output from its tool results",
+                  flush=True)
         summary = "\n".join(
             f"Tool {t['tool']}({json.dumps(t['input'])}): {json.dumps(t['output'])}"
             for t in trace
@@ -255,6 +268,20 @@ def _parse_json(text: str):
         return json.loads(text)
     except json.JSONDecodeError as err:
         raise LLMError(f"response was not valid JSON: {err}") from err
+
+
+BOUNDS = {"pattern", "minimum", "maximum", "exclusiveMinimum", "exclusiveMaximum",
+          "minItems", "maxItems", "minLength", "maxLength"}
+
+
+def _relax(schema, names=False):
+    """The schema without numeric, length and pattern bounds; enums and required fields stay.
+    Keys of a `properties` map are field names, never dropped."""
+    if isinstance(schema, dict):
+        return {k: _relax(v, k in ("properties", "$defs")) for k, v in schema.items() if names or k not in BOUNDS}
+    if isinstance(schema, list):
+        return [_relax(v) for v in schema]
+    return schema
 
 
 def _candidate(resp):

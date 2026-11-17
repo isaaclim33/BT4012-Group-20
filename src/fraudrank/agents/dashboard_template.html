@@ -211,6 +211,8 @@ kbd{font:inherit;font-size:11.5px;font-weight:700;border:1px solid var(--hero-li
 .kim ul{margin:6px 0 0;padding-left:18px}.kim li+li{margin-top:3px}
 .cnote{display:flex;gap:8px;align-items:center;margin:12px 0 0;font-size:13px;color:var(--amber-ink)}
 .cnote svg{flex:none}
+.exh{margin:12px 0 0;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--sub);font-size:13px}
+.exh b{display:block;margin-bottom:4px}.exh ul{margin:0;padding-left:18px}.exh li+li{margin-top:3px}
 .slides.static .slide+.slide{margin-top:10px}
 .wbar{display:flex;align-items:center;gap:14px 20px;flex-wrap:wrap;background:var(--card);border-radius:var(--r);padding:14px 18px;box-shadow:var(--soft)}
 .wbar .wprog{display:flex;align-items:center;gap:10px;min-width:220px;flex:1 1 260px}
@@ -648,6 +650,16 @@ const LANES = {audit: ["Full audit", "Open a case: request records and review cl
   borderline: ["Borderline", "Some models see unusual billing beyond size, some do not. Decide between a full audit and a desk review."],
   desk: ["Desk review", "High rank mainly because of size. A short records check."]};
 const evLine = p => p.evidence_line && p.evidence_line.length ? p.evidence_line.join(" · ") : null;
+// the claims behind a rule-check referral, one line each; the full rows stay in the audit record
+function exhibitList(p) {
+  const ex = p.billing_exhibits;
+  if (!ex) return null;
+  const lines = ex.duplicates.concat(ex.overlaps).map(x => x.summary), shown = lines.slice(0, 4);
+  if (!lines.length) return null;
+  return h("div", {class: "exh"}, h("b", {}, "Claims behind the rule check"),
+    h("ul", {}, shown.map(t => h("li", {}, t)),
+      lines.length > shown.length ? h("li", {}, `and ${lines.length - shown.length} more`) : null));
+}
 const isDone = id => statusOf(id) >= 2;
 // 0-1: working; 2-4: the decision recorded in the decision panel
 const STATUS = ["Not started", "In progress", "Full audit opened", "Desk review", "No further action"];
@@ -1230,6 +1242,7 @@ function providerPage(id) {
         infoBtn("reasons", "this reason")) : null),
     evLine(p) ? h("div", {class: "evchips", style: "margin-top:0"}, p.evidence_line.map(t => h("span", {class: "pl pl-white"}, t))) : null,
     h("p", {class: "lede", style: "margin-top:14px"}, (A && A.summary) || fallbackSummary(p)),
+    exhibitList(p),
     p.gate === 1 ? h("p", {class: "cnote"}, icon("alert", 15), "Can have innocent causes, such as a transfer or a data-entry error.")
       : p.recommendation_check === "borderline" ? h("p", {class: "cnote"}, icon("alert", 15), "Mixed picture: decide whether a full audit is needed.") : null));
   // 2. what to check
