@@ -1,8 +1,8 @@
 """Two-gate audit selection: who enters this cycle's review queue, and with which action.
 
-Gate 1, rule check: billing that is clearly wrong goes straight to review, whatever
-the model says. A provider is referred if it has any exact duplicate claim, or at
-least two inpatient stays that start before the same patient's previous stay ended.
+Gate 1, rule check: billing anomalies that need verification goes straight to review, whatever
+the model says. A provider is referred if it has any matching duplicate-like claim, or at
+least two inpatient stays that start before the same patient's earlier stay ended.
 Gate 2, risk ranking: the model ranks everyone gate 1 did not refer; the top of that
 ranking joins the queue. Agreement among size-free models retrained with different
 seeds decides full audit or desk review, so the action does not hinge on one seed.
@@ -16,19 +16,35 @@ from __future__ import annotations
 import pandas as pd
 
 from . import data as D
+from .ranking import ordered_scores, ranks
 from .config import (RISK_QUEUE_SIZE, RULE_DUPLICATE_MIN, RULE_OVERLAP_MIN, VOTE_AUDIT, VOTE_BORDERLINE,
                      VOTE_SEEDS)
 
 DUP_KEY = ["Provider", "BeneID", "ClaimStartDt", "InscClaimAmtReimbursed", "ClmDiagnosisCode_1"]
 
 
-def billing_checks(index: pd.Index) -> pd.DataFrame:
+def overlap_pairs(claims: pd.DataFrame):
+    """Yield one backing pair per stay overlapping any earlier stay.
+
+    Keep the earlier stay with the latest discharge. Sorting by claim ID also
+    makes simultaneous admissions independent of input row order.
+    """
+    ip = claims.dropna(subset=["AdmissionDt", "DischargeDt"]).sort_values(
+        ["Provider", "BeneID", "AdmissionDt", "ClaimID"])
+    for _, group in ip.groupby(["Provider", "BeneID"], sort=False):
+        previous = None
+        for row in group.itertuples(index=False):
+            if previous is not None and row.AdmissionDt < previous.DischargeDt:
+                yield previous, row
+            if previous is None or row.DischargeDt > previous.DischargeDt:
+                previous = row
+
+
+def billing_checks(index: pd.Index, claims: pd.DataFrame | None = None) -> pd.DataFrame:
     """Per provider: claims repeating an earlier claim, and overlapping inpatient stays."""
-    claims = D.load_claims()
+    claims = D.load_claims() if claims is None else claims
     dup = claims[claims.duplicated(DUP_KEY, keep="first")].groupby("Provider").size()
-    ip = claims[claims.AdmissionDt.notna()].sort_values(["Provider", "BeneID", "AdmissionDt"])
-    prev_discharge = ip.groupby(["Provider", "BeneID"]).DischargeDt.shift()
-    overlap = ip[ip.AdmissionDt < prev_discharge].groupby("Provider").size()
+    overlap = pd.Series([row.Provider for _, row in overlap_pairs(claims)], dtype=str).value_counts()
     return pd.DataFrame({"duplicate_claims": dup, "overlapping_stays": overlap}).reindex(index).fillna(0).astype(int)
 
 
@@ -36,9 +52,9 @@ EXHIBIT_COLS = ["ClaimID", "BeneID", "ClaimStartDt", "ClaimEndDt", "InscClaimAmt
                 "ClmDiagnosisCode_1", "AdmissionDt", "DischargeDt"]
 
 
-def billing_exhibits(providers: list[str]) -> dict[str, dict]:
+def billing_exhibits(providers: list[str], claims: pd.DataFrame | None = None) -> dict[str, dict]:
     """Return one-line summaries and backing claim rows for each gate-1 finding."""
-    claims = D.load_claims()
+    claims = D.load_claims() if claims is None else claims
     hit = claims[claims.Provider.isin(set(providers))]
     out: dict[str, dict] = {}
     for p in providers:
@@ -46,7 +62,7 @@ def billing_exhibits(providers: list[str]) -> dict[str, dict]:
         entry: dict[str, list] = {"duplicates": [], "overlaps": []}
 
         marked = pc[pc.duplicated(DUP_KEY, keep=False)]
-        for _, grp in marked.groupby(DUP_KEY[1:]):
+        for _, grp in marked.groupby(DUP_KEY[1:], dropna=False):
             rows = grp[EXHIBIT_COLS].sort_values("ClaimID")
             amt = int(rows.iloc[0].InscClaimAmtReimbursed)
             bene = str(rows.iloc[0].BeneID)
@@ -54,7 +70,8 @@ def billing_exhibits(providers: list[str]) -> dict[str, dict]:
             ends = pd.to_datetime(rows["ClaimEndDt"])
             gap = int((ends.max() - ends.min()).days)
             ids = " and ".join(str(r.ClaimID) for _, r in rows.iterrows())
-            summary = f"${amt:,} billed twice for {bene} on {date} ({ids})"
+            times = "twice" if len(rows) == 2 else f"{len(rows)} times"
+            summary = f"${amt:,} billed {times} for {bene} on {date} ({ids})"
             if gap:
                 summary += f" — end dates differ by {gap} day{'s' if gap != 1 else ''}"
             entry["duplicates"].append({
@@ -63,11 +80,7 @@ def billing_exhibits(providers: list[str]) -> dict[str, dict]:
                 "end_date_gap_days": gap,
             })
 
-        ip = pc[pc.AdmissionDt.notna()].sort_values(["BeneID", "AdmissionDt"])
-        prev_dis = ip.groupby("BeneID").DischargeDt.shift()
-        overlapping = ip[ip.AdmissionDt < prev_dis]
-        for _, row in overlapping.iterrows():
-            prev = ip[(ip.BeneID == row.BeneID) & (ip.index < row.name)].iloc[-1]
+        for prev, row in overlap_pairs(pc):
             overlap_days = (prev.DischargeDt - row.AdmissionDt).days
             summary = (f"{row.BeneID} admitted {str(row.AdmissionDt)[:10]}, "
                        f"{overlap_days} day{'s' if overlap_days != 1 else ''} before previous discharge "
@@ -76,8 +89,8 @@ def billing_exhibits(providers: list[str]) -> dict[str, dict]:
             entry["overlaps"].append({
                 "summary": summary,
                 "patient": str(row.BeneID),
-                "earlier_stay": {c: _fmt(prev[c]) for c in EXHIBIT_COLS},
-                "later_stay": {c: _fmt(row[c]) for c in EXHIBIT_COLS},
+                "earlier_stay": {c: _fmt(getattr(prev, c)) for c in EXHIBIT_COLS},
+                "later_stay": {c: _fmt(getattr(row, c)) for c in EXHIBIT_COLS},
             })
         out[p] = entry
     return out
@@ -118,18 +131,24 @@ def rule_check_dev(checks: pd.DataFrame, y: pd.Series) -> pd.DataFrame:
 
 def seed_votes(size_free_scores: dict[int, pd.Series]) -> pd.Series:
     """Number of retrained size-free models that put each provider in their top RISK_QUEUE_SIZE."""
-    tops = [s.rank(ascending=False, method="first") <= RISK_QUEUE_SIZE for s in size_free_scores.values()]
+    if not size_free_scores:
+        raise ValueError("At least one seed score series is required")
+    reference = next(iter(size_free_scores.values())).index
+    if any(set(s.index) != set(reference) for s in size_free_scores.values()):
+        raise ValueError("Seed scores must contain the same provider IDs")
+    tops = [ranks(s) <= RISK_QUEUE_SIZE for s in size_free_scores.values()]
     return pd.concat(tops, axis=1).sum(axis=1).astype(int)
 
 
 def two_gate_selection(score: pd.Series, checks: pd.DataFrame, votes: pd.Series) -> pd.DataFrame:
     """The review queue, ordered by risk score (highest first), then provider ID, so the order never
     depends on load order. Gate 1 guarantees a place and a full audit; it does not move a provider up."""
+    score = ordered_scores(score)
     reason = rule_check(checks.reindex(score.index))
-    rank = score.rank(ascending=False, method="first").astype(int)
+    rank = ranks(score)
     gate1 = reason[reason != ""].index
     rest = score.drop(gate1)
-    gate2 = rest.sort_values(ascending=False).index[:RISK_QUEUE_SIZE]
+    gate2 = ordered_scores(rest).index[:RISK_QUEUE_SIZE]
     rows = []
     for p in list(gate1) + list(gate2):
         v = int(votes[p])
@@ -168,7 +187,7 @@ def queue_evaluation(score: pd.Series, y: pd.Series, gate1: pd.Series, queue: pd
     lo, hi = bootstrap_ci(y_[rest], s_[rest], "pr_auc")
     rows.append({"ranking": "model only, providers gate 1 did not refer", "pr_auc": m["pr_auc"],
                  "pr_auc_lo": lo, "pr_auc_hi": hi})
-    top = score.sort_values(ascending=False).index[:len(queue)]
+    top = ordered_scores(score).index[:len(queue)]
     rows.append({"ranking": f"model top {len(queue)}: previously flagged", "flagged": int(y[top].sum())})
     rows.append({"ranking": f"review queue ({len(queue)}): previously flagged", "flagged": int(y[queue.provider].sum())})
     return pd.DataFrame(rows)

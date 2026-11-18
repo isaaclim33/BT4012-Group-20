@@ -21,6 +21,8 @@ def k_list(n: int) -> dict[str, int]:
 
 
 def precision_recall_at_k(y: np.ndarray, score: np.ndarray, k: int) -> tuple[float, float]:
+    if not 1 <= k <= len(y):
+        raise ValueError("k must be between 1 and the number of providers")
     order = np.argsort(-score, kind="stable")[:k]
     tp = y[order].sum()
     return tp / k, tp / max(1, y.sum())
@@ -29,7 +31,7 @@ def precision_recall_at_k(y: np.ndarray, score: np.ndarray, k: int) -> tuple[flo
 def evaluate(y, score, ks: dict[str, int] | None = None) -> dict[str, float]:
     y = np.asarray(y).astype(int)
     score = np.asarray(score, dtype=float)
-    ks = ks or k_list(len(y))
+    ks = k_list(len(y)) if ks is None else ks
     out = {"pr_auc": average_precision_score(y, score), "roc_auc": roc_auc_score(y, score)}
     for name, k in ks.items():
         p, r = precision_recall_at_k(y, score, k)
@@ -57,11 +59,11 @@ def bootstrap_ci(y, score, metric: str = "pr_auc", n: int = BOOTSTRAP, seed: int
     y = np.asarray(y).astype(int)
     score = np.asarray(score, dtype=float)
     pos, neg = np.where(y == 1)[0], np.where(y == 0)[0]
-    ks = ks or k_list(len(y))
+    ks = k_list(len(y)) if ks is None else ks
     vals = []
     for _ in range(n):
-        idx = np.concatenate([rng.choice(pos, len(pos)), rng.choice(neg, len(neg))])
-        vals.append(evaluate(y[idx], score[idx], ks)[metric])
+        idx = _bootstrap_indices(rng, pos, neg)
+        vals.append(_metric(y[idx], score[idx], metric, ks))
     return float(np.percentile(vals, 2.5)), float(np.percentile(vals, 97.5))
 
 
@@ -75,7 +77,30 @@ def paired_bootstrap_diff(y, score_a, score_b, metric: str = "pr_auc", n: int = 
     ks = k_list(len(y))
     diffs = []
     for _ in range(n):
-        idx = np.concatenate([rng.choice(pos, len(pos)), rng.choice(neg, len(neg))])
-        diffs.append(evaluate(y[idx], a[idx], ks)[metric] - evaluate(y[idx], b[idx], ks)[metric])
+        idx = _bootstrap_indices(rng, pos, neg)
+        diffs.append(_metric(y[idx], a[idx], metric, ks) - _metric(y[idx], b[idx], metric, ks))
     full = evaluate(y, a, ks)[metric] - evaluate(y, b, ks)[metric]
     return float(full), float(np.percentile(diffs, 2.5)), float(np.percentile(diffs, 97.5))
+
+
+def _bootstrap_indices(rng, pos, neg):
+    """Preserve original provider order within score ties, never label order.
+
+    Original rows must use the same canonical provider ordering as evaluation.
+    Sorting sampled positions also keeps paired comparisons on identical draws
+    without changing the random stream used for the published PR-AUC intervals.
+    """
+    return np.sort(np.concatenate([rng.choice(pos, len(pos)), rng.choice(neg, len(neg))]))
+
+
+def _metric(y, score, metric, ks):
+    # Bootstrap only the requested statistic, rather than recomputing every
+    # ranking metric thousands of times.
+    if metric == "pr_auc":
+        return average_precision_score(y, score)
+    if metric == "roc_auc":
+        return roc_auc_score(y, score)
+    for prefix, position in (("prec_", 0), ("rec_", 1)):
+        if metric.startswith(prefix):
+            return precision_recall_at_k(y, score, ks[metric[len(prefix):]])[position]
+    return evaluate(y, score, ks)[metric]

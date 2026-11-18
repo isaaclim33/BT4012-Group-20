@@ -20,6 +20,10 @@ import pandas as pd
 
 from ..audit_selection import billing_exhibits
 from ..config import BATCH_SIZE, CACHE_DIR, RISK_QUEUE_SIZE, TABLES_DIR, VOTE_AUDIT
+from ..ranking import ranks
+from .case_file import check_brief, completeness
+from .schemas import CaseBrief
+from pydantic import ValidationError
 from .rag import HybridRetriever
 
 CARE = {(1, 1): "Hospital and outpatient", (1, 0): "Hospital only", (0, 1): "Outpatient only"}
@@ -124,18 +128,19 @@ def _hist(values: np.ndarray, log: bool, bins: int = 28) -> dict:
     return {"edges": [round(float(e), 6) for e in edges], "counts": counts.tolist(), "log": log}
 
 
-def build(df: pd.DataFrame, splits: dict) -> dict:
-    scores = pd.read_pickle(CACHE_DIR / "test_scores.pkl")
-    shap = pd.read_pickle(CACHE_DIR / "shap_test_lightgbm.pkl")
-    shap_ns = pd.read_pickle(CACHE_DIR / "shap_test_lgbm_no_size.pkl")   # size-free model
+def build(df: pd.DataFrame, splits: dict, *, tables_dir=TABLES_DIR, cache_dir=CACHE_DIR,
+          claims=None) -> dict:
+    scores = pd.read_pickle(cache_dir / "test_scores.pkl")
+    shap = pd.read_pickle(cache_dir / "shap_test_lightgbm.pkl")
+    shap_ns = pd.read_pickle(cache_dir / "shap_test_lgbm_no_size.pkl")   # size-free model
     test = list(scores.index)
     dev = df.loc[splits["dev"]]
     dev = dev.assign(care=dev.apply(_care, axis=1))
 
-    rank = scores["lightgbm"].rank(ascending=False, method="first").astype(int)
-    size_free_rank = scores["lgbm:no_size"].rank(ascending=False, method="first").astype(int)
+    rank = ranks(scores["lightgbm"])
+    size_free_rank = ranks(scores["lgbm:no_size"])
     order = rank.sort_values().index
-    aq = pd.read_csv(TABLES_DIR / "agents" / "audit_queue.csv").fillna({"reason": ""}).set_index("provider")
+    aq = pd.read_csv(tables_dir / "agents" / "audit_queue.csv").fillna({"reason": ""}).set_index("provider")
 
     # peer distributions and quantiles per care type
     peers = {}
@@ -148,14 +153,19 @@ def build(df: pd.DataFrame, splits: dict) -> dict:
                 "hist": _hist(v, log)}
 
     gate1_providers = [p for p in aq.index if aq.loc[p, "gate"].startswith("1")]
-    exhibits = billing_exhibits(gate1_providers) if gate1_providers else {}
+    exhibits = billing_exhibits(gate1_providers, claims=claims) if gate1_providers else {}
 
     briefs = {}
-    bpath = TABLES_DIR / "agents" / "briefs.json"
+    bpath = tables_dir / "agents" / "briefs.json"
     if bpath.exists():
         for b in json.loads(bpath.read_text()):
             if b["condition"] == "with retrieval":
-                briefs[b["brief"]["provider"]] = b
+                try:
+                    brief = CaseBrief.model_validate(b["brief"])
+                    if check_brief(brief, b["evidence"])["passed"] and not completeness(brief, b["evidence"]):
+                        briefs[brief.provider] = b
+                except (ValidationError, KeyError, TypeError):
+                    continue
     retr = HybridRetriever()
 
     providers = []
@@ -210,7 +220,7 @@ def build(df: pd.DataFrame, splits: dict) -> dict:
             entry["case_uncertainty"] = br["uncertainty"]
         providers.append(entry)
 
-    test_res = pd.read_csv(TABLES_DIR / "test_results.csv").set_index("model")
+    test_res = pd.read_csv(tables_dir / "test_results.csv").set_index("model")
     queue = sorted((p for p in providers if p["in_queue"]), key=lambda p: p["position"])
     overview = {
         "providers_scored": len(test), "queue_size": len(queue), "risk_queue_size": RISK_QUEUE_SIZE,

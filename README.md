@@ -1,12 +1,18 @@
-# Who Should Medicare Audit Next?
+# Medicare Provider Fraud Risk Ranking, LLM-Assisted Investigation and Case Review Dashboard
 
-BT4012 Fraud Analytics, Group 20. We rank 5,410 Medicare providers for audit from their claims,
-build a review queue that people can work through, and use LLM agents to explain each case. The
-report is [`report/report20.docx`](report/report20.docx) (exported as [`report/report20.pdf`](report/report20.pdf)).
+**BT4012 Fraud Analytics · Group 20**
 
-**Design rule throughout: LLMs propose and explain; code decides and checks.** No LLM decides who
-is reviewed, which action they get, or which model is used, and nothing an LLM writes is shown
-without a check.
+| Name | Student ID |
+|---|---|
+| Isabella Tan Jing Xuan | A0282806Y |
+| Isaac Lim Zhongyu | A0272258Y |
+| Charmaine Neo Jia En | A0281655X |
+
+## Description
+
+Limited audit capacity makes it difficult to prioritise suspicious Medicare providers while distinguishing
+unusual billing from high billing volume. This project combines fraud risk ranking, billing checks, and
+LLM-assisted investigation in a case review dashboard to help reviewers assess evidence and record audit decisions.
 
 ## How it works
 
@@ -31,7 +37,7 @@ flowchart TB
     end
     subgraph P3["3 · Select · QUEUE"]
         direction LR
-        C1{{"Rule check<br/>clearly wrong billing"}}:::gate --> C3[("Review queue<br/>65 cases · 3 lanes")]:::out
+        C1{{"Rule check<br/>billing anomalies"}}:::gate --> C3[("Review queue<br/>65 cases · 3 lanes")]:::out
         C2{{"Risk ranking<br/>top 50 · seed vote"}}:::gate --> C3
     end
     subgraph P4["4 · Explain · BRIEFS, DASHBOARD"]
@@ -51,10 +57,14 @@ flowchart TB
     P4 --> P5
 ```
 
-Colours: grey = code that decides, purple = LLM agent, amber = check, blue = investigator, green = output.
-Alongside, **CLEAN**, **LEAK_AGENT** and **AGENT_MODEL** test the agents themselves and do not feed
-the queue; the model experiments (EDA_TESTS, SIZE, MODELS, FAMILIES, NETWORK, IMBALANCE, NOISE, LEAKY_SPLIT,
-QUEUE_COST, TEST, DEEP, EVASION, FAIRNESS, SIZE_BANDS) evaluate the ranking.
+| Grey | Purple | Amber | Blue | Green |
+|---|---|---|---|---|
+| Decision logic | LLM agent | Validation check | Investigator | Output |
+
+Two sets of experiments evaluate the system alongside this workflow:
+
+- **Agent evaluation:** `CLEAN`, `LEAK_AGENT` and `AGENT_MODEL` test agent performance independently of the review queue.
+- **Ranking evaluation:** Model experiments assess predictive performance, signal beyond provider size, data leakage, class imbalance, robustness, fairness and audit capacity.
 
 | Stage | What happens | Who decides |
 |---|---|---|
@@ -68,9 +78,9 @@ QUEUE_COST, TEST, DEEP, EVASION, FAIRNESS, SIZE_BANDS) evaluate the ranking.
 
 ### Two-gate audit selection
 
-* **Gate 1 – rule check.** Billing that is clearly wrong goes straight to review: any claim that
+* **Gate 1 – rule check.** Billing anomalies that need verification goes straight to review: any claim that
   repeats an earlier one (same patient, date, amount, main diagnosis), or two or more inpatient stays
-  that start before the same patient's previous stay ended. A single overlap is shown as a warning only.
+  that start before the same patient's earlier stay ended. A single overlap is shown as a warning only.
 * **Gate 2 – risk ranking.** The 50 highest-scoring remaining providers (LightGBM) join the queue.
   The size-free model is retrained with 10 seeds: **full audit** if ≥8 of 10 put the provider in
   their size-free top 50, **borderline** desk review at 3–7, otherwise **desk review**.
@@ -81,7 +91,18 @@ All thresholds are in `src/fraudrank/config.py` and were set on development prov
 
 ### Review dashboard
 
-`results/dashboard/provider_review_dashboard.html` – one self-contained file, works offline.
+`results/dashboard/provider_review_dashboard.html` – the refreshed, self-contained dashboard,
+built from the existing caches and usable offline.
+
+Open the HTML file in your browser by double-clicking it, or run this from the project root on macOS:
+
+```bash
+open results/dashboard/provider_review_dashboard.html
+```
+
+No server or internet connection is required.
+
+For the refreshed dashboard built without API calls, see **Offline fixes and rebuild** below.
 
 * **Today's work:** progress, the next case, and the review queue with lane tabs (full audit,
   borderline, desk review), grouping (reason, pattern, type of care, batch) and **batches of 12**.
@@ -92,16 +113,24 @@ All thresholds are in `src/fraudrank/config.py` and were set on development prov
   BENE25655 on 2009-08-18 … end dates differ by 2 days`). Desk reviews get a lighter page in standard wording.
 * **Decision panel:** open full audit, desk review or no further action; a reason is required when
   differing from the recommendation; *Save & next case* moves on. Keys: 1-3 choose, S save, J/K move.
-* **Download case notes:** each case's decision, reason, checklist progress and note as CSV. Decisions
+* **Export all case records:** each case's decision, reason, checklist progress and note as CSV. Decisions
   and notes stay in the browser until downloaded.
 * **All providers:** look up any of the 1,082 providers (search, table or cards).
 * **Ranking insights:** this cycle at a glance, why cases are here, what investigators will find in
   the records, and the size-or-behaviour map.
+* **Decisions:** saved outcomes, newest first, with filters for full audit opened, desk review and
+  no further action. Each row shows the original recommendation, decision, reason and local date/time.
+  Open the case to change its decision, or use **Export saved decisions** to export the selected status as CSV (timestamps in UTC).
+  The review queue tabs show recommendation totals; "Decisions recorded" tracks progress separately.
 * **How it works:** a help panel from the **?** icon or key, with ⓘ links next to key terms.
-* **Grounding gate:** every evidence item is re-derived from the case evidence, and every number in
-  the AI text must appear in it or in the page's billing exhibits, written as digits (a number spelled
-  out in words cannot be checked, so it fails); anything that fails is not shown, item by item
-  (`agents/dashboard_grounding.csv`).
+* **Grounding gate:** queue evidence is re-derived from structured case data. Factual AI wording
+  must match code-owned wording for the specific field, including units and comparisons; otherwise
+  the page uses standard wording. Qualitative review instructions can be reused, and a small sample
+  size such as "Sample two claims" is treated as an instruction. A number appearing elsewhere in
+  the evidence is not sufficient support (`agents/dashboard_grounding.csv`).
+* **Saved work:** decisions, notes and checklist ticks are scoped to the dataset and review cycle.
+  A failed save keeps the form open and displays an error. Export notes from an older dashboard
+  before switching to a rebuilt cycle; they are not automatically carried into the new cycle.
 
 ## Agent harness: design and architecture
 
@@ -155,7 +184,7 @@ flowchart TB
 
     subgraph S4["DASHBOARD · dashboard text"]
         D1["Dashboard agent<br/>overview + case pages"]:::llm --> D2{{"Page checks<br/>numbers · terms · provider"}}:::gate
-        D2 --> D3{{"Grounding gate<br/>item by item, digits only"}}:::gate
+        D2 --> D3{{"Grounding gate<br/>field-specific facts"}}:::gate
     end
 
     A2 --> B1
@@ -268,10 +297,11 @@ false alarms.
    deviation is below the best seen so far on those same 3 folds; at least one always survives.
 5. **Cross-validation** on the first CV repeat, then **code chooses** with a paired-fold rule
    (`selection.py`): the best-scoring configuration wins only if it beats a simpler one by more than
-   one paired standard error *and* on most folds; otherwise the simpler one is kept.
+   one correlation-corrected paired standard error *and* on most folds; otherwise the simpler one is kept.
 6. **Critic** (ReAct, with a tool that returns per-fold scores) sees the code's choice and decides
    whether to stop, which experiments to run next (up to 3 rounds), and what looks wrong.
-7. **Evaluation** on CV repeats 2–5, which the loop never saw, and once on the test set; ablations
+7. **Evaluation** on CV repeats 2–5 and once on the test set; later repeats reuse the same development
+   providers, so they are descriptive comparisons rather than independent nested evaluation. Ablations
    (round 1 only without the critic, no feature agent, no leakage review) are repeated for every run.
 
 Three designs are compared, 3 runs each: three agents without definitions (the original loop), three
@@ -279,13 +309,16 @@ agents with definitions, and **one agent with definitions**, a single modelling 
 features and configurations together. A **fold test** fixed in advance (`selection.py`) decides whether
 the separate roles earn their place: keep them only if the 95% CI of the per-fold difference (one agent
 minus three, each fold averaged over runs) lies entirely below 0 (`agent_model_fold_test.json`).
+The offline correction uses a Nadeau–Bengio variance correction for overlapping training folds:
+`SE = sqrt((1 / n_folds + n_validation / n_training) * variance_of_differences)`.
+This widens the interval; it does not remove selection bias or establish equivalence.
 
 *Why this design:*
 * In the first version, the critic chose the model using a "beat it by one standard deviation" rule
   and picked weaker models; comparing models fold by fold is the right yardstick, and code applies it
   exactly.
 * An earlier experiment agent was told to drop weak proposals and did not; the preview gate does it in code.
-* Scoring on the folds the loop chose on would flatter the agents, hence repeats 2–5.
+* Repeats 2–5 change fold assignments, but do not provide new providers unseen during selection.
 
 **QUEUE** (no LLM). Two-gate audit selection: the rule check, the risk ranking and the 10-seed model
 vote (see above). Written to `audit_queue.csv` before any later agent runs; BRIEFS and DASHBOARD stop if it is missing.
@@ -300,7 +333,8 @@ vote (see above). Written to `audit_queue.csv` before any later agent runs; BRIE
   the billing finding in the summary; a brief that misses them gets one revision, then code fills the gaps.
 * `check_brief` (code) checks every brief: driver values, percentiles and model contributions match the
   evidence; every cited playbook section was actually retrieved and lists one of the brief's drivers;
-  the rank is right; and there is no claim that fraud is proven (negation-aware).
+  the provider and rank are right; and there is no claim that fraud is proven (negation-aware).
+  A failed brief is excluded from downstream evidence rather than merely recorded as a failure.
 * The agent's suggested action is recorded next to the code's decision, but decides nothing and is not
   shown on the dashboard.
 * The trajectory is logged (`briefs_trajectory.json`): which tools were called, on which provider, with what result.
@@ -317,9 +351,10 @@ get standard wording. Run 3 times; the dashboard is built from run 1.
   cautions on the overview.
 * A page that fails is replaced by standard wording; text that only runs over its word limit is
   dropped in that one place.
-* A final **grounding gate** (`grounding.py`) then checks everything shown about each case: each
-  evidence item is re-derived from the case evidence, and each displayed AI sentence is checked item
-  by item, with numbers written as digits.
+* A final **grounding gate** (`grounding.py`) binds factual wording to specific evidence fields.
+  Cached factual prose that cannot be verified is replaced by code-written text; safe qualitative
+  checklist instructions are retained. Currency scales, counts and feature values cannot be
+  transferred between fields just because their digits appear somewhere in the evidence.
 * *Why:* investigators act on this text, so every statement must trace to the case. Checking item by
   item means one bad sentence does not take a whole page down.
 
@@ -383,10 +418,48 @@ how the claims were generated.
 | LEAK_AGENT | 5/5 planted leaks caught, 0 false alarms, in every run |
 | AGENT_MODEL vs fixed | CV 0.724 vs 0.730 (range 0.723–0.725); test 0.802 vs 0.805, difference −0.003 [−0.021, +0.014]. Agents match, but do not beat, the hand-tuned pipeline; the feature agent adds nothing |
 | Feature definitions | Redundant proposals fall from 53% (24 of 45) to 19% (6 of 31); CV 0.728, but only one run of three used agent features, and no run beats the fixed pipeline significantly on test |
-| One agent vs three | One agent with definitions: CV 0.721. Fold test: one minus three −0.007 [−0.011, −0.002], so separate agents are kept; weak evidence (correlated folds, one poor run, no difference on test). One agent used 27 calls against 37 |
+| One agent vs three | One agent with definitions: CV 0.721. Offline correlation-corrected fold comparison: one minus three −0.007 [−0.018, +0.004]. The interval crosses zero, so the stated simplicity rule favours one agent; equivalence is not established. Original agent configurations and predictions are retained. One agent used 27 calls against 37 |
 | BRIEFS | 130 briefs: 597/597 driver values exact, 164/164 citations real and on point, 0 claims of proven fraud, every brief complete on its first attempt. With retrieval, the suggested action matches the code's decision in 78% of briefs (74% without); of 14 disagreements, 9 escalate desk reviews on size and 5 question single-duplicate referrals. Trajectory: 6 tool calls in 2 of 65 briefs |
 | DASHBOARD | Overview passed in 3/3 runs; provider pages 55, 57, 55 of 57 (failures: an exact figure quoted from outside the page's evidence, or an unstated stay length, caught) |
-| Grounding gate | 162/162 evidence items re-derived from case evidence; 31 of 983 displayed AI items removed (numbers written in words), none with an unsupported number |
+| Grounding gate (original run) | 162/162 evidence items re-derived; 31 of 983 AI items removed by the original numeric check. This did not establish semantic faithfulness; refreshed field-specific checks are in `results/dashboard/tables/agents/dashboard_grounding.csv` |
+
+## Offline fixes and rebuild
+
+With the existing data and caches on this machine, refresh statistics, billing evidence, the queue
+and dashboard **without retraining predictive models or making any API calls**:
+
+```bash
+source .venv/bin/activate
+python scripts/rebuild_offline.py
+open results/dashboard/provider_review_dashboard.html  # macOS
+```
+
+The script blocks network access and fails if required caches are missing. It reads saved predictions,
+seed scores, fold results and agent responses. Changed case evidence uses standard dashboard text;
+it never asks an agent to rewrite it. Outputs go to `results/dashboard/`, preserving the original tables
+and locally modified agent results. Refreshed tables are in `results/dashboard/tables/`;
+`results/dashboard/manifest.json` records input/output SHA-256 hashes, cache
+compatibility checks, changed queue providers and any statistics that could not be refreshed.
+
+The rebuild also recalculates EDA using development providers only. That prevents future exploration
+from reading held-out labels, but cannot undo earlier exposure to full-dataset summaries.
+SMOTE, patient-mix features and nested CV are deferred. Existing model selections and fitted predictions
+remain the historical experiment results; the corrected selection rule applies to future searches.
+Some deep-model and agent test prediction caches are absent, so their original test intervals cannot
+be recalculated without additional model work. The manifest identifies these limits. The project report
+now incorporates the corrected interpretation and distinguishes refreshed statistics from historical model results.
+
+Local regression checks:
+
+```bash
+python tests/test_offline_fixes.py
+node tests/test_dashboard_storage.cjs
+node tests/test_dashboard_decisions.cjs
+python tests/test_agent_plumbing.py
+```
+
+The first three checks use small fixtures. The plumbing check uses existing processed data, a fake LLM,
+and a few small model fits; it does not call the API or replace experiment artifacts.
 | Retrieval | Hybrid search recall@1 0.90 (BM25 0.85, dense 0.80) on 20 test queries |
 
 ## Reproducing the results
@@ -422,11 +495,15 @@ cp .env.example .env                          # paste your key after GEMINI_API_
 python scripts/run_agents_local.py            # RETRIEVAL, CLEAN, LEAK_AGENT, AGENT_MODEL, QUEUE, BRIEFS, DASHBOARD
 ```
 
-Or replay every agent result from the cache, with no key and no cost:
+For a historical workflow whose requests still match the cache, replay mode uses no key or API calls
+(it still runs local model experiments):
 
 ```bash
 python scripts/03_run_agents.py --replay
 ```
+
+For the fixes above, prefer `python scripts/rebuild_offline.py`: changed checks, selection decisions
+or prompts can cause replay cache misses. Do not switch to live mode to refresh the dashboard.
 
 Notes:
 
@@ -436,12 +513,13 @@ Notes:
   errors at busy times; each call retries up to 7 times, and a run that still fails is recorded, so re-running
   the same command later completes it.
 * Offline check of all agent code paths (fake LLM, nothing written): `python tests/test_agent_plumbing.py`.
-* Replay is exact on the platform that produced the cache: the current agent results were produced and
-  replay-verified on macOS with Python 3.12 (0 API calls, every table and the dashboard identical). On another platform, scripts
+* The original experiment revision was replay-verified on macOS with Python 3.12
+  (0 API calls, every table and the dashboard identical). That historical verification does not cover
+  the later code fixes. On another platform, scripts
   00–02 reproduce every table exactly except last-digit floating-point noise (for example 0.69559 vs 0.69564 in a
   tuning grid). AGENT_MODEL embeds those scores in its prompts, so on Windows its cache keys can miss: with
   `--replay` it then stops with an error instead of calling the API. RETRIEVAL, CLEAN, LEAK_AGENT, QUEUE, BRIEFS
-  and DASHBOARD replay identically.
+  and DASHBOARD replay identically at the original experiment revision.
 
 ## Repository layout
 
@@ -467,9 +545,3 @@ report/                                report20.docx (editable), report20.pdf
   assigned is undocumented: results describe this benchmark, not real providers.
 * The test set has 101 flagged providers, so close models are not separable at one queue size.
 * LLM outputs vary between runs; every agent experiment is run three times and the spread reported.
-* The split attack is rebuilt from claims, but blend-in edits provider features rather than re-simulating
-  claims; fairness covers two groupings.
-* Most duplicate-claim pairs differ only in their end dates, so the duplicate rule's precision may partly
-  reflect how the claims were generated.
-* The labels cannot reward the rule check: duplicate claims and overlapping stays are evidence of a
-  different kind. Of the 4 rule referrals the model ranks outside its top 65, 1 was previously flagged.

@@ -37,7 +37,7 @@ from fraudrank.agents.feature_brief import feature_brief  # noqa: E402
 from fraudrank.agents.schemas import FeatureProposal  # noqa: E402
 from fraudrank.agents.llm import LLMClient, LLMError  # noqa: E402
 from fraudrank.agents.rag import HybridRetriever, evaluate_retrieval  # noqa: E402
-from fraudrank.agents.selection import choose_config, fold_test  # noqa: E402
+from fraudrank.agents.selection import choose_config, corrected_se, fold_test  # noqa: E402
 from fraudrank.config import CACHE_DIR, RAW_DIR, TABLES_DIR, TRAIN_FILES  # noqa: E402
 from fraudrank.metrics import bootstrap_ci, evaluate, paired_bootstrap_diff  # noqa: E402
 
@@ -168,7 +168,8 @@ def LEAK_AGENT():
 # ------------------------------------------------------------------ AGENT_MODEL
 # The loop chooses configurations on the first CV repeat (folds 1-5, previews on folds
 # 1-3), and tuning also used that repeat. Both pipelines are therefore compared on
-# repeats 2-5 only, which no choice has seen.
+# repeats 2-5 only. These reuse development providers: this is a descriptive
+# comparison of selected configurations, not independent nested evaluation.
 EVAL_FOLDS = SPLITS["folds"][5:]
 PREVIEW_FOLDS = REPEAT0[:3]
 
@@ -297,7 +298,8 @@ def agent_loop(run: int, allow_agent_features: bool = True, tag: str = "", defin
 
 
 def _ci(col):
-    return 1.96 * col.std() / np.sqrt(len(col))
+    from scipy.stats import t
+    return t.ppf(0.975, len(col) - 1) * corrected_se(col)
 
 
 # Rows of the AGENT_MODEL table. The first two agent rows measure the feature definitions (by the
@@ -570,7 +572,10 @@ def BRIEFS():
                                id_calls=len(with_id),
                                id_calls_correct=sum(t["input"]["provider_id"] == prov for t in with_id),
                                tool_errors=sum("error" in t["output"] for t in trace))
-                briefs.append({"condition": cond, "evidence": ev, "brief": brief.model_dump()})
+                publish_check = check_brief(brief, ev)
+                chk["published"] = publish_check["passed"] and not completeness(brief, ev)
+                if chk["published"]:
+                    briefs.append({"condition": cond, "evidence": ev, "brief": brief.model_dump()})
             except LLMError as e:
                 chk = {"provider": prov, "schema_valid": False, "error": str(e)[:200]}
             chk.update(condition=cond, position=q.position, gate=q.gate, code_action=q.action, rank=q.risk_rank,

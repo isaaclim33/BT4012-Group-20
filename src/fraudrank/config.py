@@ -32,7 +32,7 @@ K_FRACTIONS = (0.05, 0.10)  # audit capacity as a share of providers
 # Two-gate audit selection (see audit_selection.py). Rule thresholds were set on
 # development providers only; the test set applies them once.
 RULE_DUPLICATE_MIN = 1    # gate 1: claims repeating an earlier claim (patient, date, amount, diagnosis)
-RULE_OVERLAP_MIN = 2      # gate 1: inpatient stays starting before the same patient's previous stay ended
+RULE_OVERLAP_MIN = 2      # gate 1: inpatient stays starting before the same patient's earlier stay ended
 RISK_QUEUE_SIZE = 50      # gate 2: highest risk scores among providers gate 1 did not refer (the report's k=50)
 BATCH_SIZE = 12           # dashboard: the queue is released to reviewers in batches of this size
 VOTE_SEEDS = (42, 0, 1, 2, 3, 4, 5, 6, 7, 8)   # size-free models retrained with these seeds

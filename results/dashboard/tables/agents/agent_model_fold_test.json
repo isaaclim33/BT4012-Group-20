@@ -1,0 +1,16 @@
+{
+  "rule": "Keep the separate Feature agent and Critic only if the one-agent design is worse on paired folds: the correlation-corrected 95% CI of the PR-AUC difference (one agent minus three agents, both with definitions; each fold first averaged over runs) lies entirely below 0. Otherwise fold them into one agent.",
+  "a": "one agent, with definitions",
+  "b": "three agents, with definitions",
+  "folds": 20,
+  "runs_a": 3,
+  "runs_b": 3,
+  "diff_mean": -0.006904911916504325,
+  "ci_lo": -0.017709799355981673,
+  "ci_hi": 0.0038999755229730242,
+  "folds_a_better": 5,
+  "decision": "fold into one agent",
+  "interval_method": "Nadeau-Bengio corrected repeated-CV t interval",
+  "test_train_ratio": 0.2500000250231339,
+  "caveat": "The variance correction is approximate. The configurations were selected using the same development providers, so this is not nested evaluation. An interval crossing zero does not establish equivalence; folding follows the stated simplicity rule."
+}

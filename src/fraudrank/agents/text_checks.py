@@ -44,8 +44,9 @@ def numbers_in(obj) -> list[float]:
 
 def allowed_numbers(source) -> set[float]:
     """Numbers a text may state: every source number, common roundings, percentage and
-    'lower than' complements, and small integers (0-10) used in ordinary phrases."""
-    allowed = set(float(x) for x in range(0, 11))
+    'lower than' complements. This is a diagnostic, not proof of factual support;
+    the final grounding gate binds factual wording to a specific evidence field."""
+    allowed = set()
     for v in numbers_in(source):
         cands = [v, round(v), round(v, 1), round(v, 2), v * 100, round(v * 100), round(v * 100, 1),
                  math.floor(v), 100 - v, math.floor(100 - v), round(100 - v),

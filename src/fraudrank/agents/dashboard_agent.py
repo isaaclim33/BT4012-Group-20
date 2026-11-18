@@ -91,8 +91,8 @@ def overview_facts(data: dict) -> dict:
         "queue_unusual_beyond_size": o["queue_unusual_without_size"],
         "how_the_queue_is_built": {
             "rule_check": o["gate1_rule_check"], "rule_check_reasons": o["gate1_reasons"],
-            "rule_check_meaning": "billing that is clearly wrong (a claim repeating an earlier one, or hospital stays "
-                                  "starting before the same patient's previous stay ended) is referred whatever its rank",
+            "rule_check_meaning": "billing anomalies that need verification (a claim repeating an earlier one, or hospital stays "
+                                  "starting before the same patient's earlier stay ended) is referred whatever its rank",
             "risk_ranking": o["gate2_risk_ranking"],
             "risk_ranking_meaning": f"the {o['risk_queue_size']} highest-ranked of the remaining providers; a full "
                                     f"audit when at least {o['vote_audit']} of {o['vote_models']} models agree it is "

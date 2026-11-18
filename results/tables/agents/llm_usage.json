@@ -84,5 +84,15 @@
     "cache_hits": 340,
     "input_tokens": 822347,
     "output_tokens": 962270
+  },
+  "RETRIEVAL CLEAN LEAK_AGENT AGENT_MODEL QUEUE BRIEFS DASHBOARD": {
+    "model": "gemini-3.5-flash-lite",
+    "model_versions": [
+      "gemini-3.5-flash-lite"
+    ],
+    "api_calls": 0,
+    "cache_hits": 517,
+    "input_tokens": 838626,
+    "output_tokens": 1022370
   }
 }
