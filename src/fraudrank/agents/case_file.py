@@ -128,9 +128,9 @@ def check_brief(brief: CaseBrief, evidence: dict) -> dict:
         num_total += 1
         t = tool.get(d.feature)
         ok = (t is not None
-              and np.isclose(d.value, t["value"], rtol=0.01, atol=1e-3)
-              and abs(d.peer_percentile - t["peer_percentile"]) <= 0.5
-              and np.isclose(d.shap, t["shap"], rtol=0.01, atol=1e-3))
+              and np.isclose(d.value, t["value"], rtol=0, atol=5e-5)
+              and abs(d.peer_percentile - t["peer_percentile"]) <= 0.05
+              and np.isclose(d.shap, t["shap"], rtol=0, atol=5e-5))
         num_ok += bool(ok)
     retrieved = {c["chunk_id"]: c for c in evidence.get("playbook", [])}
     drivers = {d.feature for d in brief.drivers}
@@ -140,8 +140,13 @@ def check_brief(brief: CaseBrief, evidence: dict) -> dict:
         cite_exist += c is not None
         cite_support += c is not None and bool(drivers & set(c["signals"]))
     n_cit = len(brief.typologies)
+    provider_ok = brief.provider == evidence["provider"]
+    rank_ok = brief.risk_rank == evidence["risk_rank"]
+    says_fraud = any(asserts_fraud(t) for t in (brief.summary, brief.uncertainty, brief.action_reason))
+    passed = (provider_ok and rank_ok and num_total > 0 and num_ok == num_total
+              and cite_exist == n_cit and cite_support == n_cit and not says_fraud)
     return {"provider": brief.provider, "drivers": num_total, "drivers_faithful": num_ok,
             "citations": n_cit, "citations_exist": cite_exist, "citations_supported": cite_support,
-            "rank_matches": brief.risk_rank == evidence["risk_rank"],
-            "says_fraud_confirmed": asserts_fraud(brief.summary),
+            "provider_matches": provider_ok, "rank_matches": rank_ok, "passed": passed,
+            "says_fraud_confirmed": says_fraud,
             "action": brief.recommended_action}

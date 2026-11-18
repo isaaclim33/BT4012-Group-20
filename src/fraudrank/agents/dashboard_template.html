@@ -234,6 +234,8 @@ kbd{font:inherit;font-size:11.5px;font-weight:700;border:1px solid var(--hero-li
 .qt .qcase b{display:block}
 .qt .qev{display:block;font-size:12.5px;color:var(--ink-2);margin-top:2px;line-height:1.4}
 .qt .qacts{display:flex;gap:6px;flex-wrap:wrap}
+.decisions-table{min-width:820px}
+.decisions-table .decision-reason{min-width:180px;max-width:340px;white-space:pre-wrap;overflow-wrap:anywhere}
 @container (max-width:620px){.qt .c-pay{display:none}}
 .dec .note{padding:8px}
 .dec .note textarea{min-height:52px;transition:min-height .15s}
@@ -621,7 +623,7 @@ footer{color:var(--quiet);font-size:12.5px;padding:22px 6px 0;display:flex;justi
     <div class="top">
       <a class="logo" href="#/" aria-label="Provider review, overview"><i id="logo-ic"></i><span>Provider review</span></a>
       <nav class="nav" aria-label="Main">
-        <a href="#/" id="nav-home">Today's work</a><a href="#/providers" id="nav-prov">All providers</a><a href="#/ranking" id="nav-rank">Ranking insights</a>
+        <a href="#/" id="nav-home">Today's work</a><a href="#/providers" id="nav-prov">All providers</a><a href="#/ranking" id="nav-rank">Ranking insights</a><a href="#/decisions" id="nav-decisions">Decisions</a>
       </nav>
       <div class="icons" id="icons"></div>
     </div>
@@ -728,9 +730,12 @@ function icon(name, size = 18, sw = 1.9) {
   return el;
 }
 const store = {
-  get(k, d) { try { const v = localStorage.getItem("prq:" + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
-  set(k, v) { try { localStorage.setItem("prq:" + k, JSON.stringify(v)); } catch (e) {} }
+  prefix: "prq:v2:" + D.meta.storage_cycle + ":",
+  get(k, d) { try { const v = localStorage.getItem(this.prefix + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(this.prefix + k, JSON.stringify(v)); return true; } catch (e) { return false; } },
+  remove(k) { try { localStorage.removeItem(this.prefix + k); return true; } catch (e) { return false; } }
 };
+function saveFailed() { toast("Could not save in this browser. Keep this page open and copy your notes; enable browser storage, then retry."); }
 const int = n => Math.round(n).toLocaleString("en-US");
 function money(v) {
   if (v >= 1e6) return "$" + (v / 1e6).toFixed(v >= 1e7 ? 1 : 2) + "M";
@@ -761,8 +766,8 @@ function toast(msg) {
   const t = $("#toast"); t.replaceChildren(icon("check", 16, 2.4), msg); t.classList.add("on");
   clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("on"), 2200);
 }
-const statusOf = id => store.get("st:" + id, 0);
-const markStarted = id => { if (statusOf(id) === 0) { store.set("st:" + id, 1); logEvent(id, "status", 1); } };
+const statusOf = id => { const d = store.get("dec:" + id, null); return d ? d.outcome : store.get("st:" + id, 0); };
+const markStarted = id => { if (statusOf(id) === 0) { if (!store.set("st:" + id, 1)) { saveFailed(); return; } logEvent(id, "status", 1); } };
 const prio = p => p.in_queue ? `Priority ${p.position}` : `Rank ${p.rank}`;
 const ai = id => (AI && AI.providers && AI.providers[id]) || null;
 const recPill = p => p.action ? h("span", {class: "pl pl-dot " + REC_CLASS[p.action]}, ACTION[p.action]) : h("span", {class: "pl pl-none"}, "Not in queue");
@@ -786,7 +791,7 @@ function ago(t) {
 function sel(attrs, options) { return h("span", {class: "sel"}, h("select", attrs, options), icon("chevd", 16, 2.2)); }
 
 /* ---------- code-written fallback text (used when the agent has not written a page) ---------- */
-function fallbackHeadline() { return `${O.queue_unusual_without_size} of this cycle's ${O.queue_size} queued providers bill unusually even when their size is set aside.`; }
+function fallbackHeadline() { return `${O.queue_unusual_without_size} of the ${O.queue_size} providers queued for review show unusual billing behaviour even when provider size is excluded from the evaluation.`; }
 function fallbackSummary(p) {
   const top = p.drivers.filter(d => d[1]).slice(0, 2).map(d => label(d[0]).toLowerCase());
   const lead = p.in_queue ? `Ranked ${p.rank} of ${int(N)} and in this cycle's review queue.` + (p.gate === 1 ? ` Referred by the rule check: ${p.rule_reason}.` : "") :
@@ -909,7 +914,7 @@ let redraws = [], wasNarrow = narrow();
 window.addEventListener("resize", () => { const n = narrow(); if (n !== wasNarrow) { wasNarrow = n; redraws.forEach(f => f()); } }, {passive: true});
 function go(id) { location.hash = "#/p/" + id; }
 const DEFAULT_T = () => ({mode: "all", q: "", cares: [...CARES], lane: "", sort: "rank", dir: 1, limit: 100});
-const view = {map: "queue", qg: "", qb: 0, t: DEFAULT_T(), cards: store.get("cards2", false)};
+const view = {map: "queue", qg: "", qb: 0, decision: 0, t: DEFAULT_T(), cards: store.get("cards2", false)};
 function openProviders(patch = {}) { view.t = Object.assign(DEFAULT_T(), patch); if (location.hash === "#/providers") route(); else location.hash = "#/providers"; }
 let timers = [];
 const later = (fn, ms) => timers.push(setTimeout(fn, ms));
@@ -928,16 +933,16 @@ function overviewPage() {
   later(() => meter.style.width = `${100 * done / QUEUE.length}%`, 60);
   if (!view.qbSet) view.qb = nxt ? nxt.batch : 0;      // open on the batch being worked
   const bar = h("div", {class: "wbar rise"},
-    h("div", {class: "wprog"}, h("b", {}, done, h("small", {}, ` / ${QUEUE.length} decided`)),
+    h("div", {class: "wprog"}, h("span", {}, h("b", {style: "font-size:15px"}, `Decisions recorded: ${done} of ${QUEUE.length}`)),
       h("span", {class: "meter", role: "progressbar", "aria-label": "Queue progress", "aria-valuemin": 0, "aria-valuemax": QUEUE.length, "aria-valuenow": done}, meter)),
     nxt ? h("span", {class: "wnext"}, "Next: ", h("a", {href: "#/p/" + nxt.id}, `#${nxt.position} ${nxt.id}`), ` · ${LANES[nxt.lane][0]}`) : null,
     activityDrop(),
-    h("button", {class: "btn pill sm", onclick: exportNotes}, icon("download", 15), "Download case notes"));
+    h("button", {class: "btn pill sm", onclick: exportNotes}, icon("download", 15), "Export all case records"));
   const wel = store.get("welcomed", false) ? null : h("div", {class: "wel rise"},
     h("div", {}, h("b", {}, "Welcome to this cycle's review"),
       h("ol", {}, h("li", {}, "Start with the first case: the queue is in order of risk."),
         h("li", {}, "Check the evidence, tick what you checked, and decide in the panel on the right."),
-        h("li", {}, "Download case notes when you are done."))),
+        h("li", {}, "Export all case records when you are done."))),
     h("div", {class: "row"}, nxt ? h("a", {class: "btn solid pill sm", href: "#/p/" + nxt.id}, "Start first case", icon("right", 16)) : null,
       h("button", {class: "btn pill sm", onclick: () => openHelp()}, "How it works"),
       h("button", {class: "btn ghost pill sm", onclick: e => { store.set("welcomed", true); e.target.closest(".wel").remove(); }}, "Don't show again")));
@@ -955,7 +960,7 @@ function activityDrop() {
 }
 const REASON_STYLE = {"Rule check": ["var(--pink)", "#fff", "audit"], "Unusual billing": ["var(--solid)", "var(--solid-ink)", "audit"],
   "Possibly unusual billing": ["var(--violet)", "#fff", "borderline"], "Mainly provider size": ["var(--amber-soft)", "var(--amber-ink)", "desk"]};
-const REASON_NOTE = {"Rule check": "Billing that is clearly wrong was found. Full audit.",
+const REASON_NOTE = {"Rule check": "Billing anomalies requiring verification were found. Full audit.",
   "Unusual billing": "Stands out even compared with providers of its size. Full audit.",
   "Possibly unusual billing": "A mixed picture. Decide between a full audit and a desk review.",
   "Mainly provider size": "Large providers. Confirm the volume is legitimate first; a desk review is enough."};
@@ -1020,11 +1025,11 @@ function queueTable() {
   const GROUPS = {"": ["No grouping"], group: ["Group by reason", p => p.group],
     pattern: ["Group by pattern", p => p.pattern_group || "No pattern matched"], care: ["Group by type of care", p => p.care],
     batch: ["Group by batch", p => "Batch " + p.batch]};
-  const tabs = h("div", {class: "ltabs", role: "group", "aria-label": "Lane"});
+  const tabs = h("div", {class: "ltabs", role: "group", "aria-label": "Recommended review"});
   function drawTabs() {
     const tab = (k, lab, list, tip) => h("button", {class: "ltab", "aria-pressed": String((view.ql || "") === k), title: tip,
       onclick: () => { view.ql = k; drawTabs(); fill(); }},
-      lab, h("small", {}, k ? `${list.filter(p => isDone(p.id)).length}/${list.length}` : list.length));
+      lab, h("small", {}, `(${list.length})`));
     tabs.replaceChildren(tab("", "All", QUEUE, "Every case in this cycle's queue"),
       ...Object.entries(LANES).map(([k, [lab, note]]) => tab(k, lab, QUEUE.filter(p => p.lane === k), note)), infoBtn("reasons", "the lanes"));
   }
@@ -1047,10 +1052,10 @@ function queueTable() {
     h("div", {class: "ch"}, h("div", {}, h("h2", {class: "ct", id: "q-h"}, "Review queue", infoBtn("queue", "the review queue")),
       h("p", {class: "cs"}, "In order of risk.")),
       h("div", {class: "row"}, groupSel, batchSel)),
-    tabs, h("div", {style: "height:12px"}),
+    h("p", {class: "cs", style: "margin-bottom:8px"}, "Recommended review"), tabs, h("div", {style: "height:12px"}),
     h("div", {class: "tw"}, h("table", {class: "qt"}, h("caption", {class: "sr"}, "Review queue"),
       h("thead", {}, h("tr", {}, h("th", {scope: "col"}, "Priority"), h("th", {scope: "col"}, "Case and evidence"),
-        h("th", {scope: "col", class: "num c-pay"}, "Total paid"), h("th", {scope: "col"}, "Action"), h("th", {scope: "col"}, "Status"),
+        h("th", {scope: "col", class: "num c-pay"}, "Total paid"), h("th", {scope: "col"}, "Recommendation"), h("th", {scope: "col"}, "Status"),
         h("th", {scope: "col"}, h("span", {class: "sr"}, "Open")))), tbody)));
 }
 function queueRow(p) {
@@ -1182,7 +1187,7 @@ function providerCard(p) {
     h("a", {class: "btn wide", href: "#/p/" + p.id}, "Open case", icon("arrow", 16)));
 }
 function exportCsv() {
-  const head = ["rank", "provider", "type_of_care", "total_payments", "claims", "rank_if_size_ignored", "recommendation", "your_status"];
+  const head = ["Rank", "Provider ID", "Type of Care", "Total Payments", "Claims", "Rank if Size Ignored", "Recommendation", "Your Status"];
   const lines = [head.join(",")].concat(P.map(p => [p.rank, p.id, `"${p.care}"`, Math.round(metric(p, "total_reimb").v),
     Math.round(metric(p, "n_claims").v), p.size_free_rank, p.action ? ACTION[p.action] : "Not in queue", STATUS[statusOf(p.id)]].join(",")));
   const a = h("a", {href: URL.createObjectURL(new Blob([lines.join("\n")], {type: "text/csv"})), download: "provider_ranking.csv"});
@@ -1190,8 +1195,8 @@ function exportCsv() {
 }
 function exportNotes() {
   const q = v => `"${String(v == null ? "" : v).replace(/"/g, '""')}"`;
-  const head = ["priority", "provider", "type_of_care", "lane", "reason", "recommended", "decision", "decision_reason",
-    "decided_at", "checklist_done", "case_note"];
+  const head = ["Priority", "Provider ID", "Type of Care", "Review Lane", "Referral Reason", "Original Recommendation", "Decision", "Decision Reason",
+    "Recorded At (UTC)", "Checklist Progress", "Case Note"];
   const rows = QUEUE.map(p => {
     const d = store.get("dec:" + p.id, null), n = store.get("note:" + p.id, null), A = ai(p.id);
     const total = (A && A.what_to_check && A.what_to_check.length ? A.what_to_check : defaultChecks(p)).length;
@@ -1202,6 +1207,69 @@ function exportNotes() {
   });
   const a = h("a", {href: URL.createObjectURL(new Blob([[head.join(",")].concat(rows).join("\n")], {type: "text/csv"})), download: "case_notes.csv"});
   document.body.append(a); a.click(); a.remove(); toast("Case notes downloaded");
+}
+
+/* ---------- recorded decisions ---------- */
+function recordedDecisions(outcome = 0) {
+  return QUEUE.map(p => ({p, d: store.get("dec:" + p.id, null)}))
+    .filter(({d}) => d && [2, 3, 4].includes(d.outcome) && (!outcome || d.outcome === outcome))
+    .sort((a, b) => b.d.t - a.d.t || a.p.position - b.p.position);
+}
+function originalRecommendation(p) {
+  return p.lane === "borderline" ? "Desk review (borderline)" : ACTION[p.action];
+}
+function decisionsCsv(rows) {
+  const quote = value => {
+    let text = String(value == null ? "" : value);
+    // Notes are user input; keep spreadsheet programs from interpreting formulas.
+    if (/^[\s]*[=+@-]/.test(text) || /^[\t\r]/.test(text)) text = "'" + text;
+    return `"${text.replace(/"/g, '""')}"`;
+  };
+  const head = ["Provider ID", "Original Recommendation", "Decision", "Decision Reason", "Recorded At (UTC)"];
+  return [head, ...rows.map(({p, d}) => [p.id, originalRecommendation(p), STATUS[d.outcome],
+    d.reason || "", new Date(d.t).toISOString()])].map(row => row.map(quote).join(",")).join("\r\n");
+}
+function exportDecisions() {
+  const rows = recordedDecisions(view.decision);
+  if (!rows.length) { toast("No decisions to download"); return; }
+  const url = URL.createObjectURL(new Blob([decisionsCsv(rows)], {type: "text/csv;charset=utf-8"}));
+  const a = h("a", {href: url, download: "case_decisions.csv"});
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  toast(`${rows.length} decisions downloaded`);
+}
+function decisionsPage() {
+  const all = recordedDecisions(), rows = recordedDecisions(view.decision);
+  hero(h("div", {class: "hb-row"},
+    h("div", {}, h("h1", {}, "Decisions"),
+      h("p", {class: "lead"}, "Your recorded outcomes for this review cycle. Open a case to review or change its decision.")),
+    h("div", {class: "hact"}, h("span", {class: "chip"}, `${all.length} of ${QUEUE.length} decisions recorded`))));
+  const choices = [[0, "All decisions"], [2, "Full audit opened"], [3, "Desk review"], [4, "No further action"]];
+  const filters = h("div", {class: "ltabs", role: "group", "aria-label": "Decision status"},
+    choices.map(([value, label]) => h("button", {class: "ltab", "aria-pressed": String(view.decision === value),
+      onclick: () => { view.decision = value; route(); }}, label,
+      h("small", {}, `(${value ? all.filter(({d}) => d.outcome === value).length : all.length})`))));
+  const table = h("div", {class: "tw"}, h("table", {class: "qt decisions-table"},
+    h("caption", {class: "sr"}, "Recorded case decisions, newest first. Dates shown in your local time."),
+    h("thead", {}, h("tr", {}, ["Provider ID", "Original recommendation", "Your decision", "Reason", "Recorded (local time)", "Case"]
+      .map(label => h("th", {scope: "col"}, label)))),
+    h("tbody", {}, rows.map(({p, d}) => h("tr", {},
+      h("td", {}, h("a", {href: "#/p/" + p.id}, p.id)),
+      h("td", {}, originalRecommendation(p)), h("td", {}, statusPill(d.outcome)),
+      h("td", {class: "decision-reason"}, d.reason || "No reason recorded"),
+      h("td", {}, h("time", {datetime: new Date(d.t).toISOString()}, new Date(d.t).toLocaleString())),
+      h("td", {}, h("a", {class: "btn sm", href: "#/p/" + p.id, "aria-label": `Open ${p.id} to review or change its decision`}, "Open case")))))));
+  const empty = h("div", {class: "empty"}, all.length
+    ? h("p", {}, "No cases have this decision yet.")
+    : h("p", {}, "No decisions recorded yet. Review a case in Today's work to get started."),
+    all.length ? h("button", {class: "btn sm", onclick: () => { view.decision = 0; route(); }}, "Show all decisions")
+      : h("a", {class: "btn sm", href: "#/"}, "Go to Today's work"));
+  $("#app").append(h("section", {class: "card tcard", "aria-labelledby": "decisions-h"},
+    h("div", {class: "ch"}, h("div", {}, h("h2", {class: "ct", id: "decisions-h"}, "Recorded outcomes"),
+      h("p", {class: "cs"}, "Saved decisions are separate from the system's original recommendations.")),
+      h("button", {class: "btn sm", disabled: !rows.length, title: "Export saved decisions matching the selected status as CSV", onclick: exportDecisions}, icon("download", 16), "Export saved decisions")),
+    filters, h("p", {class: "cs", role: "status", style: "margin:12px 0"}, `Showing ${rows.length} of ${all.length} recorded decisions · Newest first`),
+    rows.length ? table : empty));
 }
 
 /* ---------- provider page ---------- */
@@ -1255,7 +1323,8 @@ function providerPage(id) {
     h("div", {class: "ch"}, h("div", {}, h("h2", {class: "ct", id: "chk-h"}, "What to check"), h("p", {class: "cs"}, "Ticks are saved in this browser only.")), prog),
     h("ul", {class: "list"}, checks.map((c, i) => h("li", {}, h("label", {class: "chk"},
       h("input", {type: "checkbox", checked: done.includes(i), onchange: e => {
-        const cur = new Set(store.get("checks:" + id, [])); e.target.checked ? cur.add(i) : cur.delete(i); store.set("checks:" + id, [...cur]);
+        const cur = new Set(store.get("checks:" + id, [])); e.target.checked ? cur.add(i) : cur.delete(i);
+        if (!store.set("checks:" + id, [...cur])) { e.target.checked = !e.target.checked; saveFailed(); return; }
         markStarted(id); updProg(); }}),
       h("span", {class: "ai"}, icon("check", 18, 2.2)), h("span", {}, c)))))));
   // 3. details, one click away
@@ -1315,8 +1384,10 @@ function noteSection(p) {
     if (editing) {
       const ta = h("textarea", {"aria-label": "Case note", placeholder: "What did you find? Saved in this browser only."}, n ? n.text : "");
       const save = () => { const v = ta.value.trim();
-        if (v) { store.set("note:" + p.id, {text: v, t: Date.now()}); logEvent(p.id, "note"); markStarted(p.id); toast("Note saved"); }
-        else { try { localStorage.removeItem("prq:note:" + p.id); } catch (e) {} }
+        if (v) {
+          if (!store.set("note:" + p.id, {text: v, t: Date.now()})) { saveFailed(); return; }
+          logEvent(p.id, "note"); markStarted(p.id); toast("Note saved");
+        } else if (!store.remove("note:" + p.id)) { saveFailed(); return; }
         drawNote(false); };
       noteBox.replaceChildren(h("div", {class: "note"}, ta, h("div", {class: "row", style: "margin-top:10px"},
         h("button", {class: "btn solid sm pill", onclick: save}, icon("check", 15, 2.4), "Save note"),
@@ -1326,9 +1397,9 @@ function noteSection(p) {
       noteBox.replaceChildren(h("div", {class: "note"}, h("p", {}, n.text), h("div", {class: "nf"}, h("span", {}, "Case note · " + cap(ago(n.t))),
         h("button", {class: "circ", "aria-label": "Edit note", onclick: () => drawNote(true)}, icon("pencil", 15)))),
         h("div", {class: "row", style: "margin-top:12px"}, h("button", {class: "btn pill sm", onclick: () => drawNote(true)}, icon("pencil", 15), "Edit note"),
-          h("button", {class: "circ", "aria-label": "Delete note", onclick: () => { try { localStorage.removeItem("prq:note:" + p.id); } catch (e) {} toast("Note deleted"); drawNote(false); }}, icon("x", 16))));
+          h("button", {class: "circ", "aria-label": "Delete note", onclick: () => { if (!store.remove("note:" + p.id)) { saveFailed(); return; } toast("Note deleted"); drawNote(false); }}, icon("x", 16))));
     } else noteBox.replaceChildren(h("div", {class: "row", style: "margin-top:12px"}, h("button", {class: "btn pill sm", onclick: () => drawNote(true)}, icon("plus", 15, 2.4), "Add case note"),
-      h("span", {style: "font-size:12.5px;opacity:.8"}, "Notes go into the case notes download.")));
+      h("span", {style: "font-size:12.5px;opacity:.8"}, "Notes are included when you export all case records.")));
   }
   drawNote(false);
   return h("div", {style: "margin-top:16px"}, h("h3", {class: "ct", style: "font-size:16px"}, "Case notes"), noteBox);
@@ -1351,7 +1422,8 @@ function decisionPanel(p, next) {
           d.reason ? h("p", {class: "ib2"}, d.reason) : null),
         h("div", {class: "row", style: "margin-top:12px"},
           next ? h("a", {class: "btn pill sm", href: "#/p/" + next.id}, "Next case", icon("right", 16)) : null,
-          h("button", {class: "btn ghost pill sm", onclick: () => draw(true)}, icon("pencil", 15), "Change")),
+          h("button", {class: "btn ghost pill sm", onclick: () => draw(true)}, icon("pencil", 15), "Change"),
+          h("a", {class: "btn ghost pill sm", href: "#/decisions"}, "View decisions")),
         nextLine(next), noteSection(p));
       return;
     }
@@ -1370,7 +1442,8 @@ function decisionPanel(p, next) {
       if (!c) { toast("Choose an outcome first"); return; }
       const reason = why.value.trim();
       if (c !== rec && !reason) { toast("Add a reason: this differs from the recommendation"); why.focus(); return; }
-      store.set("dec:" + p.id, {outcome: c, reason, t: Date.now()}); store.set("st:" + p.id, c); logEvent(p.id, "status", c);
+      if (!store.set("dec:" + p.id, {outcome: c, reason, t: Date.now()})) { saveFailed(); return; }
+      logEvent(p.id, "status", c);
       toast(`Saved: ${STATUS[c].toLowerCase()}`);
       if (goNext && next) go(next.id); else route();
     }
@@ -1478,7 +1551,7 @@ function helpSections() {
   const o = O;
   return [
     ["reasons", "Reasons and lanes", ["Every case shows a reason. The reason sets the lane; the lane says what to do.",
-      {h: "Full audit lane"}, {ul: [["Rule check", "billing that is clearly wrong was found, such as a repeated claim or overlapping hospital stays."],
+      {h: "Full audit lane"}, {ul: [["Rule check", "billing anomalies requiring verification were found, such as a repeated claim or overlapping hospital stays."],
         ["Unusual billing", "stands out even compared with providers of its size."]]},
       {h: "Borderline lane"}, {ul: [["Possibly unusual billing", "a mixed picture. Decide between a full audit and a desk review."]]},
       {h: "Desk review lane"}, {ul: [["Mainly provider size", "ranks high mostly because it is large. A short records check is enough."]]}]],
@@ -1488,9 +1561,9 @@ function helpSections() {
       ["Choosing something else?", "Add a reason. It goes into the case notes."],
       ["Save & next case", "saves and opens the next case."]]}]],
     ["queue", "How the queue is built", [
-      {h: "Step 1: rule check"}, "Refers billing that is clearly wrong, whatever its rank:", {ul: [
+      {h: "Step 1: rule check"}, "Refers billing anomalies that need verification, whatever its rank:", {ul: [
         ["Repeated claim", "same patient, date, amount and main diagnosis as an earlier claim."],
-        ["Overlapping stays", "two or more hospital stays that start before the same patient's previous stay ended."],
+        ["Overlapping stays", "two or more hospital stays that start before the same patient's earlier stay ended."],
         `${o.gate1_rule_check} providers this cycle.`]},
       {h: "Step 2: risk ranking"}, {ul: [`Adds the ${o.gate2_risk_ranking} highest-ranked of the remaining providers.`,
         ["Full audit", `when at least ${o.vote_audit} of ${o.vote_models} comparisons agree it bills unusually even for its size.`],
@@ -1507,7 +1580,7 @@ function helpSections() {
       "Every fact stated about a case is checked against that provider's evidence before it is shown.",
       "Recommendations come from the queue rules.", "No technical terms are used."]}]],
     ["notes", "Your notes and decisions", [{ul: ["Decisions, checklist ticks and notes stay in this browser; nothing is sent anywhere.",
-      ["Download case notes", "to hand them on."]]}]],
+      ["Export all case records", "to hand them on."]]}]],
     ["keys", "Keyboard shortcuts", [{ul: [["?", "open or close this help"], ["Esc", "close"], ["/", "find a provider"],
       ["J / K", "next / previous case"], ["1, 2, 3", "choose an outcome"], ["S", "save and open the next case"]]}]],
     ["data", "Data", [{ul: ["Public Medicare benchmark data (Kaggle).", `Claims from ${nice(o.period.from)} to ${nice(o.period.to)}.`,
@@ -1554,7 +1627,7 @@ function buildShell() {
   const toCheck = () => QUEUE.filter(p => p.recommendation_check && !isDone(p.id)).length;
   const bell = h("button", {class: "ib", onclick: () => openProviders({mode: "queue", lane: "borderline"})}, icon("bell", 18));
   const searchBtn = h("button", {class: "ib", "aria-label": "Find a provider", title: "Find a provider (/)", onclick: focusSearch}, icon("search", 18));
-  const dl = h("button", {class: "ib", "aria-label": "Download case notes as CSV", title: "Download case notes (CSV)", onclick: exportNotes}, icon("download", 18));
+  const dl = h("button", {class: "ib", "aria-label": "Export all case records as CSV", title: "Export all case records (CSV)", onclick: exportNotes}, icon("download", 18));
   const help = h("button", {class: "ib q", "aria-label": "How it works", title: "How it works (?)", onclick: () => openHelp()}, "?");
   $("#icons").append(searchBtn, help, bell, dl);
   buildShell.bell = () => { const n = toCheck(); bell.querySelector(".badge")?.remove(); if (n) bell.append(h("span", {class: "badge", "aria-hidden": "true"}, n));
@@ -1573,15 +1646,16 @@ function route() {
   $("#tip").style.display = "none";
   app.replaceChildren();
   const m = hsh.match(/^#\/p\/([A-Za-z0-9]+)$/);
-  const page = m ? "prov" : hsh === "#/providers" ? "list" : hsh === "#/ranking" ? "ranking" : "home";
+  const page = m ? "prov" : hsh === "#/providers" ? "list" : hsh === "#/ranking" ? "ranking" : hsh === "#/decisions" ? "decisions" : "home";
   if (hsh === "#/about") { history.replaceState(null, "", "#/"); later(() => openHelp(), 0); }
-  $("#hero").classList.toggle("compact", page === "list" || page === "ranking");
-  [["nav-home", "home"], ["nav-prov", "list"], ["nav-rank", "ranking"]].forEach(([nid, pg]) => {
+  $("#hero").classList.toggle("compact", ["list", "ranking", "decisions"].includes(page));
+  [["nav-home", "home"], ["nav-prov", "list"], ["nav-rank", "ranking"], ["nav-decisions", "decisions"]].forEach(([nid, pg]) => {
     const on = pg === page || (pg === "list" && page === "prov"); const a = $("#" + nid);
     if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
   if (page === "prov") { providerPage(m[1]); document.title = `${m[1]} · Provider review`; }
   else if (page === "list") { providersPage(); document.title = "All providers · Provider review"; }
   else if (page === "ranking") { rankingPage(); document.title = "Ranking insights · Provider review"; }
+  else if (page === "decisions") { decisionsPage(); document.title = "Decisions · Provider review"; }
   else { overviewPage(); document.title = "Today's work · Provider review"; }
   buildShell.bell();
   window.scrollTo(0, 0);

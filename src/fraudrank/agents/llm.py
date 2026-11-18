@@ -80,6 +80,8 @@ class LLMClient:
 
     # ------------------------------------------------------------------ internals
     def _api(self):
+        if os.environ.get("FRAUDRANK_OFFLINE") == "1":
+            raise LLMError("API access is disabled during an offline rebuild")
         if self._client is None:
             if not os.environ.get(API_KEY_VAR):
                 raise LLMError(f"{API_KEY_VAR} is not set: copy .env.example to .env and paste your key, "
@@ -95,6 +97,13 @@ class LLMClient:
 
     def _cached(self, payload: dict):
         path = LLM_CACHE / f"{self._key(payload)}.json"
+        # Old records were created with the default token limit and provider
+        # temperature. Reuse those only under the identical effective settings.
+        if not path.exists() and payload.get("generation") == {"max_tokens": 16000, "temperature": None}:
+            legacy = {k: v for k, v in payload.items() if k != "generation"}
+            legacy_path = LLM_CACHE / f"{self._key(legacy)}.json"
+            if legacy_path.exists():
+                path = legacy_path
         if path.exists():
             cached = json.loads(path.read_text())
             self.cache_hits += 1
@@ -106,6 +115,10 @@ class LLMClient:
         if self.mode == "replay":
             raise LLMError(f"replay mode: no cached response {path.name}")
         return path, None
+
+    def _generation(self):
+        return {"max_tokens": self.max_tokens,
+                "temperature": float(TEMPERATURE) if TEMPERATURE is not None else None}
 
     def _store(self, path: Path, payload: dict, output, stop_reason: str, usage: dict, version: str | None):
         self.calls += 1
@@ -120,7 +133,7 @@ class LLMClient:
     def _raw(self, system: str, messages: list[dict], schema: dict, effort: str | None = None) -> dict:
         eff = effort or self.effort
         payload = {"model": self.model, "system": system, "messages": messages, "schema": schema,
-                   "effort": eff}
+                   "effort": eff, "generation": self._generation()}
         path, cached = self._cached(payload)
         if cached is not None:
             return cached["output"]
@@ -133,7 +146,7 @@ class LLMClient:
         """API call with tool definitions. Returns (response content blocks, stop_reason)."""
         eff = effort or self.effort
         payload = {"model": self.model, "system": system, "messages": messages,
-                   "tools": tools, "effort": eff}
+                   "tools": tools, "effort": eff, "generation": self._generation()}
         path, cached = self._cached(payload)
         if cached is not None:
             return cached["output"], cached.get("stop_reason", "end_turn")

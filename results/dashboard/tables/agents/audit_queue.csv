@@ -1,0 +1,66 @@
+provider,gate,action,reason,risk_score,risk_rank,votes,of_models,duplicate_claims,overlapping_stays,position
+PRV56560,1_rule_check,priority_audit,1 duplicate claim; 2 overlapping hospital stays,0.997024665411861,1,10,10,1,2,1
+PRV54742,1_rule_check,priority_audit,2 overlapping hospital stays,0.9967860641547325,2,10,10,0,2,2
+PRV54772,2_risk_ranking,priority_audit,,0.9955945109427843,3,10,10,0,1,3
+PRV52985,1_rule_check,priority_audit,2 overlapping hospital stays,0.9954888098453575,4,10,10,0,2,4
+PRV52340,2_risk_ranking,priority_audit,,0.9952974947376299,5,10,10,0,1,5
+PRV55435,1_rule_check,priority_audit,2 overlapping hospital stays,0.9945921668899318,6,10,10,0,2,6
+PRV51390,1_rule_check,priority_audit,2 overlapping hospital stays,0.9945478477118745,7,10,10,0,2,7
+PRV53797,2_risk_ranking,priority_audit,,0.9942810987987643,8,10,10,0,0,8
+PRV52120,1_rule_check,priority_audit,4 overlapping hospital stays,0.9939570949658857,9,10,10,0,4,9
+PRV52590,2_risk_ranking,priority_audit,,0.9937588794712157,10,10,10,0,0,10
+PRV51578,2_risk_ranking,priority_audit,,0.9935495122455463,11,10,10,0,0,11
+PRV56416,1_rule_check,priority_audit,2 overlapping hospital stays,0.9931308728877799,12,10,10,0,2,12
+PRV53808,2_risk_ranking,priority_audit,,0.9926375665941358,13,10,10,0,0,13
+PRV55215,2_risk_ranking,priority_audit,,0.9926219011278061,14,10,10,0,0,14
+PRV57172,2_risk_ranking,priority_audit,,0.9924804382867909,15,10,10,0,1,15
+PRV54258,1_rule_check,priority_audit,2 overlapping hospital stays,0.9920314099992719,16,10,10,0,2,16
+PRV55916,2_risk_ranking,priority_audit,,0.9916492888026145,17,10,10,0,0,17
+PRV53385,2_risk_ranking,priority_audit,,0.9911955624703986,18,10,10,0,1,18
+PRV55194,2_risk_ranking,priority_audit,,0.9900130736309101,19,10,10,0,1,19
+PRV57548,2_risk_ranking,priority_audit,,0.9893289214177735,20,10,10,0,1,20
+PRV53421,2_risk_ranking,priority_audit,,0.9878768502261446,21,10,10,0,0,21
+PRV56647,2_risk_ranking,priority_audit,,0.9876490677551086,22,10,10,0,1,22
+PRV56575,2_risk_ranking,priority_audit,,0.9875562572103757,23,10,10,0,1,23
+PRV51456,2_risk_ranking,priority_audit,,0.9866291407077507,24,10,10,0,0,24
+PRV56689,2_risk_ranking,priority_audit,,0.9856708407844618,25,10,10,0,0,25
+PRV52135,2_risk_ranking,desk_review,borderline,0.9848299674808583,26,5,10,0,0,26
+PRV52041,2_risk_ranking,priority_audit,,0.9844584994442009,27,9,10,0,0,27
+PRV52320,2_risk_ranking,priority_audit,,0.9820733632246312,28,10,10,0,0,28
+PRV57103,2_risk_ranking,priority_audit,,0.9819500569721942,29,10,10,0,0,29
+PRV57306,2_risk_ranking,desk_review,,0.9819443721342475,30,0,10,0,0,30
+PRV56008,2_risk_ranking,priority_audit,,0.9809281946596893,31,10,10,0,0,31
+PRV55039,2_risk_ranking,priority_audit,,0.9794030969052556,32,10,10,0,0,32
+PRV53884,2_risk_ranking,priority_audit,,0.9789264433898296,33,10,10,0,1,33
+PRV53786,2_risk_ranking,priority_audit,,0.97798553581236,34,10,10,0,0,34
+PRV55483,1_rule_check,priority_audit,2 overlapping hospital stays,0.9761515414001767,35,10,10,0,2,35
+PRV52063,2_risk_ranking,priority_audit,,0.9760721804891529,36,10,10,0,1,36
+PRV56438,2_risk_ranking,priority_audit,,0.9754260359475245,37,10,10,0,0,37
+PRV53675,2_risk_ranking,priority_audit,,0.973838603066985,38,10,10,0,1,38
+PRV53269,2_risk_ranking,priority_audit,,0.9713390048976945,39,9,10,0,0,39
+PRV55676,2_risk_ranking,priority_audit,,0.9706631817047182,40,8,10,0,0,40
+PRV55913,2_risk_ranking,priority_audit,,0.9646381700024774,41,10,10,0,0,41
+PRV51567,2_risk_ranking,priority_audit,,0.9620498092171582,42,10,10,0,0,42
+PRV54514,2_risk_ranking,priority_audit,,0.957434621645449,43,9,10,0,0,43
+PRV54093,2_risk_ranking,priority_audit,,0.9564741698468882,44,10,10,0,0,44
+PRV55443,2_risk_ranking,priority_audit,,0.9544173809330384,45,10,10,0,1,45
+PRV57310,2_risk_ranking,priority_audit,,0.9538444040517752,46,10,10,0,1,46
+PRV55023,2_risk_ranking,priority_audit,,0.9513189501229151,47,10,10,0,1,47
+PRV52511,2_risk_ranking,desk_review,borderline,0.9503691889567842,48,7,10,0,1,48
+PRV53710,2_risk_ranking,desk_review,,0.9464460915149752,49,0,10,0,0,49
+PRV54786,1_rule_check,priority_audit,1 duplicate claim,0.9456273719535997,50,0,10,1,0,50
+PRV53781,2_risk_ranking,priority_audit,,0.9438087976105247,51,10,10,0,0,51
+PRV53961,2_risk_ranking,priority_audit,,0.9404201660808732,52,10,10,0,0,52
+PRV56588,2_risk_ranking,desk_review,,0.9374094872467502,53,0,10,0,0,53
+PRV53911,2_risk_ranking,desk_review,borderline,0.9299581816474158,54,3,10,0,0,54
+PRV56268,1_rule_check,priority_audit,1 duplicate claim; 2 overlapping hospital stays,0.9252598414093913,55,5,10,1,2,55
+PRV55732,2_risk_ranking,desk_review,,0.9132712487212223,56,1,10,0,0,56
+PRV53894,2_risk_ranking,desk_review,borderline,0.9104424974126085,57,3,10,0,0,57
+PRV53245,2_risk_ranking,desk_review,,0.901725715676209,58,0,10,0,0,58
+PRV57715,2_risk_ranking,desk_review,,0.9002911989642775,59,0,10,0,0,59
+PRV55996,2_risk_ranking,desk_review,,0.8924215321315647,60,0,10,0,0,60
+PRV52292,2_risk_ranking,desk_review,,0.8922904900427445,61,0,10,0,0,61
+PRV53623,1_rule_check,priority_audit,1 duplicate claim,0.5043091750127038,116,0,10,1,0,62
+PRV55521,1_rule_check,priority_audit,1 duplicate claim,0.318640657279709,152,0,10,1,0,63
+PRV52829,1_rule_check,priority_audit,1 duplicate claim,0.09120475216084563,223,0,10,1,0,64
+PRV54255,1_rule_check,priority_audit,1 duplicate claim,0.011326583429131563,416,0,10,1,0,65

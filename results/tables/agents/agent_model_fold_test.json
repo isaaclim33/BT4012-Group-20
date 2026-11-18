@@ -5,9 +5,9 @@
   "folds": 20,
   "runs_a": 3,
   "runs_b": 3,
-  "diff_mean": -0.006904911916504314,
-  "ci_lo": -0.011315988558360484,
-  "ci_hi": -0.0024938352746481443,
+  "diff_mean": -0.006904911916504325,
+  "ci_lo": -0.011315988558360489,
+  "ci_hi": -0.0024938352746481625,
   "folds_a_better": 5,
   "decision": "keep separate agents",
   "caveat": "Folds from repeated CV are correlated, so this CI is too narrow; that makes 'worse' easier to declare. A decision to keep separate agents is therefore weaker than the CI suggests.",
@@ -22,7 +22,7 @@
       "run": 2,
       "diff": -0.0024547754957398027,
       "lo": -0.019310753084096383,
-      "hi": 0.01573232307629194
+      "hi": 0.015732323076291937
     },
     {
       "run": 3,
